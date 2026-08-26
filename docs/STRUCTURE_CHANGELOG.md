@@ -5,6 +5,29 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-26 — Real database: MonsterASP.NET SQL Server, dropped local Postgres
+
+- Created the real dev database on MonsterASP.NET's free plan: SQL Server
+  2025, EU/Germany datacenter, Remote Access (SSMS) enabled for
+  connections from outside their network. See
+  [HOSTING.md](HOSTING.md#database-monsterasp.net-sql-server-2025-decided-2026-08-26)
+  for the full picture (why SQL Server over MySQL, free-tier limits).
+- Swapped `client-backend`'s EF Core provider: `Npgsql.EntityFrameworkCore.
+  PostgreSQL` -> `Microsoft.EntityFrameworkCore.SqlServer`
+  (`DependencyInjection.cs`: `UseNpgsql` -> `UseSqlServer`).
+- Removed the local Postgres connection string from
+  `appsettings.Development.json` (it's gone now — the real connection
+  string lives only in `dotnet user-secrets`, never in a committed file).
+- Ran `dotnet ef migrations add InitialCreate` (empty — no entities yet)
+  and `dotnet ef database update` against the real remote database as an
+  end-to-end connectivity test: it connected, created
+  `__EFMigrationsHistory`, and recorded the migration. Confirms the full
+  local-machine -> internet -> MonsterASP path works before any real
+  domain model gets built on top of it.
+- `scripts/start-dev.ps1` no longer auto-starts Docker/local Postgres —
+  the local container is now an explicit offline-only fallback (see
+  HOSTING.md), not part of the normal day-to-day flow.
+
 ## 2026-08-26 — Launcher follow-up: widget URL bug + real window cleanup
 
 Two more real bugs found by actually using the launcher repeatedly (the

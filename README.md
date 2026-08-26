@@ -13,41 +13,40 @@ infrastructure and a UI shell, not the actual English-practice features.
 ## Stack
 
 React + TypeScript + Vite + shadcn/ui (frontend) · ASP.NET Core 8 + EF Core
-+ PostgreSQL (backend). Full rationale in
++ SQL Server (backend, hosted free on MonsterASP.NET — see
+[docs/HOSTING.md](docs/HOSTING.md)). Full rationale in
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Repo layout
 
 ```
 client-frontend/   React app — has a working Navbar/Footer/theme shell, no real pages yet
-client-backend/    ASP.NET Core API, layered — builds and runs, no domain model yet
+client-backend/    ASP.NET Core API, layered — builds and runs, no domain model yet, connects to the real cloud DB
 docs/              architecture, dependencies, hosting, naming, pending ideas, error log
 scripts/           local dev start/stop helpers
 widget/            local pending/done task tracker (opens with start-dev.ps1)
-docker-compose.yml local PostgreSQL
+docker-compose.yml local PostgreSQL — offline-only fallback, not used day to day (see docs/HOSTING.md)
 ```
 
 ## Quick start
 
 Easiest: double-click the **"Start Project"** shortcut on the Desktop. It
-starts Postgres (Docker), the frontend dev server, the backend dev server,
-and the task widget. Safe to double-click again any time — it skips
-anything already running instead of duplicating it, and both dev servers
-hot-reload on save, so you generally only need this once per session.
-**"Stop Project"** shuts it all down.
+starts the frontend dev server, the backend dev server (connected to the
+real MonsterASP.NET database), and the task widget. Safe to double-click
+again any time — it skips anything already running instead of duplicating
+it, and both dev servers hot-reload on save, so you generally only need
+this once per session. **"Stop Project"** shuts it all down.
 
 Manually:
 
 ```bash
-# 1. Start Docker Desktop first (installed but not auto-started).
-docker compose up -d
-
-# 2. Frontend
+# 1. Frontend
 cd client-frontend
 npm install   # first time only
 npm run dev   # http://localhost:5173
 
-# 3. Backend
+# 2. Backend (needs ConnectionStrings:AppDb in user-secrets first —
+#    see client-backend/README.md)
 cd client-backend/src/NutriBoost.Client.Api
 dotnet watch run   # http://localhost:5223
 ```

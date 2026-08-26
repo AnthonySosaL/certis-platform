@@ -12,7 +12,7 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("AppDb")
             ?? throw new InvalidOperationException("Missing ConnectionStrings:AppDb.");
 
-        services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
         return services;
     }

@@ -8,32 +8,36 @@ an early scope mistake (see
 [../docs/errors/2026-08-26-scope-mixup.md](../docs/errors/2026-08-26-scope-mixup.md)).
 Not renamed yet — tracked in `../docs/PENDING_IDEAS.md`.
 
+## Database
+
+Connects straight to the real MonsterASP.NET SQL Server database (see
+[../docs/HOSTING.md](../docs/HOSTING.md)) — no local database needed for
+normal work. The connection string lives only in `dotnet user-secrets`,
+never in a committed file:
+
+```bash
+cd src/NutriBoost.Client.Api
+dotnet user-secrets set "ConnectionStrings:AppDb" "Server=...;Database=...;User Id=...;Password=...;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"
+```
+
 ## Run locally
 
 ```bash
-# 1. Postgres must be up first (docker compose up -d from the repo root,
-#    or just use the "Start Project" Desktop shortcut).
-
-# 2. Run the API — no migrations yet, there's no domain model
-#    (AppDbContext has zero entities) until feature scope is decided:
 cd src/NutriBoost.Client.Api
 dotnet watch run
 ```
 
-Swagger UI: `http://localhost:5223/swagger` (port from
-`src/NutriBoost.Client.Api/Properties/launchSettings.json`).
-Health check: `GET /health`.
-
 ## Adding a migration once there's a real entity
 
 ```bash
-cd src/NutriBoost.Client.Api
+cd client-backend
 dotnet ef migrations add <DescriptiveName> \
-  --project ../NutriBoost.Client.Infrastructure \
-  --startup-project .
+  --project src/NutriBoost.Client.Infrastructure \
+  --startup-project src/NutriBoost.Client.Api \
+  --output-dir Persistence/Migrations
 dotnet ef database update \
-  --project ../NutriBoost.Client.Infrastructure \
-  --startup-project .
+  --project src/NutriBoost.Client.Infrastructure \
+  --startup-project src/NutriBoost.Client.Api
 ```
 
 ## Project layout
@@ -42,7 +46,7 @@ dotnet ef database update \
 src/
 ├── NutriBoost.Client.Domain/          entities, no dependencies (currently empty)
 ├── NutriBoost.Client.Application/     use cases, interfaces (depends on Domain)
-├── NutriBoost.Client.Infrastructure/  EF Core (AppDbContext, no DbSets yet)
+├── NutriBoost.Client.Infrastructure/  EF Core (AppDbContext, SQL Server, no DbSets yet)
 └── NutriBoost.Client.Api/             controllers, DI wiring, the only HTTP-aware project
 tests/
 └── NutriBoost.Client.Domain.Tests/    xUnit — currently empty, no Domain logic to test yet

@@ -1,6 +1,9 @@
-# Starts the whole local dev environment: Postgres (Docker), the frontend
-# dev server (Vite, hot-reloads on save), the backend dev server (dotnet
-# watch, hot-reloads on save), and the task widget.
+# Starts the local dev environment: the frontend dev server (Vite,
+# hot-reloads on save), the backend dev server (dotnet watch, hot-reloads
+# on save), and the task widget. The backend connects straight to the real
+# MonsterASP.NET SQL Server database (via user-secrets) - local Docker
+# Postgres is no longer started automatically; it's a fallback for offline
+# work only, run `docker compose up -d` yourself if you ever need it.
 #
 # Safe to run again while things are already running - it checks each
 # port first and skips anything already up, instead of spawning duplicate
@@ -27,13 +30,6 @@ foreach ($p in $dotnetPaths) {
 
 function Test-PortOpen($port) {
     return [bool](Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue)
-}
-
-Write-Host "Starting Postgres (Docker)..." -ForegroundColor Cyan
-try {
-    docker compose -f "$root\docker-compose.yml" up -d
-} catch {
-    Write-Warning "Docker didn't start Postgres - is Docker Desktop running? Start it and re-run this script."
 }
 
 if (Test-PortOpen 5173) {

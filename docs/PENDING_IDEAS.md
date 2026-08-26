@@ -38,9 +38,10 @@ least at a first-pass level:
 
 ## Scaffolded structurally, not implemented
 
-- [ ] `client-backend` — layered scaffold exists, builds, and was verified
-      end-to-end against local Postgres, but there's no domain model
-      (`AppDbContext` has zero `DbSet`s) and no auth yet.
+- [ ] `client-backend` — layered scaffold exists, builds, and is verified
+      end-to-end against the real MonsterASP.NET SQL Server database
+      (see HOSTING.md), but there's no domain model (`AppDbContext` has
+      zero `DbSet`s) and no auth yet.
 - [ ] Spanish translations for the app's own UI chrome (nav labels etc.)
       — resources exist in `client-frontend/src/i18n/locales/es`, not
       exposed via a switcher. Low priority: the platform's primary
@@ -59,4 +60,10 @@ least at a first-pass level:
 
 ## Done
 
-_(nothing yet)_
+- [x] **Database hosting.** Created on MonsterASP.NET's free plan (SQL
+      Server 2025, EU datacenter). Backend switched from Npgsql/Postgres
+      to `Microsoft.EntityFrameworkCore.SqlServer`, connected and verified
+      with a real migration against the live database. Local Docker
+      Postgres demoted to an offline-only fallback. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-26--real-database-monsteraspnet-sql-server-dropped-local-postgres)
+      and [HOSTING.md](HOSTING.md). — 2026-08-26

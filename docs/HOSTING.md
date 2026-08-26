@@ -1,33 +1,54 @@
-# Hosting (deferred)
+# Hosting
 
-Everything runs **locally** for now. Hosting research here was originally
-written for a different project (see
-[errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md)) under
-the assumption of a real commercial storefront with paying customers — that
-urgency doesn't apply to a tool for two people practicing English. No
-hosting decision is needed yet; this section is kept short and revisited
-once (if) this platform needs to actually go live for you and your friend,
-or later for institutions.
+## Database: MonsterASP.NET, SQL Server 2025 (decided 2026-08-26)
 
-## Facts worth keeping (not a decision)
+Live and in use, not just researched. Created on the FREE plan
+(`db65520.databaseasp.net`, EU/Germany datacenter — Free plan only offers
+EU). EF Core connects to it directly, including from local dev — see
+"Local development" below.
 
-- **Cloudflare Workers cannot run ASP.NET Core** — it's a JS/TS edge
-  runtime (V8 isolates). Rule it out for the C# backend specifically if
-  hosting ever comes up; Cloudflare Pages (static hosting) is unrelated to
-  this and still fine for the React frontend.
-- **Vercel's free (Hobby) tier prohibits commercial/revenue use** in its
-  ToS. Irrelevant for a private 2-person tool; relevant again if this ever
-  gets sold to institutions.
-- **MonsterASP.NET** exists as a .NET-specific free/cheap host (one-click
-  deploy from Visual Studio, free MSSQL, free HTTPS) if a C# backend needs
-  a home later.
-- **Render's free tier** spins down after 15 minutes of inactivity and its
-  free Postgres expires after 30 days — fine for occasional personal use,
-  not for something that needs to always be up.
+Why SQL Server over MySQL (the other free option): this is a C#/.NET
+project specifically to build .NET skills for the job market, and SQL
+Server is what pairs with .NET/enterprise roles in practice, plus it has
+first-party EF Core support. MySQL is more broadly used across the *whole*
+market (open source, PHP/Node/web-dev ubiquity), but that's not this
+project's stack.
 
-## Local development (today)
+Free-plan limits worth remembering (from MonsterASP's own plan page): low
+performance servers, 1GB disk max, limited traffic/features, EU
+datacenters only, "not recommended for production" — fine for building and
+learning, revisit before anything with real users depends on it.
 
-Docker Compose runs Postgres locally (see `docker-compose.yml` at the repo
-root, port 5433 — see
-[errors/2026-08-26-postgres-port-conflict.md](errors/2026-08-26-postgres-port-conflict.md)
-for why not 5432).
+Two connection modes MonsterASP exposes:
+- **Local access** — only reachable from apps hosted on MonsterASP itself
+  (their internal network). Not usable from a home dev machine.
+- **Remote access (for SSMS)** — public internet access, what local dev
+  and any external CI need. Enabled for this database. Connection string
+  lives in `dotnet user-secrets` on the dev machine, never in a committed
+  file — see `docs/GIT_WORKFLOW.md`.
+
+## Backend hosting: not decided yet
+
+The database is live; the API isn't deployed anywhere yet (still runs
+locally, pointed at the remote DB). MonsterASP.NET is the natural next
+step when that's needed (same free plan, .NET-specific, one-click deploy
+from Visual Studio or a downloadable publish profile) — revisit then.
+
+## Frontend hosting: not decided yet, low stakes either way
+
+Cloudflare Pages is still the better default if/when this needs a public
+URL — Vercel's Hobby tier prohibits commercial use in its ToS, which
+matters if this ever gets sold to institutions and doesn't matter at all
+for a private 2-person tool today. Not an active decision right now.
+
+## Local development
+
+The app talks to the real MonsterASP database directly — no local
+database server needed day to day. `docker-compose.yml` (Postgres, port
+5433) is kept only as an **offline fallback**; it does not start
+automatically (`scripts/start-dev.ps1` no longer launches it). If you ever
+need to work without internet access, `docker compose up -d` it yourself
+and swap the connection string — but note the app currently targets SQL
+Server (`UseSqlServer`), so a Postgres fallback would need the Npgsql
+provider back too; not wired up right now since it wasn't needed once the
+real database was live.

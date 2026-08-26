@@ -11,7 +11,7 @@ history stays visible (per the notes' traceability requirement).
 |---|---|---|---|
 | .NET SDK | 8.0.424 (LTS) | Backend runtime + CLI (`dotnet new`, EF Core migrations). Only the runtime was preinstalled. First tried `winget install Microsoft.DotNet.SDK.8`, but that install requires admin elevation and hung indefinitely waiting on a UAC prompt with no interactive desktop to show it to — killed it and installed to the user profile instead (`dotnet-install.ps1 -InstallDir %USERPROFILE%\.dotnet`, no admin needed). `PATH` and `DOTNET_ROOT` (User scope) point there now. If `dotnet --list-sdks` ever stops showing 8.0.424, check those two env vars first. | 2026-08-26 |
 | Node.js | v22.22.0 (already installed) | Frontend tooling (npm, Vite). | pre-existing |
-| Docker Desktop | 29.4.3 (already installed) | Local Postgres via `docker-compose.yml`. Doesn't auto-start on login — start it manually before `docker compose up`. | pre-existing, wired in 2026-08-26 |
+| Docker Desktop | 29.4.3 (already installed) | Was local Postgres via `docker-compose.yml`. No longer used day to day — the app connects to the real MonsterASP.NET database now (see `docs/HOSTING.md`). Kept only as an offline fallback, not auto-started. | pre-existing, wired 2026-08-26, demoted to fallback same day once MonsterASP DB was live |
 | git | 2.53.0 (already installed) | Version control. | pre-existing |
 
 **Known PATH gotcha**: because the SDK is user-scoped, not machine-wide, a
@@ -45,18 +45,24 @@ off/on (or reboot) once to pick up the registry PATH everywhere.
 | Package | Project | Why |
 |---|---|---|
 | `Microsoft.EntityFrameworkCore` 8.0.11 | Infrastructure | ORM — pinned to the 8.x line to match the net8.0 target (`dotnet add` defaults to the newest major, which was 10.x and incompatible). |
-| `Npgsql.EntityFrameworkCore.PostgreSQL` 8.0.11 | Infrastructure | PostgreSQL provider for EF Core. |
+| `Microsoft.EntityFrameworkCore.SqlServer` 8.0.11 | Infrastructure | SQL Server provider for EF Core — swapped in for Npgsql on 2026-08-26 once the real database (MonsterASP.NET, SQL Server 2025 free tier) was created. See `docs/HOSTING.md`. |
 | `Microsoft.EntityFrameworkCore.Design` 8.0.11 | Api | Enables `dotnet ef migrations` from the Api project. |
 | `Swashbuckle.AspNetCore` | Api | Swagger/OpenAPI UI — scaffolded by default with `dotnet new webapi`, kept for local API exploration. |
+
+The `AppDb` connection string lives only in `dotnet user-secrets` (set via
+`dotnet user-secrets set "ConnectionStrings:AppDb" "..."` from
+`src/NutriBoost.Client.Api`) — never in a committed `appsettings*.json`.
+It points at MonsterASP's Remote Access (SSMS) endpoint, not Local Access
+(which only works from apps hosted on MonsterASP itself).
 
 `AppDbContext` has no entities yet — the domain model waits on the feature
 scope decision in [PENDING_IDEAS.md](PENDING_IDEAS.md). Worth keeping for
 whenever it does: if any entity needs optimistic concurrency (e.g. two
-people submitting the same exercise attempt at once), Npgsql's idiom is a
-shadow `xmin` property — `entity.Property<uint>("xmin").IsRowVersion()` —
-not the SQL Server-style `byte[]` + `.IsRowVersion()` pattern, which
-Npgsql doesn't generate automatically. `UseXminAsConcurrencyToken()` also
-exists but is obsolete as of this Npgsql version.
+people submitting the same exercise attempt at once), SQL Server's idiom
+is a `byte[]` property mapped with `.IsRowVersion()` (a `rowversion`/
+`timestamp` column) — straightforward with `Microsoft.EntityFrameworkCore.
+SqlServer`, unlike the Npgsql/Postgres setup this project briefly used,
+which needed the `xmin` shadow-property workaround instead.
 
 ## Claude Code skills relied on for this project
 
@@ -78,3 +84,4 @@ used" like any other tool:
 | What | Why removed | Date |
 |---|---|---|
 | `Product` domain entity, `ProductsController`, `IProductRepository`/`ProductRepository`, `InitialCreate` migration | Wrong-project scope (e-commerce domain) — see [errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md). Migration rolled back before deletion. | 2026-08-26 |
+| `Npgsql.EntityFrameworkCore.PostgreSQL` | Switched to `Microsoft.EntityFrameworkCore.SqlServer` once the real database was created on MonsterASP.NET (SQL Server, not Postgres). | 2026-08-26 |
