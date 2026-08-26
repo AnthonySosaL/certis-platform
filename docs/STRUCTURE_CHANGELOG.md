@@ -44,9 +44,10 @@ a diff.
   machine. See [errors/2026-08-26-postgres-port-conflict.md](errors/2026-08-26-postgres-port-conflict.md).
 - `admin-frontend/`, `admin-backend/` **not yet scaffolded** — see
   [PENDING_IDEAS.md](PENDING_IDEAS.md).
-- Root `docker-compose.yml` added for local Postgres (Docker Desktop is
-  installed on this machine but was not running — start it before
-  `docker compose up`).
+- Root `docker-compose.yml` added for local Postgres. Docker Desktop was
+  installed but not running — started it this session to run the migration
+  and end-to-end check above; it does not auto-start on login by default,
+  so start it manually (or via the Desktop shortcut) each time.
 - `scripts/start-dev.ps1` / `scripts/stop-dev.ps1` plus two Desktop
   shortcuts added, per the notes' request to not have to reopen everything
   by hand each time.
