@@ -16,9 +16,10 @@ changelog entry) instead of deleting it.
 
 ## Scaffolded structurally, not implemented
 
-- [ ] `client-backend` — ASP.NET Core Web API, layered (Domain/Application/
-      Infrastructure/Api). Starts as soon as the .NET SDK finishes
-      installing.
+- [ ] `client-backend` — layered scaffold exists, builds, and is verified
+      end-to-end against local Postgres (see STRUCTURE_CHANGELOG.md), but
+      it's still one thin vertical slice (`Product` + `GET /api/products`,
+      no seed data). No auth, cart, order, or checkout logic yet.
 - [ ] `admin-frontend` + `admin-backend` — fully isolated admin app (own
       React frontend, own ASP.NET Core backend), per note 14. Deferred
       to keep this session's scope to the customer-facing MVP + navbar

@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8011A5C7-3ED2-4C96-B23B-C5D9800DA316}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutriBoost.Client.Domain", "src\NutriBoost.Client.Domain\NutriBoost.Client.Domain.csproj", "{9AE8D6F3-D309-4B9B-9888-7CE9EC408A04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutriBoost.Client.Application", "src\NutriBoost.Client.Application\NutriBoost.Client.Application.csproj", "{1179E82B-1889-43C7-96DB-1F4891434E2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutriBoost.Client.Infrastructure", "src\NutriBoost.Client.Infrastructure\NutriBoost.Client.Infrastructure.csproj", "{1B4C6AF1-894D-4275-8B5A-37C3DF961FFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutriBoost.Client.Api", "src\NutriBoost.Client.Api\NutriBoost.Client.Api.csproj", "{02C4C462-D089-43EE-B39C-756DCE690634}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{65A518F7-4933-48FE-A682-677B9AA51930}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutriBoost.Client.Domain.Tests", "tests\NutriBoost.Client.Domain.Tests\NutriBoost.Client.Domain.Tests.csproj", "{D2EBF08B-73F2-4447-97D8-54D9B9D9BEB1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9AE8D6F3-D309-4B9B-9888-7CE9EC408A04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AE8D6F3-D309-4B9B-9888-7CE9EC408A04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AE8D6F3-D309-4B9B-9888-7CE9EC408A04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AE8D6F3-D309-4B9B-9888-7CE9EC408A04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1179E82B-1889-43C7-96DB-1F4891434E2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1179E82B-1889-43C7-96DB-1F4891434E2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1179E82B-1889-43C7-96DB-1F4891434E2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1179E82B-1889-43C7-96DB-1F4891434E2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B4C6AF1-894D-4275-8B5A-37C3DF961FFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B4C6AF1-894D-4275-8B5A-37C3DF961FFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B4C6AF1-894D-4275-8B5A-37C3DF961FFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B4C6AF1-894D-4275-8B5A-37C3DF961FFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02C4C462-D089-43EE-B39C-756DCE690634}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02C4C462-D089-43EE-B39C-756DCE690634}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02C4C462-D089-43EE-B39C-756DCE690634}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02C4C462-D089-43EE-B39C-756DCE690634}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2EBF08B-73F2-4447-97D8-54D9B9D9BEB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2EBF08B-73F2-4447-97D8-54D9B9D9BEB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2EBF08B-73F2-4447-97D8-54D9B9D9BEB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2EBF08B-73F2-4447-97D8-54D9B9D9BEB1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9AE8D6F3-D309-4B9B-9888-7CE9EC408A04} = {8011A5C7-3ED2-4C96-B23B-C5D9800DA316}
+		{1179E82B-1889-43C7-96DB-1F4891434E2D} = {8011A5C7-3ED2-4C96-B23B-C5D9800DA316}
+		{1B4C6AF1-894D-4275-8B5A-37C3DF961FFA} = {8011A5C7-3ED2-4C96-B23B-C5D9800DA316}
+		{02C4C462-D089-43EE-B39C-756DCE690634} = {8011A5C7-3ED2-4C96-B23B-C5D9800DA316}
+		{D2EBF08B-73F2-4447-97D8-54D9B9D9BEB1} = {65A518F7-4933-48FE-A682-677B9AA51930}
+	EndGlobalSection
+EndGlobal

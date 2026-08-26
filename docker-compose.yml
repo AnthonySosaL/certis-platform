@@ -8,7 +8,10 @@ services:
       POSTGRES_PASSWORD: nutriboost_dev_only
       POSTGRES_DB: nutriboost_client
     ports:
-      - "5432:5432"
+      # Host 5433, not 5432 — this machine already has another local
+      # Postgres (a Windows service, unrelated to this project) bound to
+      # 5432. See docs/errors/2026-08-26-postgres-port-conflict.md.
+      - "5433:5432"
     volumes:
       - nutriboost-postgres-data:/var/lib/postgresql/data
 

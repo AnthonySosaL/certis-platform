@@ -9,7 +9,7 @@ history stays visible (per the notes' traceability requirement).
 
 | Tool | Version | Why | Added |
 |---|---|---|---|
-| .NET SDK | 8 (LTS) | Backend runtime + CLI (`dotnet new`, EF Core migrations). Only the runtime was preinstalled on this machine; the SDK was missing and got installed via `winget`. | 2026-08-26 |
+| .NET SDK | 8.0.424 (LTS) | Backend runtime + CLI (`dotnet new`, EF Core migrations). Only the runtime was preinstalled. First tried `winget install Microsoft.DotNet.SDK.8`, but that install requires admin elevation and hung indefinitely waiting on a UAC prompt with no interactive desktop to show it to — killed it and installed to the user profile instead (`dotnet-install.ps1 -InstallDir %USERPROFILE%\.dotnet`, no admin needed). `PATH` and `DOTNET_ROOT` (User scope) point there now. If `dotnet --list-sdks` ever stops showing 8.0.424, check those two env vars first. | 2026-08-26 |
 | Node.js | v22.22.0 (already installed) | Frontend tooling (npm, Vite). | pre-existing |
 | Docker Desktop | 29.4.3 (already installed, not yet running) | Local Postgres via `docker-compose.yml`. Start Docker Desktop before `docker compose up`. | pre-existing, wired in 2026-08-26 |
 | git | 2.53.0 (already installed) | Version control. | pre-existing |
@@ -30,11 +30,21 @@ history stays visible (per the notes' traceability requirement).
 | `i18next`, `react-i18next`, `i18next-browser-languagedetector` | i18n scaffold — English active now, Spanish resource file present but not exposed, per the notes' "make it easy to add languages later" request. |
 | `@types/node` (dev) | Needed for `import.meta.dirname` path aliasing in `vite.config.ts`. |
 
-## `client-backend` (ASP.NET Core) — added once scaffolded
+## `client-backend` (ASP.NET Core, layered: Domain/Application/Infrastructure/Api)
 
-Tracked here as soon as the backend project is created; see
-[STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md) for the entry announcing
-it.
+| Package | Project | Why |
+|---|---|---|
+| `Microsoft.EntityFrameworkCore` 8.0.11 | Infrastructure | ORM — pinned to the 8.x line to match the net8.0 target (`dotnet add` defaults to the newest major, which was 10.x and incompatible). |
+| `Npgsql.EntityFrameworkCore.PostgreSQL` 8.0.11 | Infrastructure | PostgreSQL provider for EF Core. |
+| `Microsoft.EntityFrameworkCore.Design` 8.0.11 | Api | Enables `dotnet ef migrations` from the Api project. |
+| `Swashbuckle.AspNetCore` | Api | Swagger/OpenAPI UI — scaffolded by default with `dotnet new webapi`, kept for local API exploration. |
+
+Concurrency note: `Product.RowVersion` was tried first as a `byte[]`
+mapped with `.IsRowVersion()` (the SQL Server pattern) — Npgsql doesn't
+generate that automatically. Landed on Npgsql's actual idiom: a shadow
+`xmin` property (`entity.Property<uint>("xmin").IsRowVersion()`), no
+mapped CLR property needed. `UseXminAsConcurrencyToken()` also exists but
+is obsolete as of this Npgsql version.
 
 ## Claude Code skills relied on for this project
 
