@@ -5,6 +5,38 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-26 — Launcher follow-up: widget URL bug + real window cleanup
+
+Two more real bugs found by actually using the launcher repeatedly (the
+way it'd get used day to day), both now fixed and round-trip tested
+(start -> stop -> start, three times, verified clean each time):
+
+- **Widget opened broken.** The repo path contains a space
+  (`PROYECTOS PERSONALES`), which wasn't percent-encoded in the
+  `file://` URL passed to Edge's `--app=` flag — Windows' argument
+  splitting cut the URL off at the space, so Edge opened
+  `file:///D:/PROYECTOS` (nonexistent) instead of the widget. Every
+  re-run of Start created another broken Edge window. Fixed: the URL is
+  now percent-encoded, and opening the widget is now idempotent too
+  (skipped if a `widget/index.html` Edge process is already found).
+- **Stop didn't actually close the visible windows.** `taskkill /F /T` on
+  the port-owning process (node.exe/dotnet.exe) kills that process and
+  its descendants, but not its *parent* - so the wrapper PowerShell
+  window (title "Project - client-frontend"/"-backend") was left behind,
+  now just an idle empty prompt, indistinguishable from a live one at a
+  glance. Compounded by testing start.bat repeatedly without stopping
+  cleanly in between: the user ended up with a cluttered taskbar (several
+  duplicate "Project - client-*" windows, several broken widget Edge
+  windows) and reasonably asked "what do I close and what not?" Fixed:
+  `stop-dev.ps1` now walks up the parent chain from the port-owner (past
+  the intermediate cmd.exe npm spawns), specifically looking for the
+  "Project - ..." wrapper by its command line, and kills from there - the
+  window itself closes now, not just the process inside it. Also closes
+  the widget window on stop.
+- Manually cleaned up the mess left behind by the testing above (5+ stray
+  windows, several broken Edge tabs) - confirmed nothing was left running
+  outside of a fresh `start.bat` afterward.
+
 ## 2026-08-26 — Reload-safe launcher + icon
 
 - Added `assets/app-icon.ico` — a small generated icon (brand green

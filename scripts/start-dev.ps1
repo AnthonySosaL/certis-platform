@@ -61,12 +61,24 @@ if ($backendCsproj) {
     Write-Host "client-backend not scaffolded yet - skipping." -ForegroundColor DarkYellow
 }
 
-Write-Host "Opening task widget..." -ForegroundColor Cyan
-$edge = "$env:ProgramFiles (x86)\Microsoft\Edge\Application\msedge.exe"
-if (Test-Path $edge) {
-    Start-Process $edge -ArgumentList "--app=file:///$($root -replace '\\','/')/widget/index.html", '--window-size=320,480'
+$widgetAlreadyOpen = [bool](Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -and $_.CommandLine -like '*widget/index.html*' })
+
+if ($widgetAlreadyOpen) {
+    Write-Host "Task widget already open - skipping." -ForegroundColor DarkYellow
 } else {
-    Start-Process "$root\widget\index.html"
+    Write-Host "Opening task widget..." -ForegroundColor Cyan
+    $edge = "$env:ProgramFiles (x86)\Microsoft\Edge\Application\msedge.exe"
+    # The repo path has a space ("PROYECTOS PERSONALES") - it must be
+    # percent-encoded in the file:// URL, otherwise Windows' command-line
+    # argument splitting cuts the URL off at the space and Edge opens a
+    # broken/truncated path instead of the widget.
+    $widgetUrl = "file:///$(($root -replace '\\','/') -replace ' ','%20')/widget/index.html"
+    if (Test-Path $edge) {
+        Start-Process $edge -ArgumentList "--app=$widgetUrl", '--window-size=320,480'
+    } else {
+        Start-Process "$root\widget\index.html"
+    }
 }
 
 Write-Host ""
