@@ -20,9 +20,10 @@ Two corrections, so the plan stays workable instead of quietly failing later:
 
 - **Coding work** (this repo, features, fixes): use a **Sonnet 5** session —
   that's what actually writes and edits code well. This chat is one example.
-- **Ideation / high-stakes review** (auth security design, invoice legal
-  review, Ecuador tax/timezone rules, refund policy vs. Stripe's rules): open
-  a **separate chat on Fable 5** and paste in the relevant `docs/*.md` file
+- **Ideation / high-stakes review** (e.g. how AI-graded writing/speaking
+  should work, privacy for two people's practice data, anything that needs
+  real thought before code gets written): open a **separate chat on
+  Fable 5** and paste in the relevant `docs/*.md` file
   for context. Save its output back into a numbered doc under `docs/ideas/`
   (see the note in [PENDING_IDEAS.md](PENDING_IDEAS.md)) rather than pasting
   the conversation back into the coding chat — that keeps the coding
@@ -44,3 +45,16 @@ Before asking a Fable 5 chat for an idea, skim `docs/ARCHITECTURE.md` and
 settled. After it responds, the coding session's job is to implement the
 decision and log it (`STRUCTURE_CHANGELOG.md`, `DEPENDENCIES.md`, or a new
 `docs/ideas/NN-topic.md`, depending on what changed) — not to re-litigate it.
+
+## Reference material vs. the spec
+
+When a request says "take patterns from this other project's notes into
+account" for building a *different* project, the notes are reference
+material for methodology (architecture, tooling, workflow), not the new
+project's literal spec — see
+[errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md) for
+what happened when that distinction got lost (an entire e-commerce
+platform got scaffolded instead of this English-practice tool). If a
+notes file's subject matter doesn't match the project just described,
+that mismatch is worth flagging before building a full domain model
+around it.

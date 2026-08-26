@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NutriBoost — Tasks</title>
+<title>Project Tasks</title>
 <style>
   :root {
     --bg: #16171d;
@@ -101,7 +101,7 @@
 </head>
 <body>
   <header>
-    <h1>NutriBoost — Tasks</h1>
+    <h1>Project Tasks</h1>
     <button id="toggle-min" title="Minimize/restore" aria-label="Minimize or restore">—</button>
   </header>
   <div id="body">
@@ -123,8 +123,8 @@
   // Local-only widget: state lives in this browser profile's localStorage.
   // No backend — this is a lightweight stand-in until/unless a native
   // tray app is worth building (see docs/PENDING_IDEAS.md).
-  const STORAGE_KEY = 'nutriboost-widget-tasks';
-  const MIN_KEY = 'nutriboost-widget-minimized';
+  const STORAGE_KEY = 'app-widget-tasks';
+  const MIN_KEY = 'app-widget-minimized';
 
   const load = () => {
     try {

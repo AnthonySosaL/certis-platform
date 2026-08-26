@@ -1,46 +1,39 @@
 # Project naming
 
-Working title used across the codebase right now: **NutriBoost** (the name
-from the original idea notes). It is a placeholder, not a final decision —
-"nutriboost" as a brand is generic enough that it very likely collides with
-existing supplement sellers, so treat every occurrence of it in code as a
-find-and-replace waiting to happen once a final name is picked.
+**Correction (2026-08-26):** the three names previously listed here
+(ThriveCrate, StackWell, Fuelance) were for a fitness e-commerce project
+that isn't this project — see
+[errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md).
+Discard them; they have nothing to do with this platform.
 
-## Candidates researched (2026-08-26)
+The folder is currently named `english-c1-platform` — a plain descriptive
+placeholder, not a proposed brand name, chosen so the folder path itself
+stops being actively wrong while a real name gets picked.
 
-Quick web searches only — **not** a formal trademark or domain search. Verify
-on a registrar (e.g. Namecheap/Porkbun) and INESE/SENADI (Ecuador trademark
-office) before committing.
+## Tentative candidates (light research only — confirm before committing)
 
-1. **ThriveCrate** — no exact collisions found. "Thrive" alone is a very
-   common wellness-brand prefix (Thrive Market, Thrive Fitness, etc.), so the
-   full compound is what protects it, not the word "Thrive" by itself.
-2. **StackWell** — no exact collisions found. Reads naturally in the
-   supplement space ("stack" = supplement stack), which is a plus for SEO but
-   means double-check App Store / Play Store naming too before shipping a
-   mobile app under it.
-3. **Fuelance** — no collisions found at all; the most distinctive/brandable
-   of the three, but also the most invented (less immediately obvious what
-   the store sells from the name alone).
+Quick web searches only, no trademark/domain search. Offered as a
+starting point for discussion, not a recommendation to act on immediately
+— last time inventing branding ahead of the actual scope caused a lot of
+rework.
 
-## Rejected during research
-
-- **FitForge** — taken (multiple apps + a registered trademark for exercise
-  equipment).
-- **IronCrate** — taken (`ironcrate.co`, an existing fitness subscription
-  box).
-- **PeakRep** — taken (`gopeakrep.com`, an existing fitness gear brand).
-- **VaultFit** — too close to `vault.fit` (an existing Pilates studio chain).
-- **SculptWell** — too close to an existing local fitness facility
-  ("Sculpt Well Co.").
-- **Nutryve** — taken (existing supplement drink-mix brand on Amazon).
-- **PeakVault** — taken (a wellness site and an unrelated crypto platform).
+1. **Fluentrack** — no exact collisions found. Close neighbors exist
+   ("Fluently," "FluentU," both AI conversation-practice apps), so the
+   full word is what protects it, not "fluent" alone.
+2. **C1 Compass** — no exact collisions found. Reads clearly as
+   Cambridge-C1-focused, which helps if this stays scoped to that exam
+   specifically.
+3. **LexiTrack** — no exact collisions found ("Lexiplore" is a similar
+   neighbor, a different app).
 
 ## Recommendation
 
-Lean toward **ThriveCrate** or **StackWell** — both read clearly as a fitness
-nutrition store in English, which matters since the platform's UI language is
-English. Confirm the final pick, then this file plus every `NutriBoost` /
-`nutriboost` string in the codebase (package names, `index.html` title, i18n
-`brand.name` keys, namespaces in the backend) needs a rename pass — log that
-pass in [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md) when it happens.
+Hold off deciding until the feature scope (see
+[PENDING_IDEAS.md](PENDING_IDEAS.md)) is clearer — a name that's
+C1/Cambridge-specific (like *C1 Compass*) is a poor fit if this becomes
+broader multi-level practice later, while a generic one (*Fluentrack*)
+ages better if the scope grows. Once picked, do a real domain/trademark
+check before committing, and then the codebase needs a rename pass:
+folder name, `i18n` `brand.name` keys, `index.html` title, and — separately
+— the backend's `NutriBoost.Client.*` namespaces (tracked in
+PENDING_IDEAS.md as its own item, since it's a bigger mechanical change).

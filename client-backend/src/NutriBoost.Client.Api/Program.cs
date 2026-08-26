@@ -1,4 +1,3 @@
-using NutriBoost.Client.Application.Products;
 using NutriBoost.Client.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +9,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddScoped<GetProductsQueryHandler>();
 
 // Local dev only: the Vite dev server's default origin. Tighten this to
 // the real deployed frontend origin(s) before going to production.

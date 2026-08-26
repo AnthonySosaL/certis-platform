@@ -10,7 +10,6 @@ export function Footer() {
         <p>
           © {year} {t('brand.name')}. All rights reserved.
         </p>
-        <p>Made in Ecuador.</p>
       </div>
     </footer>
   )

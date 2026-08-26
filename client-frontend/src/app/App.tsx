@@ -22,7 +22,6 @@ export function App() {
         <div className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Placeholder title="Shop" />} />
             <Route path="/about" element={<Placeholder title="About" />} />
             <Route path="/contact" element={<Placeholder title="Contact" />} />
           </Routes>

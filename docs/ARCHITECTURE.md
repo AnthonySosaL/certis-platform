@@ -1,73 +1,76 @@
 # Architecture
 
-Working name: **NutriBoost** (placeholder — see [NAMING.md](NAMING.md)).
-An English-language fitness-nutrition e-commerce platform for Ecuador, built
-as a personal project doubling as English/C1 practice. This doc is the
-single source of truth for *why* things are built the way they are; update
-it whenever a decision here changes, and log the change in
+Working name: TBD — see [NAMING.md](NAMING.md). A platform to practice and
+evaluate English (targeting Cambridge C1) for you and a friend, built with
+C# .NET partly as a learning goal in itself. Possibly expanded/offered to
+institutions later — not the near-term scope. This doc is the source of
+truth for *why* things are built the way they are; update it whenever a
+decision changes, and log the change in
 [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md).
 
-## Stack decision (and why it differs from the original notes)
+**What's built so far is infrastructure, not features.** The actual
+English-practice domain (what a "practice session" or "evaluation" even
+consists of) isn't decided yet — see
+[PENDING_IDEAS.md](PENDING_IDEAS.md#feature-scope-not-yet-decided). Don't
+read the folder names below as a finished design; they're a scaffold
+waiting for that decision.
 
-| Layer | Choice | Notes |
+## Stack decision
+
+| Layer | Choice | Why |
 |---|---|---|
-| Backend | **ASP.NET Core 8 (C#) Web API** | Explicitly requested — ".NET porque he visto que mucho usan eso." LTS version. |
-| Frontend | **React 18 + TypeScript + Vite** | The notes name Go/Django as options but fall back to React if they don't fit the free-hosting story — they don't (see [HOSTING.md](HOSTING.md)), and shadcn/ui (mandated in the notes) is React-only. So React it is. |
-| Component library | **shadcn/ui** (Radix primitives, Tailwind CSS v4, "Nova" preset — Lucide icons, Geist font) | As specified in the source notes. |
-| ORM | **EF Core** (not Prisma) | Prisma is a JS/TS-only ORM; it cannot target a C# backend. EF Core is the direct .NET equivalent — migrations, schema tracked in source control, same "controlled changes" goal the notes wanted from Prisma. |
-| Database | **PostgreSQL** | Free-tier friendly, works cleanly with EF Core, and is what most of the free/cheap hosts (Render, Supabase, Neon) support well. |
-| Animation | **Motion** (the successor to Framer Motion) | Matches the "skill motion" note. |
-| Payments | **Stripe** | As specified. |
-| Auth | **ASP.NET Core Identity + Google OAuth + JWT** | See "Auth" below. |
+| Backend | **ASP.NET Core 8 (C#) Web API** | Explicitly requested — partly to learn C#/.NET, which is widely asked for in job postings. LTS version. |
+| Frontend | **React 18 + TypeScript + Vite** | Pairs with shadcn/ui (see below). |
+| Component library | **shadcn/ui** (Radix primitives, Tailwind CSS v4, "Nova" preset — Lucide icons, Geist font) | Reusable, consistent components from the start; owned source code, not an opaque dependency. |
+| ORM | **EF Core** | The direct .NET equivalent of Prisma-style "controlled, tracked schema changes" — migrations live in source control. |
+| Database | **PostgreSQL** | Free-tier friendly, works cleanly with EF Core. |
+| Animation | **Motion** (the current Framer Motion package) | For a non-static, well-designed UI. |
+| Auth | Not built yet | Needs a decision on user model first (just the two of you vs. accounts for others later) — see PENDING_IDEAS.md. |
 
-## Repo layout (monorepo)
-
-A single git repo with isolated app folders, not four separate repos. The
-notes ask for admin and client to be *fully isolated* (own frontend, own
-backend) — that isolation is at the **app/deployment** level, not the repo
-level. A monorepo keeps the point-6 "one branch per module, merge to main
-after review" workflow simple (one PR, one repo, one history) while the
-folders below still deploy independently:
+## Repo layout
 
 ```
-NutriBoost/
-├── client-frontend/   React + TS + Vite + shadcn — the public storefront
-├── client-backend/    ASP.NET Core Web API — storefront API (planned)
-├── admin-frontend/    React + TS + Vite + shadcn — internal ops panel (planned)
-├── admin-backend/     ASP.NET Core Web API — internal ops API (planned)
-├── docs/              this folder
-└── scripts/           local dev start/stop helpers
+english-c1-platform/   (folder name — placeholder, see NAMING.md)
+├── client-frontend/    React + TS + Vite + shadcn — UI shell exists, no real pages yet
+├── client-backend/     ASP.NET Core Web API — layered, builds and runs, no domain model yet
+├── docs/                this folder
+└── scripts/             local dev start/stop helpers
 ```
 
-`client-*` is scaffolded first because it's the customer-facing MVP asked
-for this session. `admin-*` folders get scaffolded next session — tracked in
-[PENDING_IDEAS.md](PENDING_IDEAS.md) so it isn't lost.
+A single app for now (not split into separate "client" and "admin" apps).
+The client/admin isolation pattern that shows up in some of the reference
+notes belongs to a *different* project (an e-commerce platform, seemingly
+already in progress elsewhere on this machine — see
+[docs/errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md))
+and doesn't apply here unless this platform later grows a real
+teacher/institution-facing admin surface.
 
 ## Backend: layered / Clean Architecture
 
-Each backend (`client-backend`, later `admin-backend`) follows the same
-layering, as separate projects in one .sln so dependencies are enforced by
-the compiler, not just convention:
+`client-backend` is split into separate projects in one `.sln` so
+dependencies are enforced by the compiler, not just convention:
 
 - **Domain** — entities, value objects, domain logic. No dependencies on
-  anything else.
-- **Application** — use cases (CQRS-style commands/queries), interfaces for
-  infrastructure (`IProductRepository`, `IPaymentGateway`, etc.). Depends
-  only on Domain.
-- **Infrastructure** — EF Core `DbContext`, repository implementations,
-  Stripe client, email sender, Google OAuth integration. Implements
-  Application's interfaces.
-- **Api** — controllers/minimal-API endpoints, DI wiring, middleware, auth
-  configuration. The only project that knows about HTTP.
+  anything else. Currently empty — no entities defined yet.
+- **Application** — use cases, interfaces for infrastructure. Depends only
+  on Domain.
+- **Infrastructure** — EF Core `DbContext` (`AppDbContext`, currently no
+  `DbSet`s), repository implementations. Implements Application's
+  interfaces.
+- **Api** — controllers/minimal-API endpoints, DI wiring, middleware, CORS.
+  The only project that knows about HTTP. Currently exposes only
+  `GET /health`.
 
-Rationale: keeps business rules (stock concurrency, invoice rules, refund
-rules) testable without spinning up a database or HTTP server, and keeps
-"which layer am I editing" explicit — directly matches the source notes'
-"cada modificación... piensa qué patrones se va usar" requirement and the
-dev-engineering-rules skill's "layer protection" rule now active in this
-project's coding sessions.
+Rationale: keeps business rules testable without a database or HTTP server,
+and keeps "which layer am I editing" explicit.
 
-## Frontend structure (per app)
+**Known holdover**: the actual namespaces/project names are still
+`NutriBoost.Client.*` (`.sln`, `.csproj` files, C# `namespace`
+declarations) — a mechanical rename pass across every file, better done
+once alongside adding the real domain model than twice. Tracked in
+[PENDING_IDEAS.md](PENDING_IDEAS.md).
+
+## Frontend structure
 
 ```
 src/
@@ -75,50 +78,33 @@ src/
 ├── components/
 │   ├── ui/         shadcn primitives (generated — don't hand-edit heavily)
 │   └── layout/     Navbar, Footer, and other structural, reused components
-├── features/       Feature-based modules as they're built (catalog, cart, auth...)
+├── features/       Feature-based modules, once features are defined
 ├── i18n/           Translation resources (English active, Spanish scaffolded)
 ├── lib/            Shared utilities (shadcn's cn() helper, etc.)
-└── pages/          Route-level components
+└── pages/          Route-level components (currently a placeholder Home)
 ```
 
-Component rule from the notes: build reusable components from the start
-(Navbar, Footer, buttons, cards already are), prefer **cards over extra
-tabs/pages** where content allows it, no emoji/text-icons — Lucide SVG icons
-only, sized responsively.
+Component rule carried over from the reference notes (still applies
+generically): build reusable components from the start, prefer cards over
+extra tabs/pages where content allows it, no emoji/text-icons — Lucide SVG
+icons only, sized responsively.
 
 ## Cross-cutting concerns staged for later (not built yet)
 
-These are architecturally accounted for (folder/config exists) but not
-implemented — see [PENDING_IDEAS.md](PENDING_IDEAS.md) for the full list
-with reasoning per item:
-
-- **Theming**: light mode is the default and only active mode, but the full
+- **Theming**: light mode is the default and only active mode; the full
   dark-mode CSS variable set already exists (`.dark` class, toggled via
-  `ThemeProvider`) — flipping the default later is a one-line change, not a
-  redesign.
-- **i18n**: English is the only language wired into the UI, but the
-  `i18next` setup and a Spanish resource file already exist side by side —
-  adding a language switcher later doesn't require a translation pass done
-  under deadline pressure.
-- **Auth**: Google OAuth + email/password with password recovery, per the
-  notes. Deferred until `client-backend` exists.
-- **Stock concurrency**: prevent overselling when two buyers race for the
-  last unit. Planned as a DB-level optimistic concurrency token (EF Core
-  `[Timestamp]` / `rowversion`) plus a transaction that re-checks stock at
-  commit time — needs a Fable 5 audit pass before it's implemented, per the
-  notes' explicit ask.
-- **Invoicing**: soft-delete only, full edit history, Ecuador-specific legal
-  requirements — needs research + a Fable 5 audit pass before implementation
-  (see AI_WORKFLOW.md).
-- **Stripe dev/prod separation**: two API key sets, never committed — see
-  the root `.gitignore` and the "before every push" reminder in the README.
+  `ThemeProvider`) — flipping the default later is a one-line change.
+- **i18n**: English is the only language wired into the UI (the platform's
+  primary language, since it's for English practice), but the `i18next`
+  setup and a Spanish resource file exist side by side for the app's own
+  UI chrome (nav labels etc.) if that's ever needed.
+- **Auth**: not designed yet. Needs the user-model decision first (private
+  2-person tool vs. something with real accounts).
 
 ## Design patterns in play so far
 
 - **Provider pattern** for cross-cutting UI state (`ThemeProvider`).
-- **Composition over configuration** for shadcn components (each is owned
-  source code in `components/ui`, not an opaque npm dependency).
+- **Composition over configuration** for shadcn components (owned source
+  code, not an opaque npm dependency).
 - **Repository pattern** (planned) for the backend's Infrastructure layer,
-  so the Application layer never talks to EF Core directly.
-- **CQRS-lite** (planned): commands and queries as distinct types in the
-  Application layer, even without a full mediator library at first.
+  once there's a real domain to persist.

@@ -1,13 +1,13 @@
 # Stops the local dev environment started by start-dev.ps1: closes the
 # frontend/backend terminal windows (matched by title) and stops Postgres.
-# Run via the "NutriBoost - Stop" Desktop shortcut, or directly:
+# Run via the "Project - Stop" Desktop shortcut, or directly:
 #   powershell -ExecutionPolicy Bypass -File scripts\stop-dev.ps1
 
 $root = Split-Path -Parent $PSScriptRoot
 
 Write-Host "Stopping dev server windows..." -ForegroundColor Cyan
 Get-Process powershell -ErrorAction SilentlyContinue |
-    Where-Object { $_.MainWindowTitle -like 'NutriBoost - *' } |
+    Where-Object { $_.MainWindowTitle -like 'Project - *' } |
     ForEach-Object {
         Write-Host "  closing: $($_.MainWindowTitle)"
         Stop-Process -Id $_.Id -Force

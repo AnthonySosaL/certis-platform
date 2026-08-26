@@ -24,10 +24,11 @@ these; they're UI chrome.
 | `--accent-foreground` | `oklch(0.3 0.1 150)` | `oklch(0.9 0.05 150)` | Text on top of `--accent` |
 | `--ring` | `oklch(0.62 0.17 150)` | `oklch(0.72 0.17 150)` | Focus ring, matches primary |
 
-Hue `150` is a green — chosen for an energetic/health/fitness association
-without going neon. This is a first pass, not a final brand decision; treat
-it as easy to swap (it's 5 variables, not scattered hex codes) once there's
-a real logo/brand direction.
+Hue `150` is a green — a neutral placeholder choice (calm, legible, not
+tied to any brand direction) rather than a deliberate pick for this
+platform specifically. This is a first pass, not a final brand decision;
+treat it as easy to swap (it's 5 variables, not scattered hex codes) once
+there's a real brand direction — see [NAMING.md](NAMING.md), still open.
 
 ## Adding or changing a color
 

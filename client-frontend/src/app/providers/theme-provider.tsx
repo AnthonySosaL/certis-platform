@@ -8,7 +8,7 @@ type ThemeProviderState = {
   toggleTheme: () => void
 }
 
-const STORAGE_KEY = 'nutriboost-theme'
+const STORAGE_KEY = 'app-theme'
 
 // The brand defaults to light mode. Dark mode is fully wired (CSS
 // variables + .dark class already exist in index.css) but is not the

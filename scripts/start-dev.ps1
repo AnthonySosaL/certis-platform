@@ -1,6 +1,6 @@
 # Starts the whole local dev environment: Postgres (Docker), the frontend
 # dev server, the backend dev server (once it exists), and the task widget.
-# Run via the "NutriBoost - Start" Desktop shortcut, or directly:
+# Run via the "Project - Start" Desktop shortcut, or directly:
 #   powershell -ExecutionPolicy Bypass -File scripts\start-dev.ps1
 
 $ErrorActionPreference = 'Stop'
@@ -16,7 +16,7 @@ try {
 Write-Host "Starting client-frontend dev server..." -ForegroundColor Cyan
 Start-Process powershell -ArgumentList @(
     '-NoExit', '-Command',
-    "`$host.ui.RawUI.WindowTitle = 'NutriBoost - client-frontend'; Set-Location '$root\client-frontend'; npm run dev"
+    "`$host.ui.RawUI.WindowTitle = 'Project - client-frontend'; Set-Location '$root\client-frontend'; npm run dev"
 )
 
 $backendCsproj = Get-ChildItem -Path "$root\client-backend" -Filter '*.Api.csproj' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -24,7 +24,7 @@ if ($backendCsproj) {
     Write-Host "Starting client-backend dev server..." -ForegroundColor Cyan
     Start-Process powershell -ArgumentList @(
         '-NoExit', '-Command',
-        "`$host.ui.RawUI.WindowTitle = 'NutriBoost - client-backend'; Set-Location '$($backendCsproj.DirectoryName)'; dotnet watch run"
+        "`$host.ui.RawUI.WindowTitle = 'Project - client-backend'; Set-Location '$($backendCsproj.DirectoryName)'; dotnet watch run"
     )
 } else {
     Write-Host "client-backend not scaffolded yet — skipping." -ForegroundColor DarkYellow

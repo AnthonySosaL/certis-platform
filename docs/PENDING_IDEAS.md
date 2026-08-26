@@ -1,75 +1,61 @@
 # Pending ideas / not forgotten, just not built yet
 
-A running list so nothing from a brainstorm gets lost while other things
-get built first — per the notes' explicit request to always be reminded of
-parked ideas. Move an item to "Done" (with a date and a link to the
-changelog entry) instead of deleting it.
+A running list so nothing gets lost while other things get built first.
+Move an item to "Done" (with a date and a link to the changelog entry)
+instead of deleting it.
+
+## Feature scope — not yet decided
+
+This is the biggest open item: what does "practice and evaluate English
+toward C1" actually consist of, concretely? Nothing below can be built
+correctly (domain model, database schema, UI) until this is answered, at
+least at a first-pass level:
+
+- [ ] Which skills does the platform cover first — reading, writing,
+      listening, speaking, vocabulary/grammar drills, full mock C1 exams,
+      some combination?
+- [ ] How is content authored — written/curated by hand and stored in the
+      database, generated on demand (e.g. via an AI model), or both?
+- [ ] What does "evaluate" mean concretely — self-scored exercises,
+      AI-graded writing/speaking, a mock exam with a C1-equivalent score,
+      progress tracking over time comparing you and your friend?
+- [ ] Who can use it right now — just the two of you (simple private
+      login is enough), or does it need to support other users from day
+      one even before the "sell to institutions" idea is pursued?
 
 ## Blocked on you / needs a decision
 
-- [ ] **Final project name.** Three candidates researched in
-      [NAMING.md](NAMING.md) — pick one (or reject all three and ask for
-      another round) before it spreads further through code and configs.
-- [ ] **MonsterASP.NET vs. staying flexible.** [HOSTING.md](HOSTING.md)
-      leans toward it for the backend, but confirm before any production
-      config gets built around it specifically.
+- [ ] **Final project name.** Three tentative candidates in
+      [NAMING.md](NAMING.md) — pick one, reject all three, or hold off
+      until the feature scope above is clearer (recommended, since a
+      C1-specific name is a poor fit if scope grows beyond C1 later).
+- [ ] **C# namespace rename.** The backend's projects/namespaces are still
+      `NutriBoost.Client.*` — a holdover from the scope mix-up (see
+      [errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md)).
+      Best done in one pass alongside adding the real domain model, once
+      the feature scope and name are both settled, rather than renaming
+      twice.
 
 ## Scaffolded structurally, not implemented
 
-- [ ] `client-backend` — layered scaffold exists, builds, and is verified
-      end-to-end against local Postgres (see STRUCTURE_CHANGELOG.md), but
-      it's still one thin vertical slice (`Product` + `GET /api/products`,
-      no seed data). No auth, cart, order, or checkout logic yet.
-- [ ] `admin-frontend` + `admin-backend` — fully isolated admin app (own
-      React frontend, own ASP.NET Core backend), per note 14. Deferred
-      to keep this session's scope to the customer-facing MVP + navbar
-      that was explicitly asked for first.
-- [ ] Spanish language switcher UI — resources already exist in
-      `client-frontend/src/i18n/locales/es`, just not exposed. See
-      [ARCHITECTURE.md](ARCHITECTURE.md#cross-cutting-concerns-staged-for-later-not-built-yet).
+- [ ] `client-backend` — layered scaffold exists, builds, and was verified
+      end-to-end against local Postgres, but there's no domain model
+      (`AppDbContext` has zero `DbSet`s) and no auth yet.
+- [ ] Spanish translations for the app's own UI chrome (nav labels etc.)
+      — resources exist in `client-frontend/src/i18n/locales/es`, not
+      exposed via a switcher. Low priority: the platform's primary
+      language is English by design.
 - [ ] Dark mode toggle — fully wired in `ThemeProvider`, light stays the
       default until you say otherwise.
 
-## Needs a Fable 5 pass before implementation (per AI_WORKFLOW.md)
+## Nice-to-haves mentioned along the way, not urgent
 
-- [ ] **Stock concurrency** — prevent two buyers both "winning" the last
-      unit. Direction sketched in ARCHITECTURE.md (EF Core optimistic
-      concurrency token + re-check at commit), needs an audit before it's
-      trusted with real money.
-- [ ] **Invoicing** — edit/delete rules (soft-delete only), Ecuador legal
-      requirements for what must be on an invoice, whether an invoice is
-      legally mandatory even for a guest checkout.
-- [ ] **Guest checkout data model** — what's the minimum data collectible
-      from a non-registered buyer while still producing a valid Ecuador
-      invoice if they want one.
-- [ ] **Timezone handling for registration/orders** — notes flag this as
-      essential for a real Ecuador storefront (Ecuador is UTC-5, no DST,
-      but don't hardcode that — store everything in UTC and convert at the
-      edges).
-- [ ] **Stripe refund/cancellation flow** — avoid Ecuador legal exposure;
-      needs research into what Stripe actually supports vs. what Ecuadorian
-      consumer law requires.
-- [ ] **Google + email/password auth flow**, including password recovery —
-      security-sensitive, notes explicitly ask for a Fable 5 review before
-      it's built.
-- [ ] **URL structure / routing scheme** — notes ask for this to be planned
-      deliberately (SEO-friendly slugs, canonical structure) rather than
-      grown ad hoc as pages get added.
-
-## Nice-to-haves flagged in the notes, not urgent
-
-- [ ] Hero `.glb` (3D model) + scroll-triggered section animations on the
-      home page.
-- [ ] Carousels on the storefront landing page.
-- [ ] Admin dashboard charting library (for order/revenue graphs) — needs
-      picking once `admin-frontend` exists.
-- [ ] Toasts for lightweight confirmations, modals reserved for
-      purchase-critical confirmations only (per note 28).
-- [ ] Product image hosting strategy — needs a free/cheap option with fast
-      global delivery; not decided yet.
-- [ ] Errors log folder (`docs/errors/`) exists but is still empty — start
-      filling it in the first time something nontrivial breaks and gets
-      fixed, so it isn't relearned.
+- [ ] Admin/teacher-facing panel, only if this grows beyond a 2-person
+      tool (institutions idea) — not needed for the current scope.
+- [ ] Toasts for lightweight confirmations, modals reserved for anything
+      more consequential (e.g. submitting a graded exercise).
+- [ ] Carousels / scroll-triggered animations on the landing page, once
+      there's real content to showcase.
 
 ## Done
 

@@ -1,60 +1,33 @@
-# Hosting research (2026-08-26)
+# Hosting (deferred)
 
-Everything runs **locally** for now (Docker Compose — see root README). This
-doc is prep for when we go to production, per the notes' request to decide
-this early so the architecture doesn't fight the host later.
+Everything runs **locally** for now. Hosting research here was originally
+written for a different project (see
+[errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md)) under
+the assumption of a real commercial storefront with paying customers — that
+urgency doesn't apply to a tool for two people practicing English. No
+hosting decision is needed yet; this section is kept short and revisited
+once (if) this platform needs to actually go live for you and your friend,
+or later for institutions.
 
-## Frontend: Cloudflare Pages over Vercel
+## Facts worth keeping (not a decision)
 
-| | Vercel (Hobby/free) | Cloudflare Pages (free) |
-|---|---|---|
-| Bandwidth | 100 GB/month cap, site pauses if exceeded | Unlimited |
-| **Commercial use** | **Prohibited by ToS on the free tier** | **Allowed** |
-| Builds | Generous | 500/month |
-
-**Decision: Cloudflare Pages.** The commercial-use restriction is
-disqualifying on its own — this is a real Ecuador storefront, not a demo, so
-Vercel's Hobby tier's ToS violation risk isn't worth it. Cloudflare Pages
-also builds and deploys any static Vite output (React here) with no
-framework lock-in.
-
-## Backend: MonsterASP.NET over Render / Cloudflare Workers
-
-- **Cloudflare Workers is ruled out** for the C# backend — it's a JS/TS edge
-  runtime (V8 isolates), it does not run ASP.NET Core. It stays usable for
-  small edge helpers later (e.g. image resizing) but not the API.
-- **Render free tier**: works for any Docker/container backend including
-  ASP.NET Core, but the free web service spins down after 15 minutes of
-  inactivity (30-60s cold start on the next request) and free Postgres
-  expires after 30 days. Fine for staging, rough for a real storefront.
-- **MonsterASP.NET** (the host named in the brief): built specifically for
-  ASP.NET Core / .NET, free tier includes one-click deploy from Visual
-  Studio, free MSSQL, free Let's Encrypt HTTPS, no credit card required.
-  Paid "Premium" tiers (billed annually, 14-day money-back guarantee) let
-  you pick a US or EU region.
-
-**Leaning: MonsterASP.NET for the backend once we leave local dev** — it's
-purpose-built for exactly this stack, which avoids fighting a generic
-container host for .NET-specific concerns (IIS/Kestrel config, MSSQL vs
-Postgres). Two things to confirm before committing, ideally with a Fable 5
-pass since it touches money/compliance:
-1. Whether its DB offering (MSSQL) or bringing external Postgres (e.g. a
-   managed free/cheap Postgres elsewhere) is the better fit — EF Core
-   supports both, but the [ARCHITECTURE.md](ARCHITECTURE.md) default is
-   Postgres; switching to MSSQL is a provider-string change in EF Core, not
-   a rewrite, so it's not a blocking decision.
-2. Whether the free tier's limits (uptime, request volume) hold up once
-   real customer traffic starts, versus paying for Premium from day one of
-   going live.
-
-## Admin app
-
-Same hosts, deployed as separate Cloudflare Pages + MonsterASP.NET
-projects/sites from the client app — keeps the "fully isolated from the
-client" requirement true in production, not just in the repo folder layout.
+- **Cloudflare Workers cannot run ASP.NET Core** — it's a JS/TS edge
+  runtime (V8 isolates). Rule it out for the C# backend specifically if
+  hosting ever comes up; Cloudflare Pages (static hosting) is unrelated to
+  this and still fine for the React frontend.
+- **Vercel's free (Hobby) tier prohibits commercial/revenue use** in its
+  ToS. Irrelevant for a private 2-person tool; relevant again if this ever
+  gets sold to institutions.
+- **MonsterASP.NET** exists as a .NET-specific free/cheap host (one-click
+  deploy from Visual Studio, free MSSQL, free HTTPS) if a C# backend needs
+  a home later.
+- **Render's free tier** spins down after 15 minutes of inactivity and its
+  free Postgres expires after 30 days — fine for occasional personal use,
+  not for something that needs to always be up.
 
 ## Local development (today)
 
 Docker Compose runs Postgres locally (see `docker-compose.yml` at the repo
-root). No cloud accounts needed yet — `docs/HOSTING.md` gets revisited once
-we're ready to actually deploy.
+root, port 5433 — see
+[errors/2026-08-26-postgres-port-conflict.md](errors/2026-08-26-postgres-port-conflict.md)
+for why not 5432).

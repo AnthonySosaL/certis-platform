@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { Menu, Moon, ShoppingCart, Sun } from 'lucide-react'
+import { Menu, Moon, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { useTheme } from '@/app/providers/theme-provider'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -19,18 +18,14 @@ import { cn } from '@/lib/utils'
 
 type NavItem = {
   to: string
-  labelKey: 'nav.home' | 'nav.shop' | 'nav.about' | 'nav.contact'
+  labelKey: 'nav.home' | 'nav.about' | 'nav.contact'
 }
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/', labelKey: 'nav.home' },
-  { to: '/shop', labelKey: 'nav.shop' },
   { to: '/about', labelKey: 'nav.about' },
   { to: '/contact', labelKey: 'nav.contact' },
 ]
-
-// Placeholder cart count until the cart feature module wires in real state.
-const CART_ITEM_COUNT = 0
 
 export function Navbar() {
   const { t } = useTranslation()
@@ -50,7 +45,7 @@ export function Navbar() {
             aria-hidden="true"
             className="inline-flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground"
           >
-            N
+            ?
           </span>
           <span className="text-lg">{t('brand.name')}</span>
         </Link>
@@ -84,15 +79,6 @@ export function Navbar() {
             onClick={toggleTheme}
           >
             {theme === 'light' ? <Moon /> : <Sun />}
-          </Button>
-
-          <Button variant="ghost" size="icon" aria-label={t('nav.cart')} className="relative">
-            <ShoppingCart />
-            {CART_ITEM_COUNT > 0 && (
-              <Badge className="absolute -right-1 -top-1 size-5 justify-center rounded-full p-0 text-[11px]">
-                {CART_ITEM_COUNT}
-              </Badge>
-            )}
           </Button>
 
           <Button className="hidden sm:inline-flex" size="sm">

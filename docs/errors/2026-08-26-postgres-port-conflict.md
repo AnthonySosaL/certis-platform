@@ -30,6 +30,11 @@ pre-existing service on 5432 alone — it may be load-bearing for another
 project on this machine, and touching it wasn't this project's call to
 make.
 
+*(Note: the container/user/db names quoted above were `nutriboost-*` at
+the time this was written — they were later genericized to `app-*` in the
+2026-08-26 scope correction; the port-conflict finding and fix are
+unaffected.)*
+
 ## How to avoid it again
 
 Before trusting "container won't connect" errors as an app-level bug,

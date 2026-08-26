@@ -1,21 +1,26 @@
-# NutriBoost (working name — see [docs/NAMING.md](docs/NAMING.md))
+# English C1 practice platform (working name — see [docs/NAMING.md](docs/NAMING.md))
 
-Fitness-nutrition e-commerce platform for Ecuador. English-first UI (also
-doubling as C1-English practice). Local development only for now.
+A platform to practice and evaluate English (reading/writing/listening/
+speaking, progress tracking) for you and a friend working toward Cambridge
+C1 — currently around B1/B2. Secondary goal: practice building with
+C# .NET. Local development only for now. Possibly expanded/offered to
+institutions later, but that's not the near-term scope.
+
+**Feature scope is still being defined** — see
+[docs/PENDING_IDEAS.md](docs/PENDING_IDEAS.md). What exists today is
+infrastructure and a UI shell, not the actual English-practice features.
 
 ## Stack
 
 React + TypeScript + Vite + shadcn/ui (frontend) · ASP.NET Core 8 + EF Core
-+ PostgreSQL (backend, in progress) · Stripe (payments, planned).
-Full rationale in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
++ PostgreSQL (backend). Full rationale in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Repo layout
 
 ```
-client-frontend/   the public storefront (React) — scaffolded, has a working Navbar
-client-backend/    storefront API (ASP.NET Core) — scaffolding in progress
-admin-frontend/    internal ops panel (React) — not started yet
-admin-backend/     internal ops API (ASP.NET Core) — not started yet
+client-frontend/   React app — has a working Navbar/Footer/theme shell, no real pages yet
+client-backend/    ASP.NET Core API, layered — builds and runs, no domain model yet
 docs/              architecture, dependencies, hosting, naming, pending ideas, error log
 scripts/           local dev start/stop helpers
 widget/            local pending/done task tracker (opens with start-dev.ps1)
@@ -24,10 +29,9 @@ docker-compose.yml local PostgreSQL
 
 ## Quick start
 
-Easiest: double-click the **"NutriBoost - Start"** shortcut on the Desktop.
-It starts Postgres (Docker), the frontend dev server, the backend dev
-server (once scaffolded), and the task widget. **"NutriBoost - Stop"**
-shuts it all down.
+Easiest: double-click the **"Project - Start"** shortcut on the Desktop. It
+starts Postgres (Docker), the frontend dev server, the backend dev server,
+and the task widget. **"Project - Stop"** shuts it all down.
 
 Manually:
 
@@ -40,23 +44,24 @@ cd client-frontend
 npm install   # first time only
 npm run dev   # http://localhost:5173
 
-# 3. Backend (once scaffolded)
+# 3. Backend
 cd client-backend/src/NutriBoost.Client.Api
-dotnet watch run
+dotnet watch run   # http://localhost:5223
 ```
 
 ## Before you read/write code here
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — the stack, the folder
-  layout, and *why*, including where this deviates from the original idea
-  notes and why (e.g. EF Core instead of Prisma).
-- [docs/PENDING_IDEAS.md](docs/PENDING_IDEAS.md) — everything that's been
-  thought through but not built yet. Check it before assuming something's
-  missing by accident.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — the stack and folder
+  layout, and *why*.
+- [docs/PENDING_IDEAS.md](docs/PENDING_IDEAS.md) — what's actually decided
+  vs. still open, including the feature scope itself.
 - [docs/GIT_WORKFLOW.md](docs/GIT_WORKFLOW.md) — branch-per-module, and the
   "is there anything sensitive in this diff?" check before every push.
 - [docs/AI_WORKFLOW.md](docs/AI_WORKFLOW.md) — how coding sessions vs.
-  ideation chats are meant to split, and two corrections to the original
-  3-brain plan worth reading once.
+  ideation chats are meant to split.
 - [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) — every package/tool added,
   and why.
+- [docs/errors/](docs/errors/) — nontrivial mistakes and their fixes,
+  including a scope mix-up on 2026-08-26 worth reading once (an unrelated
+  project's notes got mistaken for this project's spec — see
+  [docs/errors/2026-08-26-scope-mixup.md](docs/errors/2026-08-26-scope-mixup.md)).

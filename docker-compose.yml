@@ -1,19 +1,19 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: nutriboost-postgres
+    container_name: app-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: nutriboost
-      POSTGRES_PASSWORD: nutriboost_dev_only
-      POSTGRES_DB: nutriboost_client
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app_dev_only
+      POSTGRES_DB: app_dev
     ports:
       # Host 5433, not 5432 — this machine already has another local
-      # Postgres (a Windows service, unrelated to this project) bound to
-      # 5432. See docs/errors/2026-08-26-postgres-port-conflict.md.
+      # Postgres bound to 5432 (a separate, isolated setup — not part of
+      # this project). See docs/errors/2026-08-26-postgres-port-conflict.md.
       - "5433:5432"
     volumes:
-      - nutriboost-postgres-data:/var/lib/postgresql/data
+      - app-postgres-data:/var/lib/postgresql/data
 
 volumes:
-  nutriboost-postgres-data:
+  app-postgres-data:

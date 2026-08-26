@@ -1,13 +1,11 @@
 {
   "brand": {
-    "name": "NutriBoost"
+    "name": "[Project name]"
   },
   "nav": {
     "home": "Home",
-    "shop": "Shop",
     "about": "About",
     "contact": "Contact",
-    "cart": "Cart",
     "signIn": "Sign in",
     "menu": "Menu"
   }
