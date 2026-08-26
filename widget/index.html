@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NutriBoost — Tasks</title>
+<style>
+  :root {
+    --bg: #16171d;
+    --panel: #1f2028;
+    --border: #2e303a;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --accent: #4ade80;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 14px/1.4 system-ui, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    -webkit-app-region: drag;
+  }
+  header h1 { font-size: 13px; font-weight: 600; margin: 0; }
+  header button {
+    -webkit-app-region: no-drag;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+  }
+  header button:hover { color: var(--text); }
+  #body { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 14px; }
+  body.minimized #body, body.minimized form { display: none; }
+  body.minimized { height: auto; }
+  section h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
+  ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  li span { flex: 1; word-break: break-word; }
+  li.done span { color: var(--muted); text-decoration: line-through; }
+  li button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+  }
+  li button:hover { color: var(--text); }
+  li .toggle { color: var(--accent); }
+  li .remove:hover { color: var(--danger); }
+  form { display: flex; gap: 6px; padding: 10px 12px; border-top: 1px solid var(--border); }
+  form input {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 6px 8px;
+    font: inherit;
+  }
+  form button {
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    color: #0a0a0a;
+    font-weight: 600;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .empty { color: var(--muted); font-style: italic; padding: 4px 0; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>NutriBoost — Tasks</h1>
+    <button id="toggle-min" title="Minimize/restore" aria-label="Minimize or restore">—</button>
+  </header>
+  <div id="body">
+    <section>
+      <h2>Pending</h2>
+      <ul id="pending-list"></ul>
+    </section>
+    <section>
+      <h2>Done</h2>
+      <ul id="done-list"></ul>
+    </section>
+  </div>
+  <form id="add-form">
+    <input id="add-input" type="text" placeholder="Add a task..." autocomplete="off" />
+    <button type="submit">Add</button>
+  </form>
+
+<script>
+  // Local-only widget: state lives in this browser profile's localStorage.
+  // No backend — this is a lightweight stand-in until/unless a native
+  // tray app is worth building (see docs/PENDING_IDEAS.md).
+  const STORAGE_KEY = 'nutriboost-widget-tasks';
+  const MIN_KEY = 'nutriboost-widget-minimized';
+
+  const load = () => {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  };
+  const save = (tasks) => localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+
+  let tasks = load();
+
+  const pendingList = document.getElementById('pending-list');
+  const doneList = document.getElementById('done-list');
+
+  function render() {
+    const pending = tasks.filter(t => !t.done);
+    const done = tasks.filter(t => t.done);
+
+    pendingList.innerHTML = pending.length
+      ? pending.map(renderItem).join('')
+      : '<li class="empty" style="background:none;border:none;">Nothing pending.</li>';
+    doneList.innerHTML = done.length
+      ? done.map(renderItem).join('')
+      : '<li class="empty" style="background:none;border:none;">Nothing done yet.</li>';
+  }
+
+  function renderItem(task) {
+    return `<li data-id="${task.id}" class="${task.done ? 'done' : ''}">
+      <button class="toggle" title="Toggle done">${task.done ? '↩' : '✓'}</button>
+      <span>${escapeHtml(task.text)}</span>
+      <button class="remove" title="Remove">✕</button>
+    </li>`;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  document.getElementById('body').addEventListener('click', (e) => {
+    const li = e.target.closest('li[data-id]');
+    if (!li) return;
+    const id = li.dataset.id;
+    if (e.target.classList.contains('toggle')) {
+      tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      save(tasks);
+      render();
+    } else if (e.target.classList.contains('remove')) {
+      tasks = tasks.filter(t => t.id !== id);
+      save(tasks);
+      render();
+    }
+  });
+
+  document.getElementById('add-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('add-input');
+    const text = input.value.trim();
+    if (!text) return;
+    tasks.push({ id: crypto.randomUUID(), text, done: false });
+    save(tasks);
+    input.value = '';
+    render();
+  });
+
+  const toggleMinBtn = document.getElementById('toggle-min');
+  toggleMinBtn.addEventListener('click', () => {
+    const minimized = document.body.classList.toggle('minimized');
+    localStorage.setItem(MIN_KEY, minimized ? '1' : '0');
+  });
+  if (localStorage.getItem(MIN_KEY) === '1') {
+    document.body.classList.add('minimized');
+  }
+
+  render();
+</script>
+</body>
+</html>

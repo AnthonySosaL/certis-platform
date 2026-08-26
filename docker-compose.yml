@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nutriboost-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nutriboost
+      POSTGRES_PASSWORD: nutriboost_dev_only
+      POSTGRES_DB: nutriboost_client
+    ports:
+      - "5432:5432"
+    volumes:
+      - nutriboost-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  nutriboost-postgres-data:
