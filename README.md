@@ -29,9 +29,12 @@ docker-compose.yml local PostgreSQL
 
 ## Quick start
 
-Easiest: double-click the **"Project - Start"** shortcut on the Desktop. It
+Easiest: double-click the **"Start Project"** shortcut on the Desktop. It
 starts Postgres (Docker), the frontend dev server, the backend dev server,
-and the task widget. **"Project - Stop"** shuts it all down.
+and the task widget. Safe to double-click again any time — it skips
+anything already running instead of duplicating it, and both dev servers
+hot-reload on save, so you generally only need this once per session.
+**"Stop Project"** shuts it all down.
 
 Manually:
 

@@ -5,6 +5,37 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-26 — Reload-safe launcher + icon
+
+- Added `assets/app-icon.ico` — a small generated icon (brand green
+  rounded square, "C1"), no download involved, so the Desktop shortcuts
+  have something better than the default batch-file icon while there's no
+  real logo yet.
+- Added `scripts/start.bat` / `scripts/stop.bat` (thin wrappers around the
+  existing `.ps1` scripts) and repointed the Desktop shortcuts at them
+  ("Start Project" / "Stop Project"), with the new icon.
+- Made `start-dev.ps1` safe to run repeatedly: it checks each dev-server
+  port first and skips relaunching anything already up, instead of
+  spawning duplicate windows. Combined with Vite/`dotnet watch`'s own
+  hot-reload, the intent is: run Start once per session, then just save
+  files — no more stop/start per change.
+- Rewrote `stop-dev.ps1` to kill by **port ownership**
+  (`Get-NetTCPConnection` + `taskkill /F /T`) instead of matching spawned
+  windows by title — title matching turned out unreliable (a spawned
+  console window's title wasn't reliably readable from outside it, so the
+  old version silently did nothing to the frontend/backend processes).
+  Verified: start -> stop -> start again all work cleanly now.
+- Fixed a real bug found while testing the above: `start-dev.ps1`'s
+  spawned backend window couldn't find `dotnet` at all (user-scoped PATH
+  change not yet visible to that process tree) — see
+  `docs/DEPENDENCIES.md` "Known PATH gotcha". The script now sets its own
+  `$env:Path` defensively before spawning anything.
+- Also cleaned up Docker Compose's stale project registration left over
+  from the folder rename (it still pointed at the old `NutriBoost\`
+  path) — recreated the container fresh under the `english-c1-platform`
+  project name and removed the two orphaned volumes from the old name
+  (both were empty dev databases, nothing lost).
+
 ## 2026-08-26 — Scope correction
 
 The "Initial scaffold" entry below built the wrong project — a fitness

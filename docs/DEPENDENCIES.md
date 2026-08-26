@@ -14,6 +14,16 @@ history stays visible (per the notes' traceability requirement).
 | Docker Desktop | 29.4.3 (already installed) | Local Postgres via `docker-compose.yml`. Doesn't auto-start on login — start it manually before `docker compose up`. | pre-existing, wired in 2026-08-26 |
 | git | 2.53.0 (already installed) | Version control. | pre-existing |
 
+**Known PATH gotcha**: because the SDK is user-scoped, not machine-wide, a
+process tree that started before the PATH change won't see it (Explorer
+doesn't re-read env vars for already-open sessions until logoff/reboot).
+This bit `scripts/start-dev.ps1` — the backend window it spawned couldn't
+find `dotnet` at all. Fixed by having the script prepend
+`%USERPROFILE%\.dotnet` and `...\.dotnet\tools` to its own `$env:Path`
+before spawning anything, so it's self-contained regardless of ambient
+PATH staleness. If `dotnet` is ever "not found" in a fresh terminal, log
+off/on (or reboot) once to pick up the registry PATH everywhere.
+
 ## `client-frontend` (React + Vite)
 
 | Package | Why |

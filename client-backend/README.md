@@ -12,7 +12,7 @@ Not renamed yet — tracked in `../docs/PENDING_IDEAS.md`.
 
 ```bash
 # 1. Postgres must be up first (docker compose up -d from the repo root,
-#    or just use the "Project - Start" Desktop shortcut).
+#    or just use the "Start Project" Desktop shortcut).
 
 # 2. Run the API — no migrations yet, there's no domain model
 #    (AppDbContext has zero entities) until feature scope is decided:
