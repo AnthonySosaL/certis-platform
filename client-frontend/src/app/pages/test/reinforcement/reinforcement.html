@@ -30,12 +30,34 @@
       @let r = result()!;
       <div class="reinforce__result" [class.reinforce__result--pass]="passed(r)">
         <p class="reinforce__result-score">{{ r.score }} / {{ r.totalQuestions }}</p>
-        <p class="reinforce__result-label">{{ passed(r) ? "Nice - you've got this." : 'Still shaky - try again.' }}</p>
+        <p class="reinforce__result-label">{{ passed(r) ? "Nice - you've got this." : 'Still shaky - here\'s what to fix.' }}</p>
         <div class="reinforce__result-actions">
           <button mat-flat-button color="primary" type="button" (click)="retry()">Try again</button>
           <a mat-button routerLink="/test/results">Back to results</a>
         </div>
       </div>
+
+      @if (!passed(r) && r.missedQuestions.length > 0) {
+        <section class="reinforce__review">
+          <h2>What went wrong</h2>
+          @for (missed of r.missedQuestions; track missed.questionId) {
+            <div class="review-item">
+              <p class="review-item__question">{{ missed.questionText }}</p>
+              <p class="review-item__your-answer">
+                <span class="review-item__tag review-item__tag--wrong">Your answer</span>
+                {{ missed.yourAnswerText }}
+              </p>
+              <p class="review-item__correct-answer">
+                <span class="review-item__tag review-item__tag--correct">Correct answer</span>
+                {{ missed.correctAnswerText }}
+              </p>
+              @if (missed.explanation) {
+                <p class="review-item__explanation">{{ missed.explanation }}</p>
+              }
+            </div>
+          }
+        </section>
+      }
     }
   }
 </main>

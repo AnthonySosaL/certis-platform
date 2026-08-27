@@ -26,6 +26,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         modelBuilder.Entity<Question>(entity =>
         {
             entity.Property(q => q.Text).HasMaxLength(500).IsRequired();
+            entity.Property(q => q.Explanation).HasMaxLength(500);
             entity.HasMany(q => q.Options)
                 .WithOne()
                 .HasForeignKey(o => o.QuestionId)

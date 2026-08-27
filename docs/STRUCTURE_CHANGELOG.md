@@ -5,6 +5,26 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Reinforcement review + Contact page removed
+
+- **Reinforcement failure review.** `Question.Explanation` (nullable,
+  hand-written for all 32 seed questions) + a new `TestResultDto.MissedQuestions`
+  list, built server-side only for wrong answers - never sent before or
+  during the test, so it can't leak answers early. Failing a
+  reinforcement quiz now shows exactly which questions were wrong, what
+  you answered, the correct answer, and a one-line grammar/vocabulary
+  explanation, instead of just a score.
+  - Since the question bank was already seeded (locally and in
+    production), adding `Explanation` couldn't just re-seed - that would
+    orphan the `QuestionId` on every `TestAttempt` already recorded (no
+    real FK constraint stops it, but `GetLatestResultAsync`'s breakdown
+    lookup would silently come back empty for old attempts). Added
+    `QuestionSeeder.BackfillExplanationsAsync`, which matches existing
+    rows by `Text` and fills in the explanation - runs every startup,
+    no-ops once nothing's missing.
+- **Contact page removed** - route, nav link, and the page itself
+  deleted.
+
 ## 2026-08-27 — Quiz redesign: timer, persistence, hidden difficulty, premium look
 
 Feedback after using the live test: felt mediocre for something meant to

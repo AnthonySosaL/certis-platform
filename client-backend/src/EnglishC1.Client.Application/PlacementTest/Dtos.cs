@@ -11,6 +11,16 @@ public record SubmitAnswerDto(Guid QuestionId, Guid SelectedOptionId);
 
 public record SkillBreakdownDto(CefrLevel Level, SkillArea SkillArea, int Correct, int Total, bool NeedsReinforcement);
 
+// Only built for questions the test-taker got wrong - shown after
+// submission so a failed attempt teaches something instead of just
+// reporting a score. Never sent before or during answering.
+public record MissedQuestionDto(
+    Guid QuestionId,
+    string QuestionText,
+    string YourAnswerText,
+    string CorrectAnswerText,
+    string? Explanation);
+
 public record TestResultDto(
     Guid AttemptId,
     AttemptKind Kind,
@@ -18,4 +28,5 @@ public record TestResultDto(
     int TotalQuestions,
     CefrLevel? PlacementResult,
     DateTime CompletedAtUtc,
-    List<SkillBreakdownDto> Breakdown);
+    List<SkillBreakdownDto> Breakdown,
+    List<MissedQuestionDto> MissedQuestions);

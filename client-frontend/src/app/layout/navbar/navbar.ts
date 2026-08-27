@@ -13,7 +13,6 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/', label: 'Home' },
   { path: '/test', label: 'Take the test' },
   { path: '/about', label: 'About' },
-  { path: '/contact', label: 'Contact' },
 ];
 
 @Component({

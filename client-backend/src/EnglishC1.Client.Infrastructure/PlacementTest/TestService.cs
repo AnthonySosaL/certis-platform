@@ -31,14 +31,14 @@ public class TestService(AppDbContext db) : ITestService
     public async Task<TestResultDto> SubmitPlacementTestAsync(Guid userId, List<SubmitAnswerDto> answers)
     {
         var questions = await db.Questions.Include(q => q.Options).ToListAsync();
-        var (attempt, breakdown) = Grade(userId, AttemptKind.Placement, questions, answers, focusLevel: null, focusSkill: null);
+        var (attempt, breakdown, questionsById) = Grade(userId, AttemptKind.Placement, questions, answers, focusLevel: null, focusSkill: null);
 
         attempt.PlacementResult = PlacementScorer.ComputePlacement(breakdown);
 
         db.TestAttempts.Add(attempt);
         await db.SaveChangesAsync();
 
-        return ToResultDto(attempt, breakdown);
+        return ToResultDto(attempt, breakdown, questionsById);
     }
 
     public async Task<TestResultDto> SubmitReinforcementAsync(Guid userId, CefrLevel level, SkillArea skill, List<SubmitAnswerDto> answers)
@@ -47,12 +47,12 @@ public class TestService(AppDbContext db) : ITestService
             .Include(q => q.Options)
             .Where(q => q.Level == level && q.SkillArea == skill)
             .ToListAsync();
-        var (attempt, breakdown) = Grade(userId, AttemptKind.Reinforcement, questions, answers, focusLevel: level, focusSkill: skill);
+        var (attempt, breakdown, questionsById) = Grade(userId, AttemptKind.Reinforcement, questions, answers, focusLevel: level, focusSkill: skill);
 
         db.TestAttempts.Add(attempt);
         await db.SaveChangesAsync();
 
-        return ToResultDto(attempt, breakdown);
+        return ToResultDto(attempt, breakdown, questionsById);
     }
 
     public async Task<TestResultDto?> GetLatestResultAsync(Guid userId, AttemptKind kind)
@@ -66,13 +66,16 @@ public class TestService(AppDbContext db) : ITestService
         if (attempt is null) return null;
 
         var questionIds = attempt.Answers.Select(a => a.QuestionId).ToList();
-        var questionsById = await db.Questions.Where(q => questionIds.Contains(q.Id)).ToDictionaryAsync(q => q.Id);
+        var questionsById = await db.Questions
+            .Include(q => q.Options)
+            .Where(q => questionIds.Contains(q.Id))
+            .ToDictionaryAsync(q => q.Id);
         var breakdown = PlacementScorer.BuildBreakdown(attempt.Answers, questionsById);
 
-        return ToResultDto(attempt, breakdown);
+        return ToResultDto(attempt, breakdown, questionsById);
     }
 
-    private static (TestAttempt Attempt, List<SkillBreakdown> Breakdown) Grade(
+    private static (TestAttempt Attempt, List<SkillBreakdown> Breakdown, Dictionary<Guid, Question> QuestionsById) Grade(
         Guid userId,
         AttemptKind kind,
         List<Question> questions,
@@ -114,7 +117,7 @@ public class TestService(AppDbContext db) : ITestService
             attempt.Answers.Add(testAnswer);
         }
 
-        return (attempt, PlacementScorer.BuildBreakdown(testAnswers, questionsById));
+        return (attempt, PlacementScorer.BuildBreakdown(testAnswers, questionsById), questionsById);
     }
 
     private static QuestionDto ToDto(Question question)
@@ -128,7 +131,7 @@ public class TestService(AppDbContext db) : ITestService
             shuffled.Select(o => new QuestionOptionDto(o.Id, o.Text)).ToList());
     }
 
-    private static TestResultDto ToResultDto(TestAttempt attempt, List<SkillBreakdown> breakdown) => new(
+    private static TestResultDto ToResultDto(TestAttempt attempt, List<SkillBreakdown> breakdown, Dictionary<Guid, Question> questionsById) => new(
         attempt.Id,
         attempt.Kind,
         attempt.Score,
@@ -137,5 +140,29 @@ public class TestService(AppDbContext db) : ITestService
         attempt.CompletedAtUtc ?? attempt.StartedAtUtc,
         breakdown
             .Select(b => new SkillBreakdownDto(b.Level, b.SkillArea, b.Correct, b.Total, b.NeedsReinforcement))
-            .ToList());
+            .ToList(),
+        BuildMissedQuestions(attempt.Answers, questionsById));
+
+    private static List<MissedQuestionDto> BuildMissedQuestions(IEnumerable<TestAnswer> answers, Dictionary<Guid, Question> questionsById)
+    {
+        var missed = new List<MissedQuestionDto>();
+
+        foreach (var answer in answers.Where(a => !a.IsCorrect))
+        {
+            if (!questionsById.TryGetValue(answer.QuestionId, out var question)) continue;
+
+            var yourOption = question.Options.FirstOrDefault(o => o.Id == answer.SelectedOptionId);
+            var correctOption = question.Options.FirstOrDefault(o => o.Id == question.CorrectOptionId);
+            if (yourOption is null || correctOption is null) continue;
+
+            missed.Add(new MissedQuestionDto(
+                question.Id,
+                question.Text,
+                yourOption.Text,
+                correctOption.Text,
+                question.Explanation));
+        }
+
+        return missed;
+    }
 }

@@ -34,6 +34,14 @@ export interface SkillBreakdown {
   needsReinforcement: boolean;
 }
 
+export interface MissedQuestion {
+  questionId: string;
+  questionText: string;
+  yourAnswerText: string;
+  correctAnswerText: string;
+  explanation: string | null;
+}
+
 export interface TestResult {
   attemptId: string;
   kind: AttemptKind;
@@ -42,6 +50,7 @@ export interface TestResult {
   placementResult: CefrLevel | null;
   completedAtUtc: string;
   breakdown: SkillBreakdown[];
+  missedQuestions: MissedQuestion[];
 }
 
 // Thin wrapper over /api/test/* - mirrors the shape of core/auth.ts

@@ -8,4 +8,9 @@ public class Question
     public CefrLevel Level { get; init; }
     public Guid CorrectOptionId { get; set; }
     public List<QuestionOption> Options { get; set; } = [];
+
+    // Shown only after a wrong answer is submitted (never during the
+    // test itself) - a short reason so a failed reinforcement attempt
+    // teaches something instead of just reporting a score.
+    public string? Explanation { get; set; }
 }

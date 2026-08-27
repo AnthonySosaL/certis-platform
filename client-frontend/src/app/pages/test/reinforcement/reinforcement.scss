@@ -58,3 +58,66 @@
   justify-content: center;
   gap: 0.75rem;
 }
+
+.reinforce__review {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reinforce__review h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.review-item {
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  background: var(--mat-sys-surface-container);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.review-item__question {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.review-item__your-answer,
+.review-item__correct-answer {
+  margin: 0;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-item__tag {
+  display: inline-flex;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.review-item__tag--wrong {
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.review-item__tag--correct {
+  background: var(--cefr-a2-bg);
+  color: var(--cefr-a2);
+}
+
+.review-item__explanation {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  line-height: 1.5;
+}
