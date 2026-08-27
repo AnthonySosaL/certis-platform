@@ -5,6 +5,31 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Reinstated password policy with a visible hint
+
+After the previous fix relaxed the policy to length-only (8+ chars, any
+characters), the user asked for a real rule back, as long as it's shown
+to the person typing: "la politica si la veo necesaria... que salga ahi
+tipo abajo como que con caracteres minimo uno y una minima longitud."
+Chose the simplest rule that still says something (8+ characters, at
+least one digit) so it fits in one line of hint text under the field:
+
+- `DependencyInjection.cs`: `Password.RequireDigit = true` (length stays
+  8, everything else — uppercase/lowercase/symbol — stays off).
+- `register.ts`: added `Validators.pattern(/\d/)` to the password
+  control and a `passwordHint` string, both explicitly commented as
+  needing to stay in sync with the backend's Identity config (this is
+  exactly the kind of drift that caused
+  [errors/2026-08-27-password-policy-mismatch.md](errors/2026-08-27-password-policy-mismatch.md)).
+- `register.html`: `<mat-hint>` shows the rule under the password field
+  by default, and switches to the same text as a `<mat-error>` once the
+  field is touched and invalid (missing length or missing digit).
+
+Verified end-to-end in the browser: a password without a digit disables
+the submit button and shows the hint as an error; a valid password
+(`testpass01`) registers successfully, redirects home, and logs in
+correctly afterward.
+
 ## 2026-08-27 — Fixed misleading registration error (password policy mismatch)
 
 Found immediately after shipping auth: the user's real registration

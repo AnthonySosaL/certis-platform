@@ -47,10 +47,17 @@ export class Register {
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
+  // Must stay in sync with the backend's Identity.Password options in
+  // client-backend/.../DependencyInjection.cs - see the comment there.
+  protected readonly passwordHint = 'At least 8 characters, including a number.';
+
   protected readonly form = this.fb.nonNullable.group(
     {
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: [
+        '',
+        [Validators.required, Validators.minLength(8), Validators.pattern(/\d/)],
+      ],
       confirmPassword: ['', [Validators.required]],
     },
     { validators: passwordsMatch },

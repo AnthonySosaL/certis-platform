@@ -20,17 +20,18 @@ public static class DependencyInjection
         services
             .AddIdentityCore<ApplicationUser>(options =>
             {
-                // Identity's real defaults (uppercase + lowercase + digit +
-                // non-alphanumeric, all required) are stricter than what
-                // the frontend actually validates (8-char minimum only) -
-                // that mismatch is what caused a real password to get
-                // rejected with a message that looked like "email already
-                // taken" (see docs/errors/2026-08-27-password-policy-mismatch.md).
-                // Length-only here so backend and frontend agree.
+                // Chosen policy: 8+ characters, at least one digit. Nothing
+                // stricter (no forced uppercase/symbol) - simple enough to
+                // state in one line of UI hint text. This exact rule must
+                // stay in sync with the Angular Register form's validators
+                // (register.ts) - a previous mismatch between the two
+                // caused a real password to get rejected with a message
+                // that looked like "email already taken"; see
+                // docs/errors/2026-08-27-password-policy-mismatch.md.
                 options.Password.RequiredLength = 8;
+                options.Password.RequireDigit = true;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
-                options.Password.RequireDigit = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.User.RequireUniqueEmail = true;
                 options.SignIn.RequireConfirmedEmail = false; // no email sender wired up yet - see docs/PENDING_IDEAS.md
