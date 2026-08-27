@@ -5,6 +5,25 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — About page redesigned: icon cards, scroll-reveal animation
+
+Was a static stack of plain text sections - "métele más diseño, bloques
+animados" was the ask. Rebuilt `pages/about/`:
+
+- Hero with an eyebrow badge ("Methodology"), matching the pattern
+  already used on Home.
+- Each of the four sections (Format, How the level is calculated,
+  Reinforcement, Scope honestly) is now an icon card - a distinct inline
+  SVG per section instead of a bare heading, in the same card language as
+  the placement-test breakdown cells.
+- Real scroll animation, not just an on-load fade: `About` uses
+  `IntersectionObserver` (`ngAfterViewInit`, `@ViewChildren('revealItem')`)
+  to add an `is-visible` class as each block enters the viewport, with a
+  small stagger per card (`nth-of-type` transition-delay) so they don't
+  all pop in at once. Respects `prefers-reduced-motion: reduce`.
+- Verified in-browser: hero animates in immediately, cards animate in as
+  the page is scrolled.
+
 ## 2026-08-27 — Auth is now a real modal (MatDialog); clearer below-A2 label
 
 Also from the same feedback round: the result badge's "—" for a
