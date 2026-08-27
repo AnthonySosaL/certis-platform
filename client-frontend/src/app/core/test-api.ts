@@ -77,6 +77,10 @@ export class TestApi {
     );
   }
 
+  getHistory(): Promise<TestResult[]> {
+    return firstValueFrom(this.http.get<TestResult[]>(`${API_BASE_URL}/api/test/results/history`));
+  }
+
   getReinforcementQuestions(level: CefrLevel, skill: SkillArea): Promise<Question[]> {
     return firstValueFrom(
       this.http.get<Question[]>(`${API_BASE_URL}/api/test/reinforcement/${level}/${skill}/questions`),

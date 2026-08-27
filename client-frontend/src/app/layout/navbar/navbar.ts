@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,11 +10,13 @@ import { AuthDialogService } from '../../core/auth-dialog.service';
 
 type NavItem = { path: string; label: string };
 
-const NAV_ITEMS: NavItem[] = [
+const BASE_NAV_ITEMS: NavItem[] = [
   { path: '/', label: 'Home' },
   { path: '/test', label: 'Take the test' },
   { path: '/about', label: 'About' },
 ];
+
+const DASHBOARD_ITEM: NavItem = { path: '/dashboard', label: 'Dashboard' };
 
 @Component({
   imports: [RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule, MatMenuModule],
@@ -28,7 +30,9 @@ export class Navbar {
   private readonly router = inject(Router);
   private readonly authDialog = inject(AuthDialogService);
 
-  protected readonly navItems = NAV_ITEMS;
+  protected readonly navItems = computed<NavItem[]>(() =>
+    this.auth.isAuthenticated() ? [...BASE_NAV_ITEMS, DASHBOARD_ITEM] : BASE_NAV_ITEMS,
+  );
 
   openSignIn(): void {
     this.authDialog.open('login');

@@ -5,6 +5,37 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Student dashboard (`/dashboard`)
+
+Self-directed next step after "seguir en local, algo nuevo" - the natural
+continuation of the earlier request to have a student panel showing
+grades/what's approved "como un instituto". Self-contained (no admin
+roles, no new external dependency), and lays groundwork the admin panel
+will reuse later.
+
+- Backend: `ITestService.GetHistoryAsync(userId)` returns every completed
+  `TestAttempt` (placement and reinforcement) for the user, newest first,
+  reusing the existing `ToResultDto`/`BuildBreakdown`/`BuildMissedQuestions`
+  pipeline instead of a parallel one. Batches the question lookup across
+  all attempts (one `Questions` query, not N) to avoid N+1. New endpoint
+  `GET /api/test/results/history`.
+- Frontend: new `pages/dashboard/` page, routed at `/dashboard` behind
+  `authGuard`. Splits history into two lists - Placement (level badge,
+  date, score) and Reinforcement (skill icon, level+skill, pass/fail
+  chip, date, score) - with an empty state pointing at the placement
+  test when a user has no attempts yet.
+- Pulled `LEVEL_CSS_VAR`/`LEVEL_NAME`/`SKILL_ICON_PATH` out of
+  `test-result.ts` into shared `core/cefr.ts` and `core/skill-icons.ts`
+  (this was the third place that needed the same level-color/name and
+  skill-icon mapping, after `home.ts` and `test-result.ts` - not worth
+  copy-pasting again). `test-result.ts` now imports from both instead of
+  keeping its own copies.
+- Navbar shows a "Dashboard" link only when signed in (`navItems` is now
+  a `computed()` off `Auth.isAuthenticated()` instead of a static array).
+- Verified in-browser end-to-end with a throwaway test account: empty
+  state, populated placement history, populated reinforcement history
+  (pass/fail chip), and dark mode - no overflow or contrast issues.
+
 ## 2026-08-27 — Picked the Open Book model; moved it into the hero itself
 
 Follow-up to the entry right below: the Open Book was picked from the

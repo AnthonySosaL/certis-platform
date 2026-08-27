@@ -1,0 +1,143 @@
+.dashboard {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.dashboard__loading {
+  display: flex;
+  justify-content: center;
+  padding: 5rem 0;
+}
+
+.dashboard__empty {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.dashboard__empty h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.dashboard__empty p {
+  opacity: 0.75;
+  margin: 0 0 1.5rem;
+}
+
+.dashboard__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dashboard__eyebrow {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.dashboard__header h1 {
+  font-size: 1.75rem;
+  margin: 0;
+  word-break: break-word;
+}
+
+.dashboard__summary {
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+.dashboard__summary-level {
+  font-weight: 700;
+}
+
+.dashboard__section h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+.dashboard__section-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.65;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 0.9rem;
+  background: var(--mat-sys-surface);
+  border: 1.5px solid var(--mat-sys-outline-variant);
+}
+
+.history-row__level {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  height: 2.5rem;
+  padding: 0 0.5rem;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--level-color) 16%, transparent);
+  color: var(--level-color);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.history-row__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--level-color) 16%, transparent);
+  color: var(--level-color);
+}
+
+.history-row__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.history-row__title {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.history-row__meta {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+.history-row__status {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--mat-sys-error);
+}
+
+.history-row__status--pass {
+  color: var(--cefr-a2);
+}

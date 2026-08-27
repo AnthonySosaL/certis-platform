@@ -116,6 +116,13 @@ what *was* built that session):
 
 ## Done
 
+- [x] **Student dashboard (`/dashboard`).** Full attempt history (not
+      just the latest), split into placement and reinforcement activity,
+      behind `authGuard`. Pulled the CEFR level and skill-icon mappings
+      into shared `core/cefr.ts`/`core/skill-icons.ts` while doing it.
+      Groundwork the admin panel can reuse later (same `GetHistoryAsync`
+      shape, per-user instead of platform-wide). See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--student-dashboard-dashboard). — 2026-08-27
 - [x] **3D model in the hero: picked and placed.** Open Book, rotating
       next to the headline in `home__hero-row` - the two runner-up
       candidates (grad-cap.glb, globe.glb) stay in `public/models/`,

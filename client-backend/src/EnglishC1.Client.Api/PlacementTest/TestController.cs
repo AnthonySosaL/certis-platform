@@ -26,6 +26,10 @@ public class TestController(ITestService testService) : ControllerBase
         return result is null ? NotFound() : Ok(result);
     }
 
+    [HttpGet("results/history")]
+    public async Task<ActionResult<List<TestResultDto>>> GetHistory() =>
+        Ok(await testService.GetHistoryAsync(UserId));
+
     [HttpGet("reinforcement/{level}/{skill}/questions")]
     public async Task<ActionResult<List<QuestionDto>>> GetReinforcementQuestions(CefrLevel level, SkillArea skill) =>
         Ok(await testService.GetReinforcementQuestionsAsync(level, skill));

@@ -75,6 +75,29 @@ public class TestService(AppDbContext db) : ITestService
         return ToResultDto(attempt, breakdown, questionsById);
     }
 
+    public async Task<List<TestResultDto>> GetHistoryAsync(Guid userId)
+    {
+        var attempts = await db.TestAttempts
+            .Include(a => a.Answers)
+            .Where(a => a.UserId == userId && a.CompletedAtUtc != null)
+            .OrderByDescending(a => a.CompletedAtUtc)
+            .ToListAsync();
+
+        if (attempts.Count == 0) return [];
+
+        // One batched question lookup for every attempt in the history,
+        // instead of a query per attempt.
+        var allQuestionIds = attempts.SelectMany(a => a.Answers.Select(ans => ans.QuestionId)).Distinct().ToList();
+        var questionsById = await db.Questions
+            .Include(q => q.Options)
+            .Where(q => allQuestionIds.Contains(q.Id))
+            .ToDictionaryAsync(q => q.Id);
+
+        return attempts
+            .Select(attempt => ToResultDto(attempt, PlacementScorer.BuildBreakdown(attempt.Answers, questionsById), questionsById))
+            .ToList();
+    }
+
     private static (TestAttempt Attempt, List<SkillBreakdown> Breakdown, Dictionary<Guid, Question> QuestionsById) Grade(
         Guid userId,
         AttemptKind kind,

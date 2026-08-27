@@ -1,0 +1,70 @@
+<main class="dashboard">
+  @if (loading()) {
+    <div class="dashboard__loading">
+      <mat-spinner diameter="32" />
+    </div>
+  } @else if (history().length === 0) {
+    <div class="dashboard__empty">
+      <h1>No activity yet</h1>
+      <p>Take the placement test to start building your progress history.</p>
+      <a mat-flat-button color="primary" routerLink="/test">Take the test</a>
+    </div>
+  } @else {
+    <header class="dashboard__header">
+      <span class="dashboard__eyebrow">Your progress</span>
+      <h1>Welcome back{{ auth.email() ? ', ' + auth.email() : '' }}</h1>
+      @if (latestPlacement(); as latest) {
+        <p class="dashboard__summary">
+          Current level:
+          <span class="dashboard__summary-level" [style.color]="latest.placementResult ? levelCssVar(latest.placementResult) : null">
+            {{ levelCode(latest.placementResult) }} &middot; {{ levelName(latest.placementResult) }}
+          </span>
+        </p>
+      }
+    </header>
+
+    <section class="dashboard__section">
+      <h2>Placement history</h2>
+      <div class="history-list">
+        @for (r of placementHistory(); track r.attemptId) {
+          <div class="history-row" [style.--level-color]="r.placementResult ? levelCssVar(r.placementResult) : '#94a3b8'">
+            <span class="history-row__level">{{ levelCode(r.placementResult) }}</span>
+            <div class="history-row__body">
+              <span class="history-row__title">{{ levelName(r.placementResult) }}</span>
+              <span class="history-row__meta">{{ formatDate(r.completedAtUtc) }} &middot; {{ r.score }} / {{ r.totalQuestions }} correct</span>
+            </div>
+            <a mat-button color="primary" routerLink="/test/results">View</a>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="dashboard__section">
+      <h2>Reinforcement activity</h2>
+      @if (reinforcementHistory().length === 0) {
+        <p class="dashboard__section-empty">No reinforcement quizzes taken yet. They'll show up here once you practice a weak area.</p>
+      } @else {
+        <div class="history-list">
+          @for (r of reinforcementHistory(); track r.attemptId) {
+            <div class="history-row" [style.--level-color]="r.breakdown[0] ? levelCssVar(r.breakdown[0].level) : '#94a3b8'">
+              <div class="history-row__icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path [attr.d]="r.breakdown[0] ? skillIconPath(r.breakdown[0].skillArea) : skillIconPath('Grammar')" />
+                </svg>
+              </div>
+              <div class="history-row__body">
+                <span class="history-row__title">
+                  {{ r.breakdown[0]?.level }} &middot; {{ r.breakdown[0]?.skillArea }}
+                </span>
+                <span class="history-row__meta">{{ formatDate(r.completedAtUtc) }} &middot; {{ r.score }} / {{ r.totalQuestions }} correct</span>
+              </div>
+              <span class="history-row__status" [class.history-row__status--pass]="passed(r)">
+                {{ passed(r) ? 'Passed' : 'Needs work' }}
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</main>
