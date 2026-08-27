@@ -10,6 +10,8 @@ interface AuthResponse {
   token: string;
   email: string;
   expiresAtUtc: string;
+  isAdmin: boolean;
+  isTutor: boolean;
 }
 
 @Service()
@@ -18,9 +20,14 @@ export class Auth {
 
   private readonly _token = signal<string | null>(this.readStoredToken());
   private readonly _email = signal<string | null>(this.readStoredEmail());
+  private readonly _isAdmin = signal<boolean>(this.readStoredIsAdmin());
+  private readonly _isTutor = signal<boolean>(this.readStoredIsTutor());
 
   readonly token = this._token.asReadonly();
   readonly email = this._email.asReadonly();
+  readonly isAdmin = this._isAdmin.asReadonly();
+  readonly isTutor = this._isTutor.asReadonly();
+  readonly canManage = computed(() => this._isAdmin() || this._isTutor());
   readonly isAuthenticated = computed(() => this._token() !== null);
 
   async register(email: string, password: string): Promise<void> {
@@ -40,13 +47,25 @@ export class Auth {
   logout(): void {
     this._token.set(null);
     this._email.set(null);
+    this._isAdmin.set(false);
+    this._isTutor.set(false);
     localStorage.removeItem(STORAGE_KEY);
   }
 
   private setSession(response: AuthResponse): void {
     this._token.set(response.token);
     this._email.set(response.email);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: response.token, email: response.email }));
+    this._isAdmin.set(response.isAdmin);
+    this._isTutor.set(response.isTutor);
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        token: response.token,
+        email: response.email,
+        isAdmin: response.isAdmin,
+        isTutor: response.isTutor,
+      }),
+    );
   }
 
   private readStoredToken(): string | null {
@@ -57,7 +76,15 @@ export class Auth {
     return this.readStoredSession()?.email ?? null;
   }
 
-  private readStoredSession(): { token: string; email: string } | null {
+  private readStoredIsAdmin(): boolean {
+    return this.readStoredSession()?.isAdmin ?? false;
+  }
+
+  private readStoredIsTutor(): boolean {
+    return this.readStoredSession()?.isTutor ?? false;
+  }
+
+  private readStoredSession(): { token: string; email: string; isAdmin: boolean; isTutor: boolean } | null {
     if (typeof localStorage === 'undefined') return null;
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;

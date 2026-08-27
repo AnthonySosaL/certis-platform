@@ -1,0 +1,163 @@
+<main class="admin">
+  <header class="admin__header">
+    <span class="admin__eyebrow">Admin</span>
+    <h1>{{ auth.isAdmin() ? 'Admin panel' : 'Tutor panel' }}</h1>
+  </header>
+
+  <nav class="admin__tabs" aria-label="Admin sections">
+    <button type="button" class="admin-tab" [class.admin-tab--active]="tab() === 'students'" (click)="selectTab('students')">
+      Students
+    </button>
+    <button type="button" class="admin-tab" [class.admin-tab--active]="tab() === 'content'" (click)="selectTab('content')">
+      Content
+    </button>
+    @if (auth.isAdmin()) {
+      <button type="button" class="admin-tab" [class.admin-tab--active]="tab() === 'access'" (click)="selectTab('access')">
+        Access
+      </button>
+    }
+  </nav>
+
+  @if (tab() === 'students') {
+    <section class="admin-section">
+      @if (!studentsLoading() && students().length > 0) {
+        <p class="admin-section__summary">
+          {{ students().length }} student{{ students().length === 1 ? '' : 's' }}
+          @if (warningCount() > 0) {
+            &middot; <span class="admin__warning-count">{{ warningCount() }} need{{ warningCount() === 1 ? 's' : '' }} attention</span>
+          }
+        </p>
+      }
+
+      @if (studentsLoading()) {
+        <div class="admin__loading">
+          <mat-spinner diameter="32" />
+        </div>
+      } @else if (studentsError()) {
+        <p class="admin__error">{{ studentsError() }}</p>
+      } @else if (students().length === 0) {
+        <p class="admin__empty">No students have registered yet.</p>
+      } @else {
+        <div class="student-list">
+          @for (s of students(); track s.userId) {
+            <div class="student-row" [class.student-row--warning]="s.hasEarlyWarning">
+              <div class="student-row__main">
+                <span class="student-row__email">{{ s.email }}</span>
+                <span class="student-row__meta">
+                  {{ s.totalAttempts }} attempt{{ s.totalAttempts === 1 ? '' : 's' }}
+                  &middot; last placement {{ formatDate(s.latestPlacementDate) }}
+                </span>
+              </div>
+
+              @if (s.latestPlacementLevel !== null || s.latestPlacementDate) {
+                <span
+                  class="student-row__level"
+                  [style.--level-color]="s.latestPlacementLevel ? levelCssVar(s.latestPlacementLevel) : '#94a3b8'"
+                >
+                  {{ levelCode(s.latestPlacementLevel) }}
+                </span>
+              } @else {
+                <span class="student-row__level student-row__level--none">No test yet</span>
+              }
+
+              <div class="student-row__weak-areas">
+                @if (s.weakAreas.length === 0) {
+                  <span class="student-row__ok">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                    On track
+                  </span>
+                } @else {
+                  @for (area of s.weakAreas; track area.level + area.skillArea) {
+                    <span class="weak-chip" [style.--level-color]="levelCssVar(area.level)">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path [attr.d]="skillIconPath(area.skillArea)" />
+                      </svg>
+                      {{ area.level }} {{ area.skillArea }}
+                    </span>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  @if (tab() === 'content') {
+    <section class="admin-section">
+      <div class="admin-section__toolbar">
+        <p class="admin-section__summary">{{ questions().length }} question{{ questions().length === 1 ? '' : 's' }} in the bank</p>
+        <button mat-flat-button color="primary" type="button" (click)="openQuestionEditor(null)">+ New question</button>
+      </div>
+
+      @if (questionsLoading()) {
+        <div class="admin__loading">
+          <mat-spinner diameter="32" />
+        </div>
+      } @else if (questionsError()) {
+        <p class="admin__error">{{ questionsError() }}</p>
+      } @else {
+        @for (group of questionGroups(); track group[0]) {
+          <div class="question-group">
+            <h3 class="question-group__title">{{ group[0] }}</h3>
+            <div class="question-list">
+              @for (q of group[1]; track q.id) {
+                <div class="question-row">
+                  <span class="question-row__text">{{ q.text }}</span>
+                  <div class="question-row__actions">
+                    <button mat-button type="button" (click)="openQuestionEditor(q)">Edit</button>
+                    <button mat-button type="button" class="question-row__delete" (click)="deleteQuestion(q)">Delete</button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    </section>
+  }
+
+  @if (tab() === 'access' && auth.isAdmin()) {
+    <section class="admin-section">
+      <p class="admin-section__summary">Grant Admin or Tutor access to a registered account.</p>
+
+      @if (accountsLoading()) {
+        <div class="admin__loading">
+          <mat-spinner diameter="32" />
+        </div>
+      } @else if (accountsError()) {
+        <p class="admin__error">{{ accountsError() }}</p>
+      } @else {
+        @if (accountsActionError()) {
+          <p class="admin__error">{{ accountsActionError() }}</p>
+        }
+        <div class="account-list">
+          @for (a of accounts(); track a.userId) {
+            <div class="account-row">
+              <span class="account-row__email">{{ a.email }}</span>
+              <div class="account-row__toggles">
+                <label class="account-toggle">
+                  <mat-slide-toggle
+                    [checked]="a.isTutor"
+                    [disabled]="savingAccountId() === a.userId"
+                    (change)="toggleRole(a, 'isTutor', $event.checked)"
+                  />
+                  Tutor
+                </label>
+                <label class="account-toggle">
+                  <mat-slide-toggle
+                    [checked]="a.isAdmin"
+                    [disabled]="savingAccountId() === a.userId"
+                    (change)="toggleRole(a, 'isAdmin', $event.checked)"
+                  />
+                  Admin
+                </label>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</main>

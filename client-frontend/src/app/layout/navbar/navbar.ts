@@ -17,6 +17,7 @@ const BASE_NAV_ITEMS: NavItem[] = [
 ];
 
 const DASHBOARD_ITEM: NavItem = { path: '/dashboard', label: 'Dashboard' };
+const ADMIN_ITEM: NavItem = { path: '/admin', label: 'Admin' };
 
 @Component({
   imports: [RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule, MatMenuModule],
@@ -30,9 +31,12 @@ export class Navbar {
   private readonly router = inject(Router);
   private readonly authDialog = inject(AuthDialogService);
 
-  protected readonly navItems = computed<NavItem[]>(() =>
-    this.auth.isAuthenticated() ? [...BASE_NAV_ITEMS, DASHBOARD_ITEM] : BASE_NAV_ITEMS,
-  );
+  protected readonly navItems = computed<NavItem[]>(() => {
+    if (!this.auth.isAuthenticated()) return BASE_NAV_ITEMS;
+    return this.auth.canManage()
+      ? [...BASE_NAV_ITEMS, DASHBOARD_ITEM, ADMIN_ITEM]
+      : [...BASE_NAV_ITEMS, DASHBOARD_ITEM];
+  });
 
   openSignIn(): void {
     this.authDialog.open('login');

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using EnglishC1.Client.Application.Ai;
 using EnglishC1.Client.Application.PlacementTest;
 using EnglishC1.Client.Domain.PlacementTest;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,7 @@ namespace EnglishC1.Client.Api.PlacementTest;
 [ApiController]
 [Route("api/test")]
 [Authorize]
-public class TestController(ITestService testService) : ControllerBase
+public class TestController(ITestService testService, IAiInsightService aiInsightService) : ControllerBase
 {
     [HttpGet("placement/questions")]
     public async Task<ActionResult<List<QuestionDto>>> GetPlacementQuestions() =>
@@ -29,6 +30,23 @@ public class TestController(ITestService testService) : ControllerBase
     [HttpGet("results/history")]
     public async Task<ActionResult<List<TestResultDto>>> GetHistory() =>
         Ok(await testService.GetHistoryAsync(UserId));
+
+    // On-demand only - the student clicks a button for this, it's never
+    // generated automatically. 503 (not 500) when it's unavailable: no
+    // Groq:ApiKey configured yet, or the upstream call failed - both are
+    // "try again later", not a server bug.
+    [HttpPost("results/{attemptId:guid}/insight")]
+    public async Task<ActionResult<TestInsightDto>> GetInsight(Guid attemptId)
+    {
+        var result = await testService.GetResultByIdAsync(UserId, attemptId);
+        if (result is null) return NotFound();
+
+        var insight = await aiInsightService.GenerateInsightAsync(result);
+        if (insight is null)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "AI feedback isn't available right now." });
+
+        return Ok(new TestInsightDto(insight));
+    }
 
     [HttpGet("reinforcement/{level}/{skill}/questions")]
     public async Task<ActionResult<List<QuestionDto>>> GetReinforcementQuestions(CefrLevel level, SkillArea skill) =>

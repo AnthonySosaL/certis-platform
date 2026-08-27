@@ -7,13 +7,16 @@ import { PlacementTest } from './pages/test/placement-test/placement-test';
 import { TestResultPage } from './pages/test/test-result/test-result';
 import { Reinforcement } from './pages/test/reinforcement/reinforcement';
 import { Dashboard } from './pages/dashboard/dashboard';
+import { AdminDashboard } from './pages/admin/admin';
 import { authGuard } from './core/auth.guard';
+import { adminGuard } from './core/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'about', component: About },
   { path: 'forgot-password', component: ForgotPassword },
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
+  { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] },
   { path: 'test', component: PlacementTest, canActivate: [authGuard] },
   { path: 'test/results', component: TestResultPage, canActivate: [authGuard] },
   { path: 'test/reinforce/:level/:skill', component: Reinforcement, canActivate: [authGuard] },

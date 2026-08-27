@@ -1,0 +1,87 @@
+<div class="editor-modal">
+  <button type="button" class="editor-modal__close" aria-label="Close" (click)="cancel()">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  </button>
+
+  <h2 class="editor-modal__title">{{ isEditing ? 'Edit question' : 'New question' }}</h2>
+
+  <form class="editor-form" [formGroup]="form" (ngSubmit)="save()">
+    <mat-form-field appearance="outline">
+      <mat-label>Question text</mat-label>
+      <textarea matInput formControlName="text" rows="2"></textarea>
+      @if (form.controls.text.hasError('required') && form.controls.text.touched) {
+        <mat-error>Question text is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="editor-form__row">
+      <mat-form-field appearance="outline">
+        <mat-label>Level</mat-label>
+        <mat-select formControlName="level">
+          @for (level of levels; track level) {
+            <mat-option [value]="level">{{ level }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Skill</mat-label>
+        <mat-select formControlName="skillArea">
+          @for (skill of skills; track skill) {
+            <mat-option [value]="skill">{{ skill }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <fieldset class="editor-form__options" formArrayName="options">
+      <legend>Options - pick the correct one</legend>
+      <div class="options-radio-group" role="radiogroup">
+        @for (option of options.controls; track $index) {
+          <div class="option-row">
+            <input
+              type="radio"
+              [id]="'correct-' + $index"
+              name="correctOptionIndex"
+              [checked]="form.controls.correctOptionIndex.value === $index"
+              (change)="form.controls.correctOptionIndex.setValue($index)"
+            />
+            <mat-form-field appearance="outline" class="option-row__field">
+              <input matInput [formControlName]="$index" [placeholder]="'Option ' + ($index + 1)" />
+            </mat-form-field>
+            @if (options.length > 2) {
+              <button type="button" class="option-row__remove" aria-label="Remove option" (click)="removeOption($index)">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            }
+          </div>
+        }
+      </div>
+      <button type="button" mat-button (click)="addOption()">+ Add option</button>
+    </fieldset>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Explanation (shown after a wrong answer)</mat-label>
+      <textarea matInput formControlName="explanation" rows="2"></textarea>
+    </mat-form-field>
+
+    @if (errorMessage()) {
+      <p class="editor-form__error">{{ errorMessage() }}</p>
+    }
+
+    <div class="editor-form__actions">
+      <button type="button" mat-button (click)="cancel()">Cancel</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+        @if (saving()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Save
+        }
+      </button>
+    </div>
+  </form>
+</div>

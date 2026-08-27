@@ -21,6 +21,8 @@ public record MissedQuestionDto(
     string CorrectAnswerText,
     string? Explanation);
 
+public record TestInsightDto(string Insight);
+
 public record TestResultDto(
     Guid AttemptId,
     AttemptKind Kind,

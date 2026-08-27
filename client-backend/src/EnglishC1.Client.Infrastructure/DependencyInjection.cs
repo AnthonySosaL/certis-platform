@@ -3,7 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using EnglishC1.Client.Application.Admin;
+using EnglishC1.Client.Application.Ai;
 using EnglishC1.Client.Application.PlacementTest;
+using EnglishC1.Client.Infrastructure.Admin;
+using EnglishC1.Client.Infrastructure.Ai;
 using EnglishC1.Client.Infrastructure.Identity;
 using EnglishC1.Client.Infrastructure.Persistence;
 using EnglishC1.Client.Infrastructure.PlacementTest;
@@ -46,8 +50,12 @@ public static class DependencyInjection
         // docs/PENDING_IDEAS.md). Add it back when that's built.
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<GroqOptions>(configuration.GetSection(GroqOptions.SectionName));
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<ITestService, TestService>();
+        services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<IContentService, ContentService>();
+        services.AddHttpClient<IAiInsightService, GroqInsightService>(client => client.Timeout = TimeSpan.FromSeconds(20));
 
         return services;
     }

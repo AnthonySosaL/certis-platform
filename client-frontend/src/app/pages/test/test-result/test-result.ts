@@ -1,11 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { CefrLevel, TestApi, TestResult } from '../../../core/test-api';
 import { levelCode, levelCssVar, levelName } from '../../../core/cefr';
 import { skillIconPath } from '../../../core/skill-icons';
+
+type InsightState = 'idle' | 'loading' | 'ready' | 'unavailable' | 'error';
 
 @Component({
   selector: 'app-test-result',
@@ -19,6 +22,9 @@ export class TestResultPage implements OnInit {
   protected readonly loading = signal(true);
   protected readonly result = signal<TestResult | null>(null);
 
+  protected readonly insightState = signal<InsightState>('idle');
+  protected readonly insightText = signal<string | null>(null);
+
   protected readonly levelCssVar = levelCssVar;
   protected readonly levelCode = levelCode;
   protected readonly levelName = levelName;
@@ -27,6 +33,21 @@ export class TestResultPage implements OnInit {
   async ngOnInit(): Promise<void> {
     this.result.set(await this.testApi.getLatestPlacementResult());
     this.loading.set(false);
+  }
+
+  async getInsight(): Promise<void> {
+    const attemptId = this.result()?.attemptId;
+    if (!attemptId) return;
+
+    this.insightState.set('loading');
+    try {
+      const { insight } = await this.testApi.getInsight(attemptId);
+      this.insightText.set(insight);
+      this.insightState.set('ready');
+    } catch (error) {
+      const status = error instanceof HttpErrorResponse ? error.status : null;
+      this.insightState.set(status === 503 ? 'unavailable' : 'error');
+    }
   }
 
   reinforcementPath(level: CefrLevel, skill: string): string[] {

@@ -98,6 +98,24 @@ public class TestService(AppDbContext db) : ITestService
             .ToList();
     }
 
+    public async Task<TestResultDto?> GetResultByIdAsync(Guid userId, Guid attemptId)
+    {
+        var attempt = await db.TestAttempts
+            .Include(a => a.Answers)
+            .FirstOrDefaultAsync(a => a.Id == attemptId && a.UserId == userId && a.CompletedAtUtc != null);
+
+        if (attempt is null) return null;
+
+        var questionIds = attempt.Answers.Select(a => a.QuestionId).ToList();
+        var questionsById = await db.Questions
+            .Include(q => q.Options)
+            .Where(q => questionIds.Contains(q.Id))
+            .ToDictionaryAsync(q => q.Id);
+        var breakdown = PlacementScorer.BuildBreakdown(attempt.Answers, questionsById);
+
+        return ToResultDto(attempt, breakdown, questionsById);
+    }
+
     private static (TestAttempt Attempt, List<SkillBreakdown> Breakdown, Dictionary<Guid, Question> QuestionsById) Grade(
         Guid userId,
         AttemptKind kind,

@@ -10,4 +10,4 @@ public record LoginRequest(
     [Required, EmailAddress] string Email,
     [Required] string Password);
 
-public record AuthResponse(string Token, string Email, DateTime ExpiresAtUtc);
+public record AuthResponse(string Token, string Email, DateTime ExpiresAtUtc, bool IsAdmin, bool IsTutor);

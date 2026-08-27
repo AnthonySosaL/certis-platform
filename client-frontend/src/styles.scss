@@ -80,7 +80,8 @@ html.dark body {
 // Material's own dialog surface - this strips just that, leaving the
 // backdrop and positioning to MatDialog. Global because the CDK overlay
 // renders outside the component's view encapsulation.
-.auth-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+.auth-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface,
+.content-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
   padding: 0;
   background: transparent;
   box-shadow: none;

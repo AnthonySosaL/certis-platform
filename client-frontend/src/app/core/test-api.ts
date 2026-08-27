@@ -42,6 +42,10 @@ export interface MissedQuestion {
   explanation: string | null;
 }
 
+export interface TestInsight {
+  insight: string;
+}
+
 export interface TestResult {
   attemptId: string;
   kind: AttemptKind;
@@ -79,6 +83,16 @@ export class TestApi {
 
   getHistory(): Promise<TestResult[]> {
     return firstValueFrom(this.http.get<TestResult[]>(`${API_BASE_URL}/api/test/results/history`));
+  }
+
+  // On-demand AI feedback for one attempt - a real network call (Groq),
+  // never fired automatically. 503 from the backend means it isn't
+  // configured/available right now, not a bug - callers should show that
+  // distinctly from a generic error.
+  getInsight(attemptId: string): Promise<TestInsight> {
+    return firstValueFrom(
+      this.http.post<TestInsight>(`${API_BASE_URL}/api/test/results/${attemptId}/insight`, {}),
+    );
   }
 
   getReinforcementQuestions(level: CefrLevel, skill: SkillArea): Promise<Question[]> {

@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -98,6 +99,32 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     if ((await db.Database.GetAppliedMigrationsAsync()).Any())
         await QuestionSeeder.SeedAsync(db);
+}
+
+// Ensures the "Admin" role exists and grants it to whichever account is
+// configured as Admin:Email (a user-secret locally, an app setting in
+// production) - idempotent, safe to run every startup. There's no admin
+// UI to grant this role from; it's config-only on purpose, since letting
+// anyone self-select "sign in as admin" at login (as a literal reading of
+// the original request would do) is a real privilege-escalation footgun.
+// The account itself decides admin status, not the login form.
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    if (!await roleManager.RoleExistsAsync("Admin"))
+        await roleManager.CreateAsync(new IdentityRole<Guid>("Admin"));
+    if (!await roleManager.RoleExistsAsync("Tutor"))
+        await roleManager.CreateAsync(new IdentityRole<Guid>("Tutor"));
+
+    var adminEmail = builder.Configuration["Admin:Email"];
+    if (!string.IsNullOrWhiteSpace(adminEmail))
+    {
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser is not null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+    }
 }
 
 app.Run();

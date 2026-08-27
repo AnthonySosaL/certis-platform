@@ -5,6 +5,98 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Admin/Tutor panel (`/admin`), question-bank CRUD, and an AI-generated personalized insight
+
+Built while the user was away, following an explicit "sigue con todo" +
+follow-up scope request: the account/performance panel from the original
+notes ("una cuenta que pueda ver los rendimientos de los estudiantes...
+alertas tempranas"), then a follow-up mid-session message asked for
+**tutors** too, with the ability to view/edit and "crear módulos" (author
+question content) - not just admins.
+
+**Roles.** Added real ASP.NET Core Identity roles - `Admin` and `Tutor`
+- on top of the `IdentityDbContext<..., IdentityRole<Guid>, Guid>` that
+was already wired up (the role tables existed, just unused). Both roles
+are seeded at startup if missing. There's deliberately no self-service
+"become an admin" path: `Admin:Email` (a user-secret/app-setting, unset
+by default) auto-promotes exactly one configured account on startup, and
+from then on only an existing Admin can grant Admin or Tutor to anyone
+else, via the new Access tab. JWTs now carry a `role` claim per role, and
+`/api/auth/login`+`register` return `isAdmin`/`isTutor` so the frontend
+doesn't have to decode the token to know what to show.
+
+**`/admin` page**, guarded by a new `adminGuard` (signed-in and
+Admin-or-Tutor, else redirected home), three tabs:
+- **Students** - the read-only performance overview from the original
+  ask, reusing `AdminService.GetStudentSummariesAsync()`: latest
+  placement level, attempt count, and which (level, skill) areas are
+  still weak - "weak" here specifically means the latest placement
+  flagged it *and* no passing reinforcement attempt for that exact cell
+  has landed since. Sorted early-warning-first.
+- **Content** - question-bank CRUD (`ContentController`, `IContentService`
+  Admin+Tutor authorized). A "module" is a (Level, SkillArea) cell;
+  questions inside one can be added/edited/deleted through a
+  `MatDialog`-based editor (radio-select the correct option, add/remove
+  options, edit the explanation) instead of only ever coming from
+  `QuestionSeeder`. This is now genuinely how you'd grow the question
+  bank past the original 32, not just how it started.
+- **Access** (Admin-only tab, hidden for Tutors) - toggle Admin/Tutor per
+  registered account. Server-side guard against an admin removing their
+  *own* Admin role (a real lockout risk on a 2-3 person platform with no
+  recovery path) - returns a specific 400 message the UI surfaces inline
+  without hiding the rest of the list.
+
+**Real bug caught during verification, not before:** editing a question
+through the Content tab 500'd every time with a
+`DbUpdateConcurrencyException` ("expected 1 row, affected 0"). Root
+cause: assigning a `List<QuestionOption>` of freshly-constructed entities
+(client-generated Guid keys) to an already-tracked parent's navigation
+property does **not** mark them `Added` in EF Core - because the key is
+already non-default, EF's graph fixup assumes they exist and queues
+no-op `UPDATE`s instead of `INSERT`s. Fixed with an explicit
+`db.QuestionOptions.AddRange(newOptions)` alongside the navigation
+assignment - see the comment in `ContentService.cs`. Caught by actually
+clicking Edit → Save in the browser, not by reading the code.
+
+**AI insight (Groq).** Where the Groq API key lives now:
+`Groq:ApiKey` via `dotnet user-secrets` locally / an app setting in
+production - same pattern as `Jwt:SigningKey`. `GroqOptions` was already
+scaffolded as an empty slot in an earlier session specifically so this
+didn't need new wiring once a real feature was defined. The feature: a
+"Get AI feedback on this attempt" button on the test-result page
+(on-demand only - never generated automatically, since it's a real
+network call with real cost) that sends the attempt's skill breakdown
+and missed questions to Groq and shows back a short personalized
+diagnostic - the *why* behind the pattern of mistakes, not just the
+score, which is what makes this "early warning" personalized instead of
+the Students tab's generic threshold flag. New endpoint
+`POST /api/test/results/{attemptId}/insight`; returns 503 (not 500) when
+unconfigured or the upstream call fails, which the UI shows as "isn't
+set up yet" rather than an error.
+
+Two more real bugs found only by testing this end-to-end against the
+live Groq API, not by reading the code:
+- `llama-3.3-70b-versatile` (the obvious model choice) had already been
+  retired from Groq's lineup - a 404. Switched to `openai/gpt-oss-20b`
+  after confirming it's live via `GET /openai/v1/models`.
+- Even after that, responses came back with empty `content` and
+  `finish_reason: "length"`. `gpt-oss-20b` is a *reasoning* model - it
+  spends completion tokens on hidden chain-of-thought before the actual
+  answer, and the initial 220-token budget was going almost entirely to
+  reasoning (218 of 220 tokens, confirmed via a raw curl call). Fixed by
+  setting `reasoning_effort: "low"` (drops reasoning to single digits of
+  tokens) and raising the budget to 350 tokens of headroom. Separately,
+  the response DTOs weren't deserializing at all before this - System.Text.Json
+  is case-sensitive by default and Groq returns lowercase JSON keys;
+  fixed with `PropertyNameCaseInsensitive = true` on the read side (the
+  request side had been working only because Groq's parser happens to be
+  lenient about casing on the way in).
+
+Verified in-browser end-to-end with a throwaway admin test account:
+Students/Content/Access tabs, create/edit/delete a question, grant and
+revoke Tutor, the self-demotion guard, and a real AI insight rendering
+from the live Groq API. Backend unit tests (6/6) still green.
+
 ## 2026-08-27 — Student dashboard (`/dashboard`)
 
 Self-directed next step after "seguir en local, algo nuevo" - the natural
