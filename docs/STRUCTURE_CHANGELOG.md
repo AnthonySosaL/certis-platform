@@ -5,6 +5,34 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Frontend live in production too: english-c1.runasp.net
+
+The whole platform is now publicly reachable, not just the API. Full
+details in [HOSTING.md](HOSTING.md#frontend-hosting-monsteraspnet-live-decided-2026-08-27):
+
+- Second FreeSite on the same MonsterASP account (`site87768`) instead of
+  a new Cloudflare Pages signup - `ng build`'s output is plain static
+  files, IIS serves that fine, no reason to add a second hosting provider
+  for a 2-person tool.
+- `core/api-config.ts` now picks the backend URL from `location.hostname`
+  at runtime (localhost vs production) instead of a hardcoded local URL.
+- Added a hand-maintained `web.config` with an IIS rewrite rule so direct
+  hits on Angular routes (`/test`, `/about`, a page refresh) serve
+  `index.html` instead of 404ing - `ng build` doesn't generate this,
+  it has to be copied into `dist/` after every clean build.
+- Backend `Program.cs` CORS policy extended to allow the new frontend
+  origin (both http and https initially, since the SSL cert hadn't
+  finished provisioning at first deploy and the http-vs-https scheme
+  mismatch failed CORS preflight - see HOSTING.md for the cleanup note).
+- Deploy hit the same locked-DLL issue as the backend's redeploy
+  (see the entry below) on the *backend* redeploys needed for the CORS
+  change - same `app_offline.htm` fix, now a routine step.
+- Verified end-to-end against the live domains: HTTPS on both, a real
+  login from `https://english-c1.runasp.net` reaching
+  `https://english-c1-api.runasp.net` with no CORS errors, the
+  `redirectTo` post-login flow landing back on `/test`, and the 32-item
+  question bank confirmed present in the production database.
+
 ## 2026-08-27 — First real feature: placement test, end to end
 
 The first vertical slice beyond auth - a full CEFR placement test,

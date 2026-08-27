@@ -63,11 +63,16 @@ builder.Services
 builder.Services.AddAuthorization();
 
 // Local dev origin (Angular's ng serve default) plus the deployed
-// frontend origin once that's live - tighten/extend as needed.
+// frontend origin (english-c1.runasp.net, live since 2026-08-27). Both
+// http and https allowed for now since the frontend site's HTTPS
+// certificate hadn't finished provisioning yet at launch - drop the
+// http entry once it's confirmed HTTPS-only.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
-        policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod());
+        policy.WithOrigins("http://localhost:4200", "http://english-c1.runasp.net", "https://english-c1.runasp.net")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
 });
 
 var app = builder.Build();

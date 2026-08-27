@@ -89,12 +89,76 @@ every future redeploy, not just one. **As of 2026-08-27, both are live
 and verified**: `/health` → 200, a real `POST /api/auth/register` against
 the production database succeeds end-to-end.
 
-## Frontend hosting: not decided yet, low stakes either way
+## Frontend hosting: MonsterASP.NET, live (decided 2026-08-27)
 
-Cloudflare Pages is still the better default if/when this needs a public
-URL — Vercel's Hobby tier prohibits commercial use in its ToS, which
-matters if this ever gets sold to institutions and doesn't matter at all
-for a private 2-person tool today. Not an active decision right now.
+Deployed and reachable: `https://english-c1.runasp.net` (a second FreeSite
+on the same MonsterASP account, `site87768`, EU/Germany, free subdomain -
+no separate account or Cloudflare needed). HTTPS via Let's Encrypt,
+auto-renewing, same as the backend.
+
+**Why MonsterASP instead of Cloudflare Pages** (the earlier "not decided
+yet" placeholder above): Angular's `ng build` output is plain static
+files - HTML/CSS/JS - and MonsterASP serves those over IIS just fine, no
+different from any static host. Free plan allows a second FreeSite per
+account, so this needed zero new signups. Revisit only if the free
+plan's limits (5GB disk, low-performance servers) become a real problem.
+
+**Deploy steps:**
+
+```powershell
+cd client-frontend
+ng build
+# copy the SPA web.config (below) into dist/client-frontend/browser/ if it's not already there
+cd dist/client-frontend/browser
+scp -r * site87768@site87768.siteasp.net:wwwroot/
+```
+
+Unlike the backend, this site is almost never locked (static files, no
+long-running process holding them open) - the `app_offline.htm` dance
+usually isn't needed here, plain `scp -r` overwrites cleanly.
+
+**SPA routing needs one extra file**: Angular's client-side router means
+a direct hit on `/test` or `/about` isn't a real file on the server - IIS
+needs a rewrite rule to serve `index.html` for anything that isn't a real
+file, and let Angular's router take over from there. `ng build` doesn't
+generate this itself, so `dist/client-frontend/browser/web.config` is
+hand-maintained (not generated, and not overwritten by `ng build` since
+it's not part of source but must be manually copied back in after every
+clean `dist/` wipe):
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <system.webServer>
+    <rewrite>
+      <rules>
+        <rule name="Angular Routes" stopProcessing="true">
+          <match url=".*" />
+          <conditions logicalGrouping="MatchAll">
+            <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+            <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+          </conditions>
+          <action type="Rewrite" url="/index.html" />
+        </rule>
+      </rules>
+    </rewrite>
+  </system.webServer>
+</configuration>
+```
+
+**API base URL**: `client-frontend/src/app/core/api-config.ts` picks the
+backend URL at runtime from `location.hostname` (localhost → local
+backend, anything else → `https://english-c1-api.runasp.net`) rather than
+a build-time environment file - there's still no real Angular
+`environment.ts` setup (see the note further down), and this was the
+smallest change that worked for exactly two environments.
+
+**CORS**: the backend's `Program.cs` explicitly allowlists the frontend
+origin. Had to include *both* `http://english-c1.runasp.net` and
+`https://...` at first, since the frontend's SSL certificate hadn't
+finished provisioning yet when this was first wired up and the browser's
+CORS preflight failed for the scheme mismatch - drop the `http` entry
+once it's confirmed the site never falls back to plain HTTP.
 
 ## Local development
 

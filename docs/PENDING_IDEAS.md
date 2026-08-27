@@ -86,6 +86,11 @@ Still open, now that the first slice exists:
 
 ## Done
 
+- [x] **Frontend deployed live.** `https://english-c1.runasp.net`, a
+      second free site on the existing MonsterASP account - the whole
+      platform is now publicly reachable, not just the API. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--frontend-live-in-production-too-english-c1runaspnet)
+      and [HOSTING.md](HOSTING.md). — 2026-08-27
 - [x] **Placement test, end to end.** Backend (domain model, scoring
       algorithm with 6 unit tests, API) + Angular UI (test-taking,
       results with a color-coded CEFR badge, per-area breakdown,
