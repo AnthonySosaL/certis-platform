@@ -5,6 +5,40 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — 3D model picker in the empty Home hero space
+
+The empty space below "How it works" on Home now holds a real,
+interactive 3D preview - `<model-viewer>` (`@google/model-viewer`) with
+prev/next arrows and dots, cycling through three candidate models so
+the final pick can be made by looking at them live on the actual page
+instead of on Poly Pizza's site. Not a final choice yet - `home.ts`'s
+`MODEL_OPTIONS` array is deliberately still a list of three; trim it to
+one (or restyle around the winner) once picked.
+
+- Three CC0 (public domain) low-poly models downloaded from Poly Pizza
+  and committed to `public/models/`: `open-book.glb` (35KB),
+  `grad-cap.glb` (9KB), `globe.glb` (81KB) - all by Quaternius except
+  the globe. Poly Pizza's own "Download" button triggers a real browser
+  file download that the sandboxed browser tool used this session
+  couldn't handle (crashed the tab twice) - worked around it by reading
+  each model page's embedded `<model-viewer src="...">` tag for the
+  direct `static.poly.pizza/*.glb` URL and fetching that with `curl`
+  instead.
+- `@google/model-viewer` is a heavy dependency (~900KB, bundles its own
+  three.js-based renderer) - a static top-level import put that weight
+  in the app's MAIN bundle, loaded on every single page, and pushed the
+  initial bundle over Angular's 1MB hard error budget. Fixed with a
+  dynamic `import('@google/model-viewer')` inside `Home.ngOnInit()`
+  instead - Angular code-splits that into its own lazy chunk, fetched
+  only when the Home page actually renders.
+- Verified: the model loads (network request 200s, `model-viewer`'s own
+  `loaded`/`modelIsVisible` flags true, canvas has real non-blank pixel
+  data), and the prev/next/dot controls correctly swap the `src`
+  attribute and label. Couldn't get a visual screenshot of the WebGL
+  canvas itself through this session's screenshot tool (a tooling
+  limitation, not a rendering bug) - confirmed via the canvas's own
+  `toDataURL()` output instead.
+
 ## 2026-08-27 — About page redesigned: icon cards, scroll-reveal animation
 
 Was a static stack of plain text sections - "métele más diseño, bloques

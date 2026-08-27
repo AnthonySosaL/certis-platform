@@ -104,6 +104,12 @@ what *was* built that session):
       site currently has none. Needs a source (stock, commissioned,
       generated) and a place they'd actually earn their spot (the
       landing hero is the obvious first candidate).
+- [ ] **Pick a final 3D model** for the Home hero. A live prev/next/dot
+      switcher is on the page now with three CC0 candidates (Open Book,
+      Graduation Cap, Globe - see STRUCTURE_CHANGELOG.md 2026-08-27) so
+      the pick can be made by looking at them in place. Once decided,
+      trim `home.ts`'s `MODEL_OPTIONS` to one and drop the switcher UI
+      (arrows/dots), or restyle the frame around the winner.
 - [ ] **Broader visual pass beyond the test module** - the redesign this
       session focused on the quiz/results/navbar specifically. Home and
       About got a content pass earlier (2026-08-27, design system entry)
