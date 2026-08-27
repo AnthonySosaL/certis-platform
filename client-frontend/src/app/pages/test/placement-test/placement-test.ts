@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { Question, SubmitAnswer, TestApi, TestResult } from '../../../core/test-api';
-import { Quiz } from '../../../shared/quiz/quiz';
+import { Quiz, readPersistedQuiz } from '../../../shared/quiz/quiz';
 
 type Stage = 'loading' | 'intro' | 'taking' | 'submitting';
 
@@ -37,6 +37,20 @@ export class PlacementTest implements OnInit {
     } catch {
       // Best-effort - if this fails, we just skip straight to "no previous result" state.
     }
+
+    // A reload (or a lost connection) mid-test used to always land back on
+    // this intro screen, requiring one click on "Retake the test" before
+    // the preserved answers/timer became visible again. Restoring the
+    // exact question set here instead skips that click entirely - it also
+    // has to be the *exact* set, not a fresh fetch, since placement
+    // questions are sampled per call (see readPersistedQuiz's comment).
+    const persisted = readPersistedQuiz(STORAGE_KEY);
+    if (persisted && persisted.hasAnswers) {
+      this.questions.set(persisted.questions);
+      this.stage.set('taking');
+      return;
+    }
+
     this.stage.set('intro');
   }
 

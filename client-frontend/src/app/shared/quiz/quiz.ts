@@ -9,6 +9,31 @@ const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 interface PersistedState {
   selections: Record<string, string>;
   startedAtMs: number;
+  // The exact questions shown for this attempt - needed to resume
+  // straight into the quiz on reload instead of re-fetching. Re-fetching
+  // isn't safe to do silently: placement questions are now sampled per
+  // call (see TestService.GetPlacementQuestionsAsync), so a fresh fetch
+  // can return a different subset whose IDs don't match the persisted
+  // selections, silently orphaning progress the user thinks was saved.
+  questions: Question[];
+}
+
+// Lets a parent page check for (and restore) an in-progress attempt
+// before Quiz itself ever mounts - e.g. to skip a "ready to start?" intro
+// screen and land the user straight back in the quiz after a reload.
+export function readPersistedQuiz(storageKey: string): { questions: Question[]; hasAnswers: boolean } | null {
+  if (typeof localStorage === 'undefined') return null;
+
+  const raw = localStorage.getItem(storageKey);
+  if (!raw) return null;
+
+  try {
+    const state = JSON.parse(raw) as Partial<PersistedState>;
+    if (!state.questions || state.questions.length === 0) return null;
+    return { questions: state.questions, hasAnswers: Object.keys(state.selections ?? {}).length > 0 };
+  } catch {
+    return null;
+  }
 }
 
 // Shared by the placement test and every reinforcement quiz - both are
@@ -124,7 +149,11 @@ export class Quiz implements OnInit {
     const key = this.storageKey();
     if (!key || typeof localStorage === 'undefined') return;
 
-    const state: PersistedState = { selections: this.selections(), startedAtMs: this.startedAtMs() };
+    const state: PersistedState = {
+      selections: this.selections(),
+      startedAtMs: this.startedAtMs(),
+      questions: this.questions(),
+    };
     localStorage.setItem(key, JSON.stringify(state));
   }
 }

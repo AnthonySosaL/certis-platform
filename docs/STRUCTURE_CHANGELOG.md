@@ -5,6 +5,49 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Real auto-resume for the placement test (and a stale-docs fix)
+
+Second autonomous `/loop` iteration through `PENDING_IDEAS.md`.
+
+**Found already done, not built**: "How it works / methodology content
+on the About page" turned out to be stale - the earlier About redesign
+(icon cards, commit `d6f4a24`) already replaced the "Coming soon"
+placeholder with real methodology content. No code changed; just moved
+the line to Done with a note about why, instead of redoing work that
+already shipped.
+
+**Real work this iteration**: auto-resume, the last item in "Flagged for
+a future design pass" that didn't actually need a product decision - the
+direction was already fully specified ("answers and timer are preserved,
+but the user has to click Retake the test once to see them restored").
+
+- `shared/quiz/quiz.ts`'s persisted state now also stores the exact
+  `questions` array shown for the attempt, not just selections/timer.
+  Exported a new `readPersistedQuiz(storageKey)` helper so a parent page
+  can peek at an in-progress attempt *before* Quiz ever mounts.
+- `placement-test.ts`'s `ngOnInit` now calls that helper: if there's a
+  persisted attempt with at least one answer, it restores the exact
+  question set and jumps straight to the `taking` stage - skipping the
+  intro screen and the "Retake the test" click entirely. A draft with no
+  answers yet still shows the normal intro (a blank in-progress quiz
+  isn't worth skipping the intro for).
+- **This wasn't just a UX nicety - it fixed a real bug the previous
+  iteration introduced.** Once `GetPlacementQuestionsAsync` started
+  sampling 4-of-8 questions per cell (see the question-bank-doubling
+  entry below), a reload that re-fetched fresh questions from the API
+  could silently get a *different* random sample than the one the
+  answers were keyed against - orphaning progress with no error, just a
+  quiz that looked reset. Persisting and reusing the exact original
+  question set fixes both problems with the same change.
+
+Verified in-browser end-to-end: started a fresh attempt, answered two
+questions (confirmed via `localStorage` which exact questions/options),
+hard-reloaded `/test`, and confirmed it landed straight in the quiz with
+the same 32 questions, the same 2 answers still visually selected on the
+right questions, and the elapsed timer continuing (not reset). Confirmed
+the normal intro screen still shows correctly when there's no in-progress
+draft. Frontend build clean.
+
 ## 2026-08-27 — Doubled the question bank (32 → 64); placement stays 32 via sampling
 
 First autonomous iteration of a `/loop`-scheduled pass through

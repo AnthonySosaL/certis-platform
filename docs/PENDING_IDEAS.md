@@ -40,8 +40,6 @@ Still open, now that the first slice exists:
       immediately, but real before anyone else ever gets an account.
 - [ ] **Google OAuth.** Nice-to-have from the original notes; email/password
       shipped first since it needed no external app registration.
-- [ ] "How it works" / methodology content on the About page — currently
-      just a placeholder ("Coming soon").
 - [ ] i18n (Spanish for the app's own UI chrome) — not set up in the
       Angular rebuild yet; low priority, the platform's primary language
       is English by design. See ARCHITECTURE.md for the library options
@@ -103,14 +101,23 @@ what *was* built that session):
       session focused on the quiz/results/navbar specifically. Home and
       About got a content pass earlier (2026-08-27, design system entry)
       but not this round's card/animation treatment.
-- [ ] Auto-resume: reloading mid-test currently lands back on the
-      `/test` intro screen, not straight into the in-progress quiz - the
-      answers and timer *are* preserved (see changelog), but the user
-      has to click "Retake the test" once to see them restored. A fully
-      seamless resume would skip that click.
-
 ## Done
 
+- [x] **Auto-resume on the placement test.** A reload mid-test now lands
+      straight back in the quiz - exact questions, answers, and timer
+      restored - no more one click on "Retake the test" first. Also fixed
+      a real bug the previous entry's sampling change had introduced (a
+      reload could silently re-fetch a *different* random sample of
+      questions than the one the saved answers were keyed to). See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--real-auto-resume-for-the-placement-test-and-a-stale-docs-fix). — 2026-08-27
+- [x] **"How it works" / methodology content on the About page.** Found
+      already done while working this list, just never checked off - the
+      earlier About redesign (icon cards + scroll-reveal) replaced the
+      "Coming soon" placeholder with real methodology content (Format,
+      How the level is calculated, Reinforcement, Scope honestly). No new
+      code needed here, just fixing a stale line in this file. See
+      `git log -- client-frontend/src/app/pages/about/about.html`
+      (commit `d6f4a24`). — 2026-08-27
 - [x] **Question bank doubled (32 → 64), placement stays fixed at 32.**
       4 more hand-written questions per (level, skill) cell, same
       explanation-per-question quality bar. `GetPlacementQuestionsAsync`
