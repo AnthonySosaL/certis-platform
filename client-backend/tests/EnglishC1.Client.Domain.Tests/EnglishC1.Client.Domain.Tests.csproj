@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\NutriBoost.Client.Domain\NutriBoost.Client.Domain.csproj" />
+    <ProjectReference Include="..\..\src\EnglishC1.Client.Domain\EnglishC1.Client.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace NutriBoost.Client.Infrastructure.Persistence;
+namespace EnglishC1.Client.Infrastructure.Persistence;
 
 // No entities yet — the real domain model (exercises, attempts, users,
 // progress...) depends on the actual feature scope of the English-practice

@@ -34,6 +34,8 @@ C1/Cambridge-specific (like *C1 Compass*) is a poor fit if this becomes
 broader multi-level practice later, while a generic one (*Fluentrack*)
 ages better if the scope grows. Once picked, do a real domain/trademark
 check before committing, and then the codebase needs a rename pass:
-folder name, `i18n` `brand.name` keys, `index.html` title, and — separately
-— the backend's `NutriBoost.Client.*` namespaces (tracked in
-PENDING_IDEAS.md as its own item, since it's a bigger mechanical change).
+folder name, `i18n` `brand.name` keys, `index.html` title, and the
+backend's `EnglishC1.Client.*` namespaces (currently a descriptive
+placeholder, not the wrong-project holdover it used to be — see
+[STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md) — so this last rename is
+lower-stakes than it was).

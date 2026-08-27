@@ -1,4 +1,4 @@
-using NutriBoost.Client.Infrastructure;
+using EnglishC1.Client.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 

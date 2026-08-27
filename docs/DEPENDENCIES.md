@@ -51,7 +51,7 @@ off/on (or reboot) once to pick up the registry PATH everywhere.
 
 The `AppDb` connection string lives only in `dotnet user-secrets` (set via
 `dotnet user-secrets set "ConnectionStrings:AppDb" "..."` from
-`src/NutriBoost.Client.Api`) — never in a committed `appsettings*.json`.
+`src/EnglishC1.Client.Api`) — never in a committed `appsettings*.json`.
 It points at MonsterASP's Remote Access (SSMS) endpoint, not Local Access
 (which only works from apps hosted on MonsterASP itself).
 

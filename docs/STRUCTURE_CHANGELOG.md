@@ -5,6 +5,23 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-26 — Backend renamed: NutriBoost.Client.* -> EnglishC1.Client.*
+
+Closed out the last tracked holdover from the scope mix-up (see
+[errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md)):
+every folder, `.sln`/`.csproj` file, and C# `namespace` declaration in
+`client-backend` renamed `NutriBoost.Client.*` -> `EnglishC1.Client.*`
+(Domain, Application, Infrastructure, Api, and the Domain.Tests project).
+Rebuilt clean, tests still pass (0 tests — the project is still empty),
+and re-verified the app starts and connects to the real MonsterASP
+database under the new names. `EnglishC1` is a descriptive placeholder
+tied to the platform's subject matter, not a proposed final brand — see
+[NAMING.md](NAMING.md), still undecided. Updated every doc and script that
+referenced the old path (`README.md`, `client-backend/README.md`,
+`ARCHITECTURE.md`, `DEPENDENCIES.md`, `PENDING_IDEAS.md`, `NAMING.md`) —
+`scripts/start-dev.ps1` needed no change, it finds the backend project by
+glob (`*.Api.csproj`), not by name.
+
 ## 2026-08-26 — Real database: MonsterASP.NET SQL Server, dropped local Postgres
 
 - Created the real dev database on MonsterASP.NET's free plan: SQL Server

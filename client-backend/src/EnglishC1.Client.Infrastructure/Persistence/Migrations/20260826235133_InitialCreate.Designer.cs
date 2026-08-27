@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NutriBoost.Client.Infrastructure.Persistence;
+using EnglishC1.Client.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace NutriBoost.Client.Infrastructure.Persistence.Migrations
+namespace EnglishC1.Client.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260826235133_InitialCreate")]

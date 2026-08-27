@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace NutriBoost.Client.Infrastructure.Persistence.Migrations
+namespace EnglishC1.Client.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

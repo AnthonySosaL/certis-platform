@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\NutriBoost.Client.Application\NutriBoost.Client.Application.csproj" />
+    <ProjectReference Include="..\EnglishC1.Client.Application\EnglishC1.Client.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

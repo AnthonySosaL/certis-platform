@@ -47,7 +47,7 @@ npm run dev   # http://localhost:5173
 
 # 2. Backend (needs ConnectionStrings:AppDb in user-secrets first —
 #    see client-backend/README.md)
-cd client-backend/src/NutriBoost.Client.Api
+cd client-backend/src/EnglishC1.Client.Api
 dotnet watch run   # http://localhost:5223
 ```
 

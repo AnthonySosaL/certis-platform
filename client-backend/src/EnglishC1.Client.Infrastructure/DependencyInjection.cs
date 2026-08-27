@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NutriBoost.Client.Infrastructure.Persistence;
+using EnglishC1.Client.Infrastructure.Persistence;
 
-namespace NutriBoost.Client.Infrastructure;
+namespace EnglishC1.Client.Infrastructure;
 
 public static class DependencyInjection
 {

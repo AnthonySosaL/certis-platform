@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NutriBoost.Client.Application\NutriBoost.Client.Application.csproj" />
-    <ProjectReference Include="..\NutriBoost.Client.Infrastructure\NutriBoost.Client.Infrastructure.csproj" />
+    <ProjectReference Include="..\EnglishC1.Client.Application\EnglishC1.Client.Application.csproj" />
+    <ProjectReference Include="..\EnglishC1.Client.Infrastructure\EnglishC1.Client.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

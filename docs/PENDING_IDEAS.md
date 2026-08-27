@@ -29,13 +29,6 @@ least at a first-pass level:
       [NAMING.md](NAMING.md) — pick one, reject all three, or hold off
       until the feature scope above is clearer (recommended, since a
       C1-specific name is a poor fit if scope grows beyond C1 later).
-- [ ] **C# namespace rename.** The backend's projects/namespaces are still
-      `NutriBoost.Client.*` — a holdover from the scope mix-up (see
-      [errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md)).
-      Best done in one pass alongside adding the real domain model, once
-      the feature scope and name are both settled, rather than renaming
-      twice.
-
 ## Scaffolded structurally, not implemented
 
 - [ ] `client-backend` — layered scaffold exists, builds, and is verified
@@ -67,3 +60,8 @@ least at a first-pass level:
       Postgres demoted to an offline-only fallback. See
       [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-26--real-database-monsteraspnet-sql-server-dropped-local-postgres)
       and [HOSTING.md](HOSTING.md). — 2026-08-26
+- [x] **C# namespace rename.** `NutriBoost.Client.*` → `EnglishC1.Client.*`
+      across every `.sln`/`.csproj`/`namespace` — folders, solution,
+      migrations, all updated in one pass. Still a placeholder (not the
+      final brand name — see [NAMING.md](NAMING.md)), but no longer the
+      wrong-project holdover. — 2026-08-26

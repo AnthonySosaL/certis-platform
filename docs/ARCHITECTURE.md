@@ -64,11 +64,11 @@ dependencies are enforced by the compiler, not just convention:
 Rationale: keeps business rules testable without a database or HTTP server,
 and keeps "which layer am I editing" explicit.
 
-**Known holdover**: the actual namespaces/project names are still
-`NutriBoost.Client.*` (`.sln`, `.csproj` files, C# `namespace`
-declarations) — a mechanical rename pass across every file, better done
-once alongside adding the real domain model than twice. Tracked in
-[PENDING_IDEAS.md](PENDING_IDEAS.md).
+Namespaces/project names are `EnglishC1.Client.*` (`.sln`, `.csproj`
+files, C# `namespace` declarations) — a placeholder tied to the folder
+name, not a final brand (renamed from an earlier `NutriBoost.Client.*`
+holdover on 2026-08-26; see
+[errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md)).
 
 ## Frontend structure
 
