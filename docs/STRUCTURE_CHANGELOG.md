@@ -5,6 +5,17 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-26 — Fixed ng serve hanging on start
+
+Found (the frontend silently failed to come up after `start.bat`, twice)
+and fixed two separate causes — full diagnosis in
+[errors/2026-08-26-ng-serve-hangs.md](errors/2026-08-26-ng-serve-hangs.md).
+`scripts/start-dev.ps1` now clears `client-frontend/.angular/cache` before
+every frontend start and redirects `ng serve`'s output to
+`%TEMP%\ng-serve.log` instead of the spawned console window (the second
+cause; that specific combination reliably prevented the hang across
+repeated testing). Verified with two clean stop/start round-trips.
+
 ## 2026-08-26 — Frontend switched: React -> Angular 22 + Material
 
 Deliberate change, not a correction — the user has many existing React

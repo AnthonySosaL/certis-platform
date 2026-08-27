@@ -35,10 +35,21 @@ function Test-PortOpen($port) {
 if (Test-PortOpen 4200) {
     Write-Host "client-frontend already running on :4200 - skipping." -ForegroundColor DarkYellow
 } else {
+    # ng serve's .angular/cache gets corrupted whenever the process is
+    # killed abruptly (closing the window, a crash, a forced stop) instead
+    # of exiting cleanly - the next run then hangs forever without ever
+    # binding the port. Clearing the cache before every start costs a few
+    # seconds of rebuild but avoids that hang entirely.
+    Remove-Item "$root\client-frontend\.angular\cache" -Recurse -Force -ErrorAction SilentlyContinue
     Write-Host "Starting client-frontend dev server..." -ForegroundColor Cyan
+    # ng serve also hangs (separately from the cache issue above) when its
+    # output goes straight to a detached console window instead of being
+    # redirected - confirmed by testing both ways repeatedly. Redirecting
+    # to a log file avoids that; check the log if something looks wrong.
+    $frontendLog = "$env:TEMP\ng-serve.log"
     Start-Process powershell -ArgumentList @(
         '-NoExit', '-Command',
-        "`$host.ui.RawUI.WindowTitle = 'Project - client-frontend'; Set-Location '$root\client-frontend'; npx ng serve"
+        "`$host.ui.RawUI.WindowTitle = 'Project - client-frontend'; Set-Location '$root\client-frontend'; Write-Host 'Logging to $frontendLog - tail it if this seems stuck.'; npx ng serve *> '$frontendLog'"
     )
 }
 

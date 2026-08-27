@@ -41,11 +41,21 @@ Angular 22 yet (too new, `npm install` failed with an ERESOLVE conflict);
 inline SVG sidesteps that without waiting on an upstream update, and stays
 true to the "SVG, not an icon font" preference either way.
 
-**Known gotcha**: `ng serve` can hang indefinitely after several
-interrupted runs (stuck rebuilding, port never binds) — clearing the
-`.angular/` cache directory in `client-frontend` and restarting fixes it.
-Not a real bug, just what happened during this session's repeated manual
-testing; unlikely to matter for normal day-to-day use.
+**Two real `ng serve` hangs found and fixed in `scripts/start-dev.ps1`**
+(not upstream Angular bugs, just facts about running it from a spawned
+Windows console — see errors/2026-08-26-ng-serve-hangs.md for the full
+diagnosis):
+1. `.angular/cache` gets corrupted whenever the process is killed abruptly
+   instead of exiting cleanly (closing the window, `taskkill`, a crash) —
+   the next run then hangs forever, port never binds. Fix: the script
+   clears that cache before every start.
+2. Separately, `ng serve`'s output going straight to a **detached,
+   non-redirected** console window hangs it outright, even with a clean
+   cache — confirmed by testing the same command with and without output
+   redirection, repeatedly, with consistent results either way. Fix: the
+   script redirects `ng serve`'s output to `%TEMP%\ng-serve.log` instead
+   of letting it print directly to the spawned window. Tail that file if
+   the frontend window looks stuck.
 
 ## `client-backend` (ASP.NET Core, layered: Domain/Application/Infrastructure/Api)
 
