@@ -51,11 +51,6 @@ Still open, needed before building the domain model:
       end-to-end against the real MonsterASP.NET SQL Server database
       (see HOSTING.md). Domain model so far is auth (Identity's own
       tables) — the actual English-practice entities still don't exist.
-- [ ] **Frontend auth.** Backend (register/login/JWT) is done and
-      verified — Angular side isn't: login/register pages, an auth
-      service, an HTTP interceptor to attach the token to API calls, a
-      route guard, and updating the Navbar's "Sign in" button to reflect
-      real auth state instead of being a dead button.
 - [ ] **Password reset + email confirmation.** Needs an email
       sender (SendGrid free tier, or similar) before it can work at all —
       `AddDefaultTokenProviders()` isn't even called yet. Not urgent for
@@ -102,6 +97,12 @@ Still open, needed before building the domain model:
 
 ## Done
 
+- [x] **Frontend auth: login/register pages, wired end-to-end.** Auth
+      service, HTTP interceptor, Login/Register pages (Reactive Forms +
+      Material), Navbar reflects real session state. Verified in the
+      browser: register -> reload persists session -> sign out -> sign
+      back in, against the real backend + database. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--frontend-auth-loginregister-pages-wired-end-to-end). — 2026-08-27
 - [x] **Backend auth: register/login/JWT.** ASP.NET Core Identity +
       JWT bearer, `AuthController` (`register`/`login`/`me`), migration
       applied and verified end-to-end against the real database. Not

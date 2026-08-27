@@ -78,8 +78,11 @@ holdover on 2026-08-26; see
 ```
 src/app/
 ├── layout/          Navbar, Footer — structural, reused components
-├── pages/           Route-level standalone components (Home, About, Contact — placeholders)
-├── core/            Cross-cutting services (Theme, auth later)
+├── pages/           Route-level standalone components (Home, About, Contact,
+│                    Login, Register — Login/Register are real, the rest are placeholders)
+├── core/            Cross-cutting services: Theme, Auth (JWT in localStorage,
+│                    signals for isAuthenticated/email), auth.interceptor.ts
+│                    (attaches the token to requests to our own API), api-config.ts
 ├── app.routes.ts    Route table
 └── app.ts/.html     App shell (renders Navbar + <router-outlet /> + Footer)
 ```
@@ -103,9 +106,11 @@ responsively.
   what `i18next` did — isn't set up yet since the platform's primary
   language is English by design). Add if/when a language switcher is
   actually needed.
-- **Auth (frontend)**: backend is done (register/login/JWT), Angular side
-  (login/register pages, an auth service, an HTTP interceptor to attach
-  the token, a route guard) isn't built yet.
+- **Route guard**: register/login/JWT (both backend and Angular UI) are
+  built and verified end-to-end (2026-08-27) — email/password register,
+  login, session persisted in `localStorage`, Navbar reflects real auth
+  state. What's *not* built yet: a route guard (nothing is actually
+  protected client-side yet — there's no route that needs to be).
 - **Password reset / email confirmation**: `AddDefaultTokenProviders()`
   is deliberately not called yet in `DependencyInjection.cs` — it's only
   needed for those tokens, and there's no email sender configured to

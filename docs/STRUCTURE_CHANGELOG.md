@@ -5,6 +5,46 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Frontend auth: login/register pages, wired end-to-end
+
+Angular side of auth, on top of yesterday's backend work:
+
+- `core/auth.ts` (`Auth` service): signals for `token`/`email`/
+  `isAuthenticated`, `register()`/`login()`/`logout()`, session persisted
+  in `localStorage` (survives a page reload — verified).
+- `core/auth.interceptor.ts`: attaches `Authorization: Bearer <token>`
+  only to requests whose URL starts with our own API's base URL (never
+  to third-party requests).
+- `core/api-config.ts`: `API_BASE_URL` pointed at `localhost:5223` for
+  now — no Angular `environment.ts` setup yet (the CLI doesn't scaffold
+  one by default anymore), revisit when the frontend itself gets
+  deployed somewhere.
+- `pages/login/` and `pages/register/`: Reactive Forms + Material
+  (`mat-form-field`/`mat-input`/`mat-button`), client-side validation
+  (required, email format, 8-char minimum password, password-confirmation
+  match on register), loading state, error messages.
+- Navbar: "Sign in" now actually links to `/login`; once authenticated it
+  shows the user's email and a "Sign out" menu (desktop dropdown and
+  mobile drawer both updated).
+- `app.config.ts`: added `provideHttpClient(withInterceptors([authInterceptor]))`.
+
+No new npm packages needed — Reactive Forms, HttpClient, and the Material
+form components were already available from the existing Angular/Material
+install.
+
+Verified in the real browser end-to-end: register -> navbar shows email
+-> reload persists the session -> sign out -> sign back in with the same
+credentials, all against the live backend + real database. (Note for
+future browser-driven testing in this repo: `computer` click+type on
+Material form fields was unreliable in this session — layout apparently
+shifts after the floating label animates, landing clicks/typing on the
+wrong element. `form_input` by ref, or a direct `element.click()` /
+`.value = ...` via `javascript_tool`, worked reliably instead.)
+
+Not done yet: route guard (nothing needs protecting client-side yet — no
+routes exist that require auth), the JWT signing key still isn't in the
+production `web.config` (see yesterday's entry and HOSTING.md).
+
 ## 2026-08-27 — Backend auth: register/login/JWT, first real domain model
 
 `client-backend` now has actual auth, not just a health check:

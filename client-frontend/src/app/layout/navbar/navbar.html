@@ -37,7 +37,16 @@
     }
   </button>
 
-  <button mat-flat-button type="button" class="navbar__sign-in">Sign in</button>
+  @if (auth.isAuthenticated()) {
+    <button mat-button type="button" class="navbar__sign-in" [matMenuTriggerFor]="accountMenu">
+      {{ auth.email() }}
+    </button>
+    <mat-menu #accountMenu="matMenu">
+      <button mat-menu-item type="button" (click)="signOut()">Sign out</button>
+    </mat-menu>
+  } @else {
+    <button mat-flat-button type="button" class="navbar__sign-in" routerLink="/login">Sign in</button>
+  }
 
   <button
     mat-icon-button
@@ -56,5 +65,9 @@
   @for (item of navItems; track item.path) {
     <a mat-menu-item [routerLink]="item.path">{{ item.label }}</a>
   }
-  <a mat-menu-item>Sign in</a>
+  @if (auth.isAuthenticated()) {
+    <button mat-menu-item type="button" (click)="signOut()">Sign out ({{ auth.email() }})</button>
+  } @else {
+    <a mat-menu-item routerLink="/login">Sign in</a>
+  }
 </mat-menu>
