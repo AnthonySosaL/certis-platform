@@ -26,9 +26,6 @@ Still open, now that the first slice exists:
       the original placement, or stay purely a practice log forever? No
       auto-update exists yet - retaking the full placement test is
       currently the only way to change your recorded level.
-- [ ] Bigger question bank - 4 questions per (level, skill) cell is thin
-      for anything beyond a first estimate (already flagged honestly on
-      the About page).
 
 ## Scaffolded structurally, not implemented
 
@@ -114,6 +111,18 @@ what *was* built that session):
 
 ## Done
 
+- [x] **Question bank doubled (32 → 64), placement stays fixed at 32.**
+      4 more hand-written questions per (level, skill) cell, same
+      explanation-per-question quality bar. `GetPlacementQuestionsAsync`
+      now randomly samples 4-of-8 per cell instead of loading everything,
+      so the placement test stays the advertised ~15 minutes while two
+      attempts won't always show the identical 32 questions. Reinforcement
+      quizzes now show all 8 per cell (a pure improvement, not
+      length-advertised anywhere). Also fixed a latent `TotalQuestions`
+      bug this sampling would otherwise have exposed (it was counting the
+      loaded question pool, not what was actually answered - see
+      changelog). See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--doubled-the-question-bank-32--64-placement-stays-32-via-sampling). — 2026-08-27
 - [x] **Admin/Tutor panel (`/admin`) + question-bank CRUD + AI insight.**
       Real Identity roles (Admin, Tutor); Students/Content/Access tabs;
       question editor dialog (create/edit/delete) replacing

@@ -6,17 +6,27 @@ using Microsoft.EntityFrameworkCore;
 namespace EnglishC1.Client.Infrastructure.PlacementTest;
 
 // Scoring model (fixed-form, not adaptive - see docs/PENDING_IDEAS.md for
-// why): every placement attempt answers all 32 questions in one sitting.
-// The actual scoring/placement algorithm lives in
-// EnglishC1.Client.Domain.PlacementTest.PlacementScorer (pure, unit
-// tested) - this class is just the EF Core plumbing around it: load
-// questions, grade answers, persist the attempt, map to DTOs.
+// why): every placement attempt answers a fixed 32 questions (4 per
+// (level, skill) cell) in one sitting. The actual scoring/placement
+// algorithm lives in EnglishC1.Client.Domain.PlacementTest.PlacementScorer
+// (pure, unit tested) - this class is just the EF Core plumbing around
+// it: load questions, grade answers, persist the attempt, map to DTOs.
 public class TestService(AppDbContext db) : ITestService
 {
+    // The bank now holds more than 4 questions per cell (see
+    // QuestionSeeder) so repeat placement attempts don't always show the
+    // exact same 32 questions - but the placement test itself deliberately
+    // stays fixed-length rather than growing with the bank; a longer bank
+    // buys variety and a bigger reinforcement pool, not a longer test.
+    private const int PlacementQuestionsPerCell = 4;
+
     public async Task<List<QuestionDto>> GetPlacementQuestionsAsync()
     {
         var questions = await db.Questions.Include(q => q.Options).ToListAsync();
-        return questions.Select(ToDto).ToList();
+        var sampled = questions
+            .GroupBy(q => (q.Level, q.SkillArea))
+            .SelectMany(cell => cell.OrderBy(_ => Random.Shared.Next()).Take(PlacementQuestionsPerCell));
+        return sampled.Select(ToDto).ToList();
     }
 
     public async Task<List<QuestionDto>> GetReinforcementQuestionsAsync(CefrLevel level, SkillArea skill)
@@ -150,7 +160,12 @@ public class TestService(AppDbContext db) : ITestService
             StartedAtUtc = DateTime.UtcNow,
             CompletedAtUtc = DateTime.UtcNow,
             Score = testAnswers.Count(a => a.IsCorrect),
-            TotalQuestions = questions.Count,
+            // testAnswers.Count, not questions.Count: `questions` here is
+            // whatever the caller loaded to grade against (the whole bank,
+            // a superset), not what the test-taker was actually shown -
+            // those only coincided by luck before GetPlacementQuestionsAsync
+            // started sampling a fixed 32 out of a larger bank.
+            TotalQuestions = testAnswers.Count,
         };
         foreach (var testAnswer in testAnswers)
         {

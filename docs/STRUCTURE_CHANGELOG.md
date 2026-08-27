@@ -5,6 +5,54 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Doubled the question bank (32 → 64); placement stays 32 via sampling
+
+First autonomous iteration of a `/loop`-scheduled pass through
+`PENDING_IDEAS.md` (every 10 minutes, while the user was away) - picked
+"Bigger question bank... thin for anything beyond a first estimate" as
+the first unblocked item.
+
+- 32 new hand-written questions added to `QuestionSeeder.Bank` - 4 more
+  per (level, skill) cell, same style/quality bar as the original batch
+  (a short rule-based `Explanation` on every one). Bank is now 8
+  questions per cell instead of 4.
+- `SeedAsync` changed from "insert only if the table is empty" to
+  "insert whatever Bank entries aren't in the database yet, matched by
+  Text" - the same match-by-Text approach `BackfillExplanationsAsync`
+  already used, so the second batch could be added without clearing and
+  re-seeding (which would have orphaned every `TestAttempt.QuestionId`
+  already recorded, in dev *and* production - same DB).
+- **Deliberately did not let the placement test grow to 64 questions.**
+  A longer bank buys variety and a bigger reinforcement pool, not a
+  longer test - doubling everyone's placement test from ~15 to ~30
+  minutes as a side effect of a content addition felt like a real UX
+  regression nobody asked for. Instead, `GetPlacementQuestionsAsync` now
+  randomly samples 4 of the available questions per cell each time
+  (`PlacementQuestionsPerCell = 4`), so the test stays a fixed 32
+  questions but two attempts (or two different people) won't always see
+  the exact same set. Reinforcement quizzes are unaffected - they still
+  show every question in that cell (now 8 instead of 4), which is a
+  pure improvement there since retrying is already expected to vary.
+- **Real latent bug fixed while wiring the sampling in**: `Grade()`'s
+  `TotalQuestions` was set from `questions.Count` - the full pool the
+  caller loaded to grade against - not from how many questions the
+  test-taker was actually shown and answered. This only "worked" before
+  by coincidence (`GetPlacementQuestionsAsync` returned literally
+  everything in the bank, so the two counts always matched). The moment
+  placement started sampling a subset, this would have shown "8/64"
+  instead of "8/32" on the result page. Fixed to use `testAnswers.Count`
+  instead - also more correct for reinforcement if a submitted answer
+  ever fails to resolve to a real question.
+
+Verified via the API (not just reading the code): three separate calls
+to `/api/test/placement/questions` all returned exactly 32; two
+back-to-back calls overlapped on only 15 of 32 questions (real
+variety, roughly what you'd expect sampling 4-of-8 twice); a full
+submit round-trip correctly reported `totalQuestions: 32`. Confirmed
+in-browser too - the placement intro page's "32 multiple-choice
+questions" copy is still accurate, no text needed to change. Backend
+unit tests (6/6) still green.
+
 ## 2026-08-27 — Admin/Tutor panel (`/admin`), question-bank CRUD, and an AI-generated personalized insight
 
 Built while the user was away, following an explicit "sigue con todo" +

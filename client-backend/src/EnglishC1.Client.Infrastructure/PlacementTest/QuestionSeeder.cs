@@ -4,42 +4,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EnglishC1.Client.Infrastructure.PlacementTest;
 
-// Hand-authored question bank: 4 questions per (level, skill) cell across
-// A2/B1/B2/C1 x Grammar/Vocabulary = 32 questions. SeedAsync runs once at
-// startup (see Program.cs) and only inserts if the table is empty.
-// BackfillExplanationsAsync runs every startup regardless - it matches
-// existing rows by Text and fills in Explanation where missing, so
-// adding explanations after the bank was already seeded (in dev AND in
-// production - see docs/errors) doesn't need clearing and re-seeding,
-// which would have orphaned the QuestionId references on every
-// TestAttempt already recorded.
+// Hand-authored question bank: 8 questions per (level, skill) cell across
+// A2/B1/B2/C1 x Grammar/Vocabulary = 64 questions (doubled from the
+// original 32 - see docs/PENDING_IDEAS.md, "thin for anything beyond a
+// first estimate"). SeedAsync runs every startup and inserts whatever
+// Bank entries aren't already in the database yet, matched by Text -
+// the same match-by-Text approach BackfillExplanationsAsync already used
+// for adding the Explanation column after the bank was live. This is
+// what let the second batch of 32 questions get added here without
+// clearing and re-seeding, which would have orphaned the QuestionId
+// references on every TestAttempt already recorded (in dev AND
+// production - see docs/errors).
 public static class QuestionSeeder
 {
     public static async Task SeedAsync(AppDbContext db)
     {
-        if (!await db.Questions.AnyAsync())
+        var existingTexts = (await db.Questions.Select(q => q.Text).ToListAsync()).ToHashSet();
+        var newEntries = Bank.Where(b => !existingTexts.Contains(b.Text)).ToList();
+
+        foreach (var (text, level, skill, options, correctIndex, explanation) in newEntries)
         {
-            foreach (var (text, level, skill, options, correctIndex, explanation) in Bank)
+            var question = new Question
             {
-                var question = new Question
-                {
-                    Id = Guid.NewGuid(),
-                    Text = text,
-                    Level = level,
-                    SkillArea = skill,
-                    Explanation = explanation,
-                };
-                question.Options = options
-                    .Select(optionText => new QuestionOption { Id = Guid.NewGuid(), QuestionId = question.Id, Text = optionText })
-                    .ToList();
-                question.CorrectOptionId = question.Options[correctIndex].Id;
+                Id = Guid.NewGuid(),
+                Text = text,
+                Level = level,
+                SkillArea = skill,
+                Explanation = explanation,
+            };
+            question.Options = options
+                .Select(optionText => new QuestionOption { Id = Guid.NewGuid(), QuestionId = question.Id, Text = optionText })
+                .ToList();
+            question.CorrectOptionId = question.Options[correctIndex].Id;
 
-                db.Questions.Add(question);
-            }
-
-            await db.SaveChangesAsync();
-            return;
+            db.Questions.Add(question);
         }
+
+        if (newEntries.Count > 0)
+            await db.SaveChangesAsync();
 
         await BackfillExplanationsAsync(db);
     }
@@ -140,5 +142,87 @@ public static class QuestionSeeder
             "\"Candid\" describes someone speaking truthfully and openly."),
         ("A \"deft\" solution is one that is ___.", CefrLevel.C1, SkillArea.Vocabulary, ["skillful", "slow", "expensive", "risky"], 0,
             "\"Deft\" describes something done with skill and ease."),
+
+        // --- Second batch (2026-08-27, doubling the bank) ---
+
+        // A2 - Grammar
+        ("I ___ like coffee, I prefer tea.", CefrLevel.A2, SkillArea.Grammar, ["don't", "doesn't", "not", "no"], 0,
+            "\"I\" takes \"don't\" (do not) in present simple negatives; \"doesn't\" is only for he/she/it."),
+        ("We ___ to the beach last weekend.", CefrLevel.A2, SkillArea.Grammar, ["went", "go", "goes", "going"], 0,
+            "\"Went\" is the simple past of \"go\", used for a completed action (\"last weekend\")."),
+        ("Is this ___ car parked outside?", CefrLevel.A2, SkillArea.Grammar, ["your", "you", "yours", "you're"], 0,
+            "\"Your\" is a possessive adjective used directly before a noun (\"your car\"); \"yours\" stands alone."),
+        ("The meeting is ___ Monday morning.", CefrLevel.A2, SkillArea.Grammar, ["on", "in", "at", "for"], 0,
+            "\"On\" is used with specific days (\"on Monday\"); \"in\" is for months/years, \"at\" for clock times."),
+
+        // A2 - Vocabulary
+        ("What do you use to write a letter?", CefrLevel.A2, SkillArea.Vocabulary, ["a pen", "a fork", "a spoon", "a key"], 0,
+            "A pen is a writing tool; the other objects are used for eating or opening locks."),
+        ("Your mother's sister is your ___.", CefrLevel.A2, SkillArea.Vocabulary, ["aunt", "cousin", "niece", "grandmother"], 0,
+            "\"Aunt\" specifically names a parent's sister."),
+        ("What is the opposite of \"fast\"?", CefrLevel.A2, SkillArea.Vocabulary, ["slow", "quick", "early", "big"], 0,
+            "\"Slow\" and \"fast\" describe opposite speeds; \"quick\" means the same as fast, not its opposite."),
+        ("The day after Monday is ___.", CefrLevel.A2, SkillArea.Vocabulary, ["Tuesday", "Sunday", "Wednesday", "Friday"], 0,
+            "Tuesday directly follows Monday in the week."),
+
+        // B1 - Grammar
+        ("I ___ play football every weekend when I was young.", CefrLevel.B1, SkillArea.Grammar, ["used to", "use to", "was using", "uses"], 0,
+            "\"Used to\" + base verb describes a repeated past habit that no longer happens."),
+        ("This exercise is ___ difficult as the last one.", CefrLevel.B1, SkillArea.Grammar, ["as", "so", "than", "more"], 0,
+            "\"As...as\" compares two things that are equal; \"than\" is used with comparatives like \"more difficult than\"."),
+        ("She's not answering her phone; she ___ be asleep.", CefrLevel.B1, SkillArea.Grammar, ["must", "can", "should", "would"], 0,
+            "\"Must\" expresses a confident logical deduction based on the evidence available."),
+        ("The woman ___ called earlier left a message.", CefrLevel.B1, SkillArea.Grammar, ["who", "which", "whom", "whose"], 0,
+            "\"Who\" introduces a relative clause describing a person acting as the subject (\"the woman... called\")."),
+
+        // B1 - Vocabulary
+        ("\"To find out\" means to ___.", CefrLevel.B1, SkillArea.Vocabulary, ["discover", "hide", "forget", "lose"], 0,
+            "\"Find out\" means to learn or discover a piece of information."),
+        ("\"Exhausted\" is closest in meaning to ___.", CefrLevel.B1, SkillArea.Vocabulary, ["extremely tired", "very happy", "a little hungry", "slightly bored"], 0,
+            "\"Exhausted\" describes an intense level of tiredness, stronger than just \"tired\"."),
+        ("\"To turn down\" an offer means to ___ it.", CefrLevel.B1, SkillArea.Vocabulary, ["refuse", "accept", "discuss", "repeat"], 0,
+            "\"Turn down\" means to reject or decline something offered."),
+        ("A \"generous\" person is someone who ___.", CefrLevel.B1, SkillArea.Vocabulary, ["shares willingly", "never smiles", "works hard", "arrives late"], 0,
+            "\"Generous\" describes willingness to give time, money, or help freely."),
+
+        // B2 - Grammar
+        ("She enjoys ___ novels in her free time.", CefrLevel.B2, SkillArea.Grammar, ["reading", "read", "to read", "reads"], 0,
+            "\"Enjoy\" is followed by a gerund (verb + -ing), not an infinitive or base form."),
+        ("I wish I ___ more free time these days.", CefrLevel.B2, SkillArea.Grammar, ["had", "have", "will have", "having"], 0,
+            "\"Wish\" + past simple expresses a regret about the present, even though the meaning is not past."),
+        ("We ___ our car repaired at the garage yesterday.", CefrLevel.B2, SkillArea.Grammar, ["had", "did", "made", "has"], 0,
+            "The causative \"have something done\" (had + object + past participle) shows someone else performed the action for you."),
+        ("You haven't finished the report yet, ___?", CefrLevel.B2, SkillArea.Grammar, ["have you", "haven't you", "did you", "don't you"], 0,
+            "A negative statement takes a positive question tag (\"haven't... have you\")."),
+
+        // B2 - Vocabulary
+        ("\"Reluctant\" means ___ to do something.", CefrLevel.B2, SkillArea.Vocabulary, ["unwilling", "eager", "confident", "calm"], 0,
+            "\"Reluctant\" describes hesitation or unwillingness, the opposite of \"eager\"."),
+        ("\"To compensate\" someone means to ___.", CefrLevel.B2, SkillArea.Vocabulary, ["make up for a loss", "avoid them", "ignore them", "delay a payment"], 0,
+            "\"Compensate\" means to give something to balance out a loss, damage, or inconvenience."),
+        ("A \"versatile\" tool is one that ___.", CefrLevel.B2, SkillArea.Vocabulary, ["adapts to many uses", "never changes", "is very expensive", "breaks easily"], 0,
+            "\"Versatile\" describes flexibility - being useful in many different situations."),
+        ("\"Skeptical\" is closest in meaning to ___.", CefrLevel.B2, SkillArea.Vocabulary, ["doubtful", "confident", "excited", "careless"], 0,
+            "\"Skeptical\" describes having doubts about whether something is true."),
+
+        // C1 - Grammar
+        ("It was in 1969 ___ the moon landing happened.", CefrLevel.C1, SkillArea.Grammar, ["that", "which", "when", "who"], 0,
+            "This cleft sentence (\"It was... that...\") emphasizes \"in 1969\"; \"that\" is the standard connector in this structure."),
+        ("If she had studied medicine, she ___ a doctor now.", CefrLevel.C1, SkillArea.Grammar, ["would be", "would have been", "will be", "had been"], 0,
+            "A mixed conditional pairs a past unreal condition (\"had studied\") with a present unreal result (\"would be... now\")."),
+        ("___ tired after the long journey, she decided to rest.", CefrLevel.C1, SkillArea.Grammar, ["Feeling", "Feel", "Felt", "To feel"], 0,
+            "A present participle clause (\"Feeling tired...\") gives the reason for the main action in a single economical clause."),
+        ("It was ___ cold that the lake froze overnight.", CefrLevel.C1, SkillArea.Grammar, ["so", "such", "too", "very"], 0,
+            "\"So\" + adjective + \"that\" introduces a result clause; \"such\" would instead need a noun (\"such cold weather\")."),
+
+        // C1 - Vocabulary
+        ("An \"astute\" businessperson is one who is ___.", CefrLevel.C1, SkillArea.Vocabulary, ["sharp and perceptive", "careless", "generous", "talkative"], 0,
+            "\"Astute\" describes someone with sharp judgment, quick to notice opportunities or risks."),
+        ("\"To relinquish\" something means to ___ it.", CefrLevel.C1, SkillArea.Vocabulary, ["give up", "gain", "defend", "hide"], 0,
+            "\"Relinquish\" means to formally give up control of or claim to something."),
+        ("\"Tenacious\" is closest in meaning to ___.", CefrLevel.C1, SkillArea.Vocabulary, ["persistent", "weak", "lazy", "forgetful"], 0,
+            "\"Tenacious\" describes holding firmly onto something, especially not giving up easily."),
+        ("Something \"ephemeral\" is ___.", CefrLevel.C1, SkillArea.Vocabulary, ["short-lived", "permanent", "expensive", "dangerous"], 0,
+            "\"Ephemeral\" describes something that lasts only a very short time."),
     ];
 }
