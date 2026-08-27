@@ -49,16 +49,20 @@ Still open, needed before building the domain model:
 
 - [ ] `client-backend` — layered scaffold exists, builds, and is verified
       end-to-end against the real MonsterASP.NET SQL Server database
-      (see HOSTING.md), but there's no domain model (`AppDbContext` has
-      zero `DbSet`s) and no auth yet.
-- [ ] **Auth (registration/login).** Needed before the placement test can
-      exist (results must tie to a person). Per
-      [AI_WORKFLOW.md](AI_WORKFLOW.md), the notes this project inherited
-      from an earlier reference project explicitly want a Fable 5 pass on
-      auth/security design before implementation — worth doing even
-      though this is a much smaller, private tool than that reference
-      project was, since password/account handling mistakes are costly
-      regardless of scale.
+      (see HOSTING.md). Domain model so far is auth (Identity's own
+      tables) — the actual English-practice entities still don't exist.
+- [ ] **Frontend auth.** Backend (register/login/JWT) is done and
+      verified — Angular side isn't: login/register pages, an auth
+      service, an HTTP interceptor to attach the token to API calls, a
+      route guard, and updating the Navbar's "Sign in" button to reflect
+      real auth state instead of being a dead button.
+- [ ] **Password reset + email confirmation.** Needs an email
+      sender (SendGrid free tier, or similar) before it can work at all —
+      `AddDefaultTokenProviders()` isn't even called yet. Not urgent for
+      2 users who won't forget their own passwords immediately, but real
+      before anyone else ever gets an account.
+- [ ] **Google OAuth.** Nice-to-have from the original notes; email/password
+      shipped first since it needed no external app registration.
 - [ ] "How it works" / methodology content on the About page — currently
       just a placeholder ("Coming soon").
 - [ ] i18n (Spanish for the app's own UI chrome) — not set up in the
@@ -70,14 +74,19 @@ Still open, needed before building the domain model:
 
 ## Rough edges worth revisiting
 
-- [ ] **Deploy loses the production connection string on every redeploy.**
+- [ ] **Deploy loses production secrets on every redeploy.**
       `dotnet publish` regenerates `web.config` from scratch each time,
-      which wipes the manually-added `ConnectionStrings__AppDb`
-      environment variable — see HOSTING.md. Fragile (a redeploy that
-      forgets this step silently breaks the live site with a 500.30).
-      Worth finding whether MonsterASP has a persistent env-var/app-settings
-      panel outside `web.config`, or scripting the web.config edit so it's
-      one command instead of a manual step, before this trips someone up.
+      which wipes any manually-added environment variables —
+      `ConnectionStrings__AppDb` (see HOSTING.md) and now also
+      `Jwt__SigningKey`, needed the same way before auth works on the
+      live site at all. Fragile (a redeploy that forgets this step
+      silently breaks the live site — 500.30 for the DB, 500 for any
+      auth endpoint if the signing key's missing). Worth finding whether
+      MonsterASP has a persistent env-var/app-settings panel outside
+      `web.config`, or scripting the web.config edit so it's one command
+      instead of a manual step, before this trips someone up. The next
+      deploy needs to re-add *both* variables, not just the one from
+      last time.
 - [ ] No CI — every deploy so far has been a manual `dotnet publish` +
       `scp` from a local machine. Fine for now (single developer, low
       frequency), revisit if that changes.
@@ -93,6 +102,12 @@ Still open, needed before building the domain model:
 
 ## Done
 
+- [x] **Backend auth: register/login/JWT.** ASP.NET Core Identity +
+      JWT bearer, `AuthController` (`register`/`login`/`me`), migration
+      applied and verified end-to-end against the real database. Not
+      deployed to production yet (signing key missing from web.config —
+      see "Rough edges" above) and no Angular UI yet (see above). See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--backend-auth-registerloginjwt-first-real-domain-model). — 2026-08-27
 - [x] **Frontend switched to Angular.** React → Angular 22 + Material,
       deliberate (portfolio breadth), not a mistake. Same shell rebuilt
       (Navbar/Footer/theme). See

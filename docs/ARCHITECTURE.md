@@ -25,7 +25,7 @@ waiting for that decision.
 | ORM | **EF Core** | The direct .NET equivalent of Prisma-style "controlled, tracked schema changes" — migrations live in source control. |
 | Database | **SQL Server** (MonsterASP.NET, free tier) | Switched from PostgreSQL on 2026-08-26 once a real database was created — see [HOSTING.md](HOSTING.md). |
 | Icons | **Inline SVG**, hand-written | `lucide-angular`'s peer dependency range doesn't yet cover Angular 22 (too new); a handful of small inline SVGs (menu, sun/moon) avoids both the version conflict and an icon web font. |
-| Auth | Not built yet | Needs a decision on user model first (just the two of you vs. accounts for others later) — see PENDING_IDEAS.md. Per [AI_WORKFLOW.md](AI_WORKFLOW.md), security-sensitive design (registration/login/password reset) gets a Fable 5 pass before implementation. |
+| Auth | **ASP.NET Core Identity + JWT bearer tokens** | Email/password register + login, built 2026-08-26 (the user asked for a standard pattern directly rather than routing it through a separate Fable 5 review first). JWT (not cookies) because Angular is a separate SPA calling the API cross-origin. |
 
 ## Repo layout
 
@@ -54,12 +54,15 @@ dependencies are enforced by the compiler, not just convention:
   anything else. Currently empty — no entities defined yet.
 - **Application** — use cases, interfaces for infrastructure. Depends only
   on Domain.
-- **Infrastructure** — EF Core `DbContext` (`AppDbContext`, currently no
-  `DbSet`s), repository implementations. Implements Application's
-  interfaces.
-- **Api** — controllers/minimal-API endpoints, DI wiring, middleware, CORS.
-  The only project that knows about HTTP. Currently exposes only
-  `GET /health`.
+- **Infrastructure** — EF Core `DbContext` (`AppDbContext` — now an
+  `IdentityDbContext`, so the Identity tables are the domain model so
+  far), repository implementations, ASP.NET Core Identity setup
+  (`Identity/ApplicationUser.cs`, `JwtTokenService`). Implements
+  Application's interfaces.
+- **Api** — controllers/minimal-API endpoints, DI wiring, middleware, CORS,
+  JWT bearer authentication scheme. The only project that knows about
+  HTTP. Exposes `GET /health` and `POST /api/auth/register`,
+  `POST /api/auth/login`, `GET /api/auth/me` (`[Authorize]`).
 
 Rationale: keeps business rules testable without a database or HTTP server,
 and keeps "which layer am I editing" explicit.
@@ -100,9 +103,16 @@ responsively.
   what `i18next` did — isn't set up yet since the platform's primary
   language is English by design). Add if/when a language switcher is
   actually needed.
-- **Auth**: not designed yet. Needs the user-model decision first (private
-  2-person tool vs. something with real accounts) and a Fable 5 security
-  pass before implementation — see AI_WORKFLOW.md.
+- **Auth (frontend)**: backend is done (register/login/JWT), Angular side
+  (login/register pages, an auth service, an HTTP interceptor to attach
+  the token, a route guard) isn't built yet.
+- **Password reset / email confirmation**: `AddDefaultTokenProviders()`
+  is deliberately not called yet in `DependencyInjection.cs` — it's only
+  needed for those tokens, and there's no email sender configured to
+  actually deliver them. Revisit together.
+- **Google OAuth**: mentioned as a nice-to-have in the original notes;
+  email/password shipped first since it needed no external app
+  registration to stand up.
 
 ## Design patterns in play so far
 

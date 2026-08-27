@@ -5,6 +5,43 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Backend auth: register/login/JWT, first real domain model
+
+`client-backend` now has actual auth, not just a health check:
+
+- `AppDbContext` -> `IdentityDbContext<ApplicationUser, IdentityRole<Guid>,
+  Guid>`. `ApplicationUser` lives in `Infrastructure/Identity/` (tightly
+  coupled to the Identity framework, not a pure Domain concept).
+- `AddIdentityCore<ApplicationUser>` wired up in
+  `Infrastructure/DependencyInjection.cs` (8-char minimum password,
+  unique email required, `RequireConfirmedEmail = false` since there's no
+  email sender yet). `AddDefaultTokenProviders()` deliberately not called
+  yet — only needed for password-reset/email-confirmation tokens.
+- JWT bearer auth: `JwtOptions` (Issuer/Audience/ExpirationMinutes in
+  `appsettings.json`, `SigningKey` in `dotnet user-secrets` only — a
+  freshly generated random secret, not tied to any account) and
+  `JwtTokenService` in Infrastructure; `AddAuthentication().AddJwtBearer()`
+  wired in `Program.cs`. JWT over cookies because Angular calls the API
+  cross-origin as a separate SPA.
+- `AuthController` (`Api/Auth/`): `POST /api/auth/register`,
+  `POST /api/auth/login`, `GET /api/auth/me` (`[Authorize]`). Swagger UI
+  now has a Bearer auth scheme configured so these are testable directly
+  from `/swagger`.
+- Migration `AddIdentity` created and applied against the real MonsterASP
+  database (all `AspNetUser*`/`AspNetRole*` tables). Verified end-to-end
+  with curl: register -> login -> `/me` without a token (401) -> `/me`
+  with a valid token (200, correct email back).
+- CORS origin fixed from the stale `localhost:5173` (old React/Vite port)
+  to `localhost:4200` (Angular) — leftover from the frontend switch that
+  hadn't been caught since nothing had exercised CORS yet.
+
+Not done yet: Angular-side auth (login/register pages, auth service,
+interceptor, route guard), the JWT signing key isn't added to the
+production `web.config` yet (same class of gotcha as the connection
+string — deployed auth endpoints will 500 until that's done), Google
+OAuth, and password reset. See
+[PENDING_IDEAS.md](PENDING_IDEAS.md#rough-edges-worth-revisiting).
+
 ## 2026-08-26 — Fixed backend hang too: dotnet.exe now called by full path
 
 Follow-up to the ng serve fixes below — once the frontend was reliable,

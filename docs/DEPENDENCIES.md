@@ -69,19 +69,34 @@ diagnosis):
 | `Microsoft.EntityFrameworkCore` 8.0.11 | Infrastructure | ORM — pinned to the 8.x line to match the net8.0 target (`dotnet add` defaults to the newest major, which was 10.x and incompatible). |
 | `Microsoft.EntityFrameworkCore.SqlServer` 8.0.11 | Infrastructure | SQL Server provider for EF Core — swapped in for Npgsql on 2026-08-26 once the real database (MonsterASP.NET, SQL Server 2025 free tier) was created. See `docs/HOSTING.md`. |
 | `Microsoft.EntityFrameworkCore.Design` 8.0.11 | Api | Enables `dotnet ef migrations` from the Api project. |
-| `Swashbuckle.AspNetCore` | Api | Swagger/OpenAPI UI — scaffolded by default with `dotnet new webapi`, kept for local API exploration. |
+| `Swashbuckle.AspNetCore` | Api | Swagger/OpenAPI UI — scaffolded by default with `dotnet new webapi`, kept for local API exploration. Configured with a Bearer auth scheme (2026-08-26) so `/api/auth/me` etc. can be tested straight from Swagger UI. |
+| `Microsoft.AspNetCore.Identity.EntityFrameworkCore` 8.0.11 | Infrastructure | ASP.NET Core Identity's EF Core store — `AppDbContext` is now an `IdentityDbContext`. |
+| `Microsoft.Extensions.Identity.Core` 8.0.11 | Infrastructure | Needed explicitly (not pulled in transitively in a way the compiler could see) for `IdentityBuilder` extensions like `AddRoles<T>`. |
+| `Microsoft.Extensions.Options.ConfigurationExtensions` 8.0.0 | Infrastructure | Needed explicitly for `services.Configure<JwtOptions>(IConfigurationSection)` — a class library project doesn't get this for free the way an ASP.NET Core Web SDK project does. |
+| `Microsoft.AspNetCore.Authentication.JwtBearer` 8.0.11 | Api | JWT bearer authentication scheme for validating incoming tokens. |
 
-The `AppDb` connection string lives only in `dotnet user-secrets` (set via
-`dotnet user-secrets set "ConnectionStrings:AppDb" "..."` from
-`src/EnglishC1.Client.Api`) — never in a committed `appsettings*.json`.
-It points at MonsterASP's Remote Access (SSMS) endpoint, not Local Access
-(which only works from apps hosted on MonsterASP itself).
+The `AppDb` connection string and `Jwt:SigningKey` both live only in
+`dotnet user-secrets` (`dotnet user-secrets set "ConnectionStrings:AppDb"
+"..."` / `"Jwt:SigningKey" "..."` from `src/EnglishC1.Client.Api`) — never
+in a committed `appsettings*.json`. The connection string points at
+MonsterASP's Remote Access (SSMS) endpoint, not Local Access (which only
+works from apps hosted on MonsterASP itself). The signing key was
+generated once (`openssl rand -base64 48`) and is just a random secret —
+nothing tied to an external account, so no confirmation needed to
+generate it, unlike the database password. **Not yet added to the
+production `web.config`** on MonsterASP (same gotcha as the connection
+string — see `docs/PENDING_IDEAS.md` "Rough edges") — the deployed API
+will 500 on any auth endpoint until that's done, same as it did for the
+database before that was fixed.
 
-`AppDbContext` has no entities yet — the domain model waits on the feature
-scope decision in [PENDING_IDEAS.md](PENDING_IDEAS.md). Worth keeping for
-whenever it does: if any entity needs optimistic concurrency (e.g. two
-people submitting the same exercise attempt at once), SQL Server's idiom
-is a `byte[]` property mapped with `.IsRowVersion()` (a `rowversion`/
+`AppDbContext`'s domain model so far is Identity's own tables
+(`AspNetUsers`, `AspNetRoles`, etc., via `IdentityDbContext`) — the actual
+English-practice entities (exercises, attempts, progress...) still wait
+on the feature scope decision in [PENDING_IDEAS.md](PENDING_IDEAS.md).
+Worth keeping for whenever it does: if any entity needs optimistic
+concurrency (e.g. two people submitting the same exercise attempt at
+once), SQL Server's idiom is a `byte[]` property mapped with
+`.IsRowVersion()` (a `rowversion`/
 `timestamp` column) — straightforward with `Microsoft.EntityFrameworkCore.
 SqlServer`, unlike the Npgsql/Postgres setup this project briefly used,
 which needed the `xmin` shadow-property workaround instead.
