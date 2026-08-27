@@ -5,6 +5,23 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Fixed misleading registration error (password policy mismatch)
+
+Found immediately after shipping auth: the user's real registration
+attempt failed with "may already be registered, or password too weak" -
+neither was actually true. Root cause was two compounding bugs, full
+diagnosis in
+[errors/2026-08-27-password-policy-mismatch.md](errors/2026-08-27-password-policy-mismatch.md):
+Identity's default password rules (needs uppercase/lowercase/digit/symbol)
+didn't match what the Angular form actually validated (8-char minimum
+only), and the frontend showed a fixed guessed message instead of the
+backend's real error. Fixed both: password policy relaxed to length-only
+in `DependencyInjection.cs`, and `register.ts` now parses and displays
+the actual `ValidationProblem()` response. Cleaned up the test account
+accidentally created under the user's real email while diagnosing this.
+Verified: a real duplicate-email attempt now shows the specific "Email
+'...' is already taken" message instead of a guess.
+
 ## 2026-08-27 — Frontend auth: login/register pages, wired end-to-end
 
 Angular side of auth, on top of yesterday's backend work:
