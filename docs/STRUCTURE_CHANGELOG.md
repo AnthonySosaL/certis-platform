@@ -5,6 +5,27 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Picked the Open Book model; moved it into the hero itself
+
+Follow-up to the entry right below: the Open Book was picked from the
+three candidates. Two changes from that:
+
+- Moved the model from its own section below "How it works" into the
+  hero itself - `home__hero-row` is now a flex row with the headline/
+  copy/CTA on the left and the rotating book on the right, filling the
+  empty space next to the H1 instead of being buried below three other
+  sections. Removed the prev/next/dot switcher entirely (`Home` no
+  longer has `activeModelIndex`/`previousModel`/`nextModel`/
+  `selectModel` - just a single fixed `heroModel`).
+- `grad-cap.glb` and `globe.glb` stay in `public/models/` on purpose -
+  not dead files, reserved for another spot or a loading screen later.
+- Verified in a fresh browser tab (a stale tab from earlier in the
+  session - degraded by the Poly Pizza download crashes noted below -
+  gave a false "won't load" reading first; a new tab loaded it
+  correctly, confirming that was tab state, not a real bug): the model
+  loads, canvas renders real content, and the hero row wraps sanely on
+  mobile (text first, book below).
+
 ## 2026-08-27 — 3D model picker in the empty Home hero space
 
 The empty space below "How it works" on Home now holds a real,

@@ -1,15 +1,32 @@
 <main class="home">
-  <section class="home__hero">
-    <span class="home__eyebrow">Free placement test</span>
-    <h1>Find your English level. Then close the gaps.</h1>
-    <p>
-      A short placement test tells you your CEFR level - A2 to C1 - and exactly
-      which grammar and vocabulary areas need work. Fail an area and a focused
-      reinforcement quiz unlocks for it, so you always know what to practice next.
-    </p>
-    <button mat-flat-button color="primary" class="home__cta" (click)="startTest()">
-      Start the placement test
-    </button>
+  <section class="home__hero-row">
+    <div class="home__hero">
+      <span class="home__eyebrow">Free placement test</span>
+      <h1>Find your English level. Then close the gaps.</h1>
+      <p>
+        A short placement test tells you your CEFR level - A2 to C1 - and exactly
+        which grammar and vocabulary areas need work. Fail an area and a focused
+        reinforcement quiz unlocks for it, so you always know what to practice next.
+      </p>
+      <button mat-flat-button color="primary" class="home__cta" (click)="startTest()">
+        Start the placement test
+      </button>
+    </div>
+
+    <div class="home__hero-visual">
+      <model-viewer
+        class="hero-model"
+        [attr.src]="heroModel.src"
+        [attr.alt]="heroModel.alt"
+        camera-controls
+        auto-rotate
+        rotation-per-second="14deg"
+        interaction-prompt="none"
+        shadow-intensity="0.7"
+        exposure="1"
+        disable-zoom
+      ></model-viewer>
+    </div>
   </section>
 
   <section class="home__levels" aria-label="CEFR levels covered">
@@ -34,44 +51,5 @@
         </li>
       }
     </ol>
-  </section>
-
-  <section class="home__model" aria-label="3D model preview - candidates, not final">
-    <p class="home__model-note">Picking a look — cycle through the candidates</p>
-
-    <div class="model-viewer-frame">
-      <button type="button" class="model-viewer-frame__nav model-viewer-frame__nav--prev" aria-label="Previous model" (click)="previousModel()">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-      </button>
-
-      <model-viewer
-        class="model-viewer-frame__viewer"
-        [attr.src]="activeModel().src"
-        [attr.alt]="activeModel().alt"
-        camera-controls
-        auto-rotate
-        rotation-per-second="18deg"
-        interaction-prompt="none"
-        shadow-intensity="0.6"
-        exposure="1"
-      ></model-viewer>
-
-      <button type="button" class="model-viewer-frame__nav model-viewer-frame__nav--next" aria-label="Next model" (click)="nextModel()">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-      </button>
-    </div>
-
-    <div class="model-viewer-frame__dots">
-      @for (model of models; track model.src; let i = $index) {
-        <button
-          type="button"
-          class="model-viewer-frame__dot"
-          [class.model-viewer-frame__dot--active]="i === activeModelIndex()"
-          [attr.aria-label]="'Show ' + model.label"
-          (click)="selectModel(i)"
-        ></button>
-      }
-    </div>
-    <p class="model-viewer-frame__label">{{ activeModel().label }}</p>
   </section>
 </main>

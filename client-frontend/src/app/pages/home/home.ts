@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -27,22 +27,12 @@ const LEVELS: { level: string; cssVar: string; label: string }[] = [
   { level: 'C1', cssVar: '--cefr-c1', label: 'Advanced' },
 ];
 
-interface ModelOption {
-  src: string;
-  label: string;
-  alt: string;
-}
-
-// Candidates only - swap this array down to one entry (or restyle
-// entirely) once a final pick is made. All three are CC0 (public
-// domain) low-poly models from Poly Pizza, downloaded to
-// public/models/ - see docs/STRUCTURE_CHANGELOG.md for the direct
-// source URLs.
-const MODEL_OPTIONS: ModelOption[] = [
-  { src: '/models/open-book.glb', label: 'Open Book', alt: 'A low-poly open book' },
-  { src: '/models/grad-cap.glb', label: 'Graduation Cap', alt: 'A low-poly graduation cap' },
-  { src: '/models/globe.glb', label: 'Globe', alt: 'A low-poly globe' },
-];
+// Picked from three CC0 candidates previewed live on this page - see
+// docs/STRUCTURE_CHANGELOG.md (2026-08-27) for how they were sourced.
+// The other two (grad-cap.glb, globe.glb) are kept in public/models/
+// on purpose, reserved for another spot or a loading screen later -
+// not dead files.
+const HERO_MODEL = { src: '/models/open-book.glb', alt: 'A low-poly open book' };
 
 @Component({
   imports: [MatButtonModule],
@@ -58,10 +48,7 @@ export class Home implements OnInit {
 
   protected readonly steps = STEPS;
   protected readonly levels = LEVELS;
-
-  protected readonly models = MODEL_OPTIONS;
-  protected readonly activeModelIndex = signal(0);
-  protected readonly activeModel = computed(() => this.models[this.activeModelIndex()]);
+  protected readonly heroModel = HERO_MODEL;
 
   ngOnInit(): void {
     // Dynamic import, not a static one: @google/model-viewer is ~900KB
@@ -78,17 +65,5 @@ export class Home implements OnInit {
     } else {
       this.authDialog.open('register', '/test');
     }
-  }
-
-  previousModel(): void {
-    this.activeModelIndex.update((i) => (i - 1 + this.models.length) % this.models.length);
-  }
-
-  nextModel(): void {
-    this.activeModelIndex.update((i) => (i + 1) % this.models.length);
-  }
-
-  selectModel(index: number): void {
-    this.activeModelIndex.set(index);
   }
 }
