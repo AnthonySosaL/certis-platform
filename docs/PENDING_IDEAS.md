@@ -32,11 +32,15 @@ Still open, now that the first slice exists:
 
 ## Scaffolded structurally, not implemented
 
-- [ ] **Password reset + email confirmation.** Needs an email
-      sender (SendGrid free tier, or similar) before it can work at all —
-      `AddDefaultTokenProviders()` isn't even called yet. Not urgent for
-      2 users who won't forget their own passwords immediately, but real
-      before anyone else ever gets an account.
+- [ ] **Password reset + email confirmation.** The UI side has a real
+      "Forgot your password?" link now (`pages/forgot-password/`), but
+      it's an honest placeholder — actually sending a reset email still
+      needs a sender (SendGrid free tier, or similar) and
+      `AddDefaultTokenProviders()` isn't called yet. **When built: an
+      emailed token link, not OTP codes** — explicitly requested, OTP
+      flows are easy to get wrong if every failure path isn't handled.
+      Not urgent for 2 users who won't forget their own passwords
+      immediately, but real before anyone else ever gets an account.
 - [ ] **Google OAuth.** Nice-to-have from the original notes; email/password
       shipped first since it needed no external app registration.
 - [ ] "How it works" / methodology content on the About page — currently
@@ -112,6 +116,12 @@ what *was* built that session):
 
 ## Done
 
+- [x] **Login/register merged into one modal-style page**, sliding
+      between Sign in/Register instead of two separate routes, plus a
+      real "Forgot your password?" link (honest placeholder - see
+      "Scaffolded structurally" above for what's still missing).
+      Verified `redirectTo` still works after the merge. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--loginregister-merged-into-one-modal-style-page). — 2026-08-27
 - [x] **Brand name picked: Certis.** Chosen from four recommendations
       (Nivelo, Bandly, Fluentia, Certis) - "certify" evocation, good fit
       if this sells to institutions later. Wordmark replaces the "C"

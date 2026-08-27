@@ -5,6 +5,29 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Login/register merged into one modal-style page
+
+Separate `/login` and `/register` pages felt like a full context switch
+for what should be a quick in-and-out. Merged into
+`pages/auth/auth-page.ts`: one component, two forms, an internal
+`mode` signal - switching tabs is a local state change, not a route
+navigation, so a CSS `transform: translateX` slide animates between
+them (Sign in / Register tabs with an animated underline indicator on
+top). `/login` and `/register` still both route here (`data: { mode }`
+sets which panel opens), so deep links and the auth guard's
+`redirectTo` keep working exactly as before - verified: logging out,
+hitting a protected route, landing on `/login?redirectTo=...`, and
+signing in still lands back on the original page.
+
+Also added a real "Forgot your password?" link - it goes to
+`pages/forgot-password/`, which states plainly that password recovery
+isn't wired up yet (no email sender configured - see
+PENDING_IDEAS.md) rather than shipping a form that silently does
+nothing. When it does get built: an emailed reset-token link
+(ASP.NET Identity's `GeneratePasswordResetTokenAsync`), not OTP codes
+- flagged explicitly as the safer choice given how many ways an OTP
+flow can go wrong if every failure path isn't handled.
+
 ## 2026-08-27 — Brand name picked: Certis
 
 Chose from four recommendations (Nivelo, Bandly, Fluentia, Certis) -
