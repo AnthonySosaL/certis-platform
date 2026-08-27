@@ -4,28 +4,6 @@ A running list so nothing gets lost while other things get built first.
 Move an item to "Done" (with a date and a link to the changelog entry)
 instead of deleting it.
 
-## Needs you: one setting to actually reach the admin panel
-
-The Admin/Tutor panel (`/admin`, see Done below) is built and verified,
-but **nobody can reach it yet on the real account** - `Admin:Email` was
-only set temporarily to a throwaway test account for verification, then
-removed on purpose (not my call which of your two accounts should be
-admin). To make your account an Admin:
-
-```powershell
-& "$env:USERPROFILE\.dotnet\dotnet.exe" user-secrets set "Admin:Email" "your-login-email@here" --project "D:\PROYECTOS PERSONALES\english-c1-platform\client-backend\src\EnglishC1.Client.Api"
-```
-
-(Full path to `dotnet.exe` on purpose — a bare `dotnet` in a fresh
-PowerShell window can resolve to the machine-wide runtime-only install
-instead of the per-user SDK and fail with "No .NET SDKs were found".)
-
-Restart the backend, then sign out and back in (the Admin/Tutor role is
-baked into the JWT at login, so an old token won't show the new access).
-From there you can promote your partner's account to Tutor (or Admin)
-yourself from the Access tab - no more config-file edits needed after
-this first one.
-
 ## Feature scope — placement test shipped, what's next
 
 The placement test (see "Done" below) answered the questions that used
@@ -142,9 +120,13 @@ what *was* built that session):
       seed-only content; Access tab to grant/revoke roles with a
       self-demotion guard. Plus: an on-demand "Get AI feedback on this
       attempt" button on the test-result page, calling Groq
-      (`openai/gpt-oss-20b`, `reasoning_effort: low`) for a personalized
-      diagnostic beyond the generic early-warning flag. See "Needs you"
-      above — one setting away from being reachable on your real account.
+      (`openai/gpt-oss-20b`, `reasoning_effort: low` — confirmed correct
+      against [Groq's own reasoning docs](https://console.groq.com/docs/reasoning))
+      for a personalized diagnostic beyond the generic early-warning flag.
+      `Admin:Email` is now set to `anthonysosa44@gmail.com` so the panel
+      is actually reachable — picked as a working default, not a final
+      decision; revisit who should hold Admin vs Tutor once both accounts
+      exist and you've looked at the Access tab.
       See [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--admintutor-panel-admin-question-bank-crud-and-an-ai-generated-personalized-insight). — 2026-08-27
 - [x] **Student dashboard (`/dashboard`).** Full attempt history (not
       just the latest), split into placement and reinforcement activity,
