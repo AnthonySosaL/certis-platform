@@ -5,6 +5,28 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Brand name picked: Certis
+
+Chose from four recommendations (Nivelo, Bandly, Fluentia, Certis) -
+see [NAMING.md](NAMING.md) for the reasoning. Applied to everything
+user-visible:
+
+- `core/brand.ts` - single `BRAND_NAME` constant, replacing the
+  `'[Project name]'` placeholder duplicated in navbar and footer.
+- Navbar wordmark: the "C" is a custom SVG seal-and-ribbon glyph (a
+  certification badge) sized and positioned inline with the "ertis"
+  text, sitting where the letter would be - not a separate icon next
+  to a text label like before.
+- `index.html` `<title>`.
+
+Deliberately NOT done: the backend namespace (`EnglishC1.Client.*`),
+repo folder (`english-c1-platform`), and the two live subdomains still
+carry the old placeholder name - none of that is user-visible, and
+re-pointing the live subdomains means redoing HTTPS provisioning and
+CORS from scratch (see how much friction that was in the two entries
+below). Tracked as its own item in PENDING_IDEAS.md, not bundled in
+here.
+
 ## 2026-08-27 — Fixed dark-mode overflow, redesigned practice-area cards
 
 - **Result badge overflow bug** (reported in dark mode, but present in

@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 
+import { BRAND_NAME } from '../../core/brand';
+
 @Component({
   imports: [],
   selector: 'app-footer',
@@ -8,5 +10,5 @@ import { Component } from '@angular/core';
 })
 export class Footer {
   protected readonly year = new Date().getFullYear();
-  protected readonly brandName = '[Project name]';
+  protected readonly brandName = BRAND_NAME;
 }

@@ -27,8 +27,6 @@ export class Navbar {
   private readonly router = inject(Router);
 
   protected readonly navItems = NAV_ITEMS;
-  // Placeholder brand text until the final project name is picked - see docs/NAMING.md.
-  protected readonly brandName = '[Project name]';
 
   signOut(): void {
     this.auth.logout();

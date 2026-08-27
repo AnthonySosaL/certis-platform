@@ -30,13 +30,6 @@ Still open, now that the first slice exists:
       for anything beyond a first estimate (already flagged honestly on
       the About page).
 
-## Blocked on you / needs a decision
-
-- [ ] **Final project name.** Three tentative candidates in
-      [NAMING.md](NAMING.md) — pick one, reject all three, or hold off
-      until the feature scope above is clearer (recommended, since a
-      C1-specific name is a poor fit if scope grows beyond C1 later).
-
 ## Scaffolded structurally, not implemented
 
 - [ ] **Password reset + email confirmation.** Needs an email
@@ -74,6 +67,15 @@ Still open, now that the first slice exists:
 - [ ] No CI — every deploy so far has been a manual `dotnet publish` +
       `scp` from a local machine. Fine for now (single developer, low
       frequency), revisit if that changes.
+- [ ] **Technical rename to Certis, deferred.** The name is decided
+      (see NAMING.md) and applied everywhere user-visible, but the
+      backend namespace (`EnglishC1.Client.*`), the repo folder
+      (`english-c1-platform`), and the two live subdomains
+      (`english-c1-api.runasp.net`, `english-c1.runasp.net`) still say
+      the old placeholder name. Worth doing eventually for consistency;
+      deliberately not done as a side effect of picking the name, since
+      re-pointing the live subdomains means re-provisioning HTTPS certs
+      and CORS from scratch again.
 
 ## Nice-to-haves mentioned along the way, not urgent
 
@@ -110,6 +112,13 @@ what *was* built that session):
 
 ## Done
 
+- [x] **Brand name picked: Certis.** Chosen from four recommendations
+      (Nivelo, Bandly, Fluentia, Certis) - "certify" evocation, good fit
+      if this sells to institutions later. Wordmark replaces the "C"
+      with a seal-and-ribbon icon. Applied to the navbar, footer, and
+      page title. See [NAMING.md](NAMING.md) - the deeper technical
+      rename (namespace, folder, subdomains) is deliberately deferred,
+      see "Rough edges" above. — 2026-08-27
 - [x] **Frontend deployed live.** `https://english-c1.runasp.net`, a
       second free site on the existing MonsterASP account - the whole
       platform is now publicly reachable, not just the API. See

@@ -22,16 +22,33 @@
   margin-inline-end: 1rem;
 }
 
+// Wordmark: the "C" in "Certis" is replaced by this seal-and-ribbon
+// glyph (a certification badge) instead of the letter - sized and
+// positioned to sit inline with the "ertis" text like a real letter.
 .navbar__brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.7rem;
-  background: linear-gradient(135deg, var(--mat-sys-primary), color-mix(in srgb, var(--mat-sys-primary) 70%, #1c7bef));
-  color: var(--mat-sys-on-primary, #fff);
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--mat-sys-primary) 35%, transparent);
+  flex: 0 0 auto;
+  margin-inline-end: -0.15rem;
+  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--mat-sys-primary) 35%, transparent));
+}
+
+.navbar__brand-ribbon {
+  fill: color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+}
+
+.navbar__brand-seal {
+  fill: var(--mat-sys-primary);
+}
+
+.navbar__brand-check {
+  fill: none;
+  stroke: var(--mat-sys-on-primary, #fff);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.navbar__brand-name {
+  line-height: 1;
 }
 
 .navbar__links {

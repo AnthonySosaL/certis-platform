@@ -1,41 +1,43 @@
 # Project naming
 
+**Decided (2026-08-27): the brand name is Certis.**
+
+Picked from four recommendations (Nivelo, Bandly, Fluentia, Certis) -
+evokes "certify"/"certificate", short and professional, a good fit if
+this ever sells to institutions around actual certification prep. The
+wordmark replaces the "C" with a seal-and-ribbon icon (a certification
+badge) instead of a literal letterform - see
+`client-frontend/src/app/layout/navbar/navbar.html`
+(`.navbar__brand-mark`) for the SVG.
+
+Applied so far (visible branding only):
+- `core/brand.ts` — single `BRAND_NAME` constant, used by the navbar and
+  footer.
+- `index.html` `<title>`.
+- Navbar wordmark (seal-and-ribbon "C" + "ertis").
+
+**Not yet done (technical rename, deliberately deferred):** the backend
+namespace (`EnglishC1.Client.*`), the repo folder
+(`english-c1-platform`), and the two live subdomains
+(`english-c1-api.runasp.net`, `english-c1.runasp.net`) still use the old
+placeholder name. None of that is user-visible, and re-pointing the
+live subdomains means re-provisioning HTTPS certs and CORS again (see
+`docs/HOSTING.md` for how much friction that was the first two times).
+Worth doing for consistency, but it's a deliberate, separate pass - not
+done as a side effect of picking the name.
+
+---
+
+<details>
+<summary>History (superseded)</summary>
+
 **Correction (2026-08-26):** the three names previously listed here
 (ThriveCrate, StackWell, Fuelance) were for a fitness e-commerce project
 that isn't this project — see
 [errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md).
-Discard them; they have nothing to do with this platform.
 
-The folder is currently named `english-c1-platform` — a plain descriptive
-placeholder, not a proposed brand name, chosen so the folder path itself
-stops being actively wrong while a real name gets picked.
+Tentative candidates researched 2026-08-26 (Fluentrack, C1 Compass,
+LexiTrack) were superseded by the 2026-08-27 shortlist above once the
+"letter replaced by a logo" branding direction was decided.
 
-## Tentative candidates (light research only — confirm before committing)
-
-Quick web searches only, no trademark/domain search. Offered as a
-starting point for discussion, not a recommendation to act on immediately
-— last time inventing branding ahead of the actual scope caused a lot of
-rework.
-
-1. **Fluentrack** — no exact collisions found. Close neighbors exist
-   ("Fluently," "FluentU," both AI conversation-practice apps), so the
-   full word is what protects it, not "fluent" alone.
-2. **C1 Compass** — no exact collisions found. Reads clearly as
-   Cambridge-C1-focused, which helps if this stays scoped to that exam
-   specifically.
-3. **LexiTrack** — no exact collisions found ("Lexiplore" is a similar
-   neighbor, a different app).
-
-## Recommendation
-
-Hold off deciding until the feature scope (see
-[PENDING_IDEAS.md](PENDING_IDEAS.md)) is clearer — a name that's
-C1/Cambridge-specific (like *C1 Compass*) is a poor fit if this becomes
-broader multi-level practice later, while a generic one (*Fluentrack*)
-ages better if the scope grows. Once picked, do a real domain/trademark
-check before committing, and then the codebase needs a rename pass:
-folder name, `i18n` `brand.name` keys, `index.html` title, and the
-backend's `EnglishC1.Client.*` namespaces (currently a descriptive
-placeholder, not the wrong-project holdover it used to be — see
-[STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md) — so this last rename is
-lower-stakes than it was).
+</details>
