@@ -27,28 +27,41 @@
           />
         </svg>
         <div class="result__badge-inner">
-          <span class="result__badge-level">{{ r.placementResult ?? 'Below A2' }}</span>
-          <span class="result__badge-score">{{ r.score }} / {{ r.totalQuestions }}</span>
+          <span class="result__badge-level">{{ r.placementResult ?? '—' }}</span>
+          <span class="result__badge-name">{{ levelName(r.placementResult) }}</span>
+          <span class="result__badge-score">{{ r.score }} / {{ r.totalQuestions }} correct</span>
         </div>
       </div>
     </div>
 
     <section class="result__breakdown">
-      <h2>Breakdown by area</h2>
+      <h2>Practice areas</h2>
       <div class="breakdown-grid">
         @for (cell of r.breakdown; track cell.level + cell.skillArea) {
-          <div class="breakdown-cell" [class.breakdown-cell--weak]="cell.needsReinforcement">
-            <div class="breakdown-cell__head">
-              <span class="breakdown-cell__level" [style.--level-color]="levelCssVar(cell.level)">{{ cell.level }}</span>
-              <span class="breakdown-cell__skill">{{ cell.skillArea }}</span>
+          <div class="breakdown-cell" [class.breakdown-cell--weak]="cell.needsReinforcement" [style.--level-color]="levelCssVar(cell.level)">
+            <div class="breakdown-cell__top">
+              <div class="breakdown-cell__icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path [attr.d]="skillIconPath(cell.skillArea)" />
+                </svg>
+              </div>
+              <div class="breakdown-cell__body">
+                <div class="breakdown-cell__head">
+                  <span class="breakdown-cell__level">{{ cell.level }}</span>
+                  <span class="breakdown-cell__skill">{{ cell.skillArea }}</span>
+                </div>
+                <p class="breakdown-cell__score">{{ cell.correct }} / {{ cell.total }} correct</p>
+              </div>
             </div>
-            <p class="breakdown-cell__score">{{ cell.correct }} / {{ cell.total }}</p>
             @if (cell.needsReinforcement) {
-              <a mat-flat-button class="breakdown-cell__cta" [routerLink]="reinforcementPath(cell.level, cell.skillArea)">
+              <a mat-flat-button color="primary" class="breakdown-cell__cta" [routerLink]="reinforcementPath(cell.level, cell.skillArea)">
                 Practice this
               </a>
             } @else {
-              <span class="breakdown-cell__ok">Solid</span>
+              <span class="breakdown-cell__ok">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                Solid
+              </span>
             }
           </div>
         }

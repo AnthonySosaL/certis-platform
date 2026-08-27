@@ -5,6 +5,24 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Fixed dark-mode overflow, redesigned practice-area cards
+
+- **Result badge overflow bug** (reported in dark mode, but present in
+  light too): "Below A2" wrapped to two lines inside the fixed 190px
+  ring and spilled outside it top and bottom, since `.result__badge-inner`
+  had no `overflow: hidden`. Fixed by keeping the big number short (a
+  level code, or "—" for the below-A2 case) and moving the descriptive
+  text ("Just starting out", "Intermediate", ...) to a small caption
+  underneath - plus a slightly bigger ring (13.5rem) and inset padding
+  so nothing touches the edge.
+- **Practice-area cards redesigned** - they read as flat "Practice this"
+  buttons on solid red blocks, alarming when every cell needs work and
+  not far off a plain list. Now: an icon per skill (open book for
+  Grammar, speech bubble for Vocabulary), a level-colored badge and
+  border instead of a full color fill, and the CTA as a proper pill
+  button - closer to how a course catalog presents a module than an
+  error state.
+
 ## 2026-08-27 — Reinforcement review + Contact page removed
 
 - **Reinforcement failure review.** `Question.Explanation` (nullable,

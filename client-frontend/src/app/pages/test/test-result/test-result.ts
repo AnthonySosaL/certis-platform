@@ -12,6 +12,20 @@ const LEVEL_CSS_VAR: Record<CefrLevel, string> = {
   C1: '--cefr-c1',
 };
 
+const LEVEL_NAME: Record<CefrLevel, string> = {
+  A2: 'Elementary',
+  B1: 'Intermediate',
+  B2: 'Upper-Intermediate',
+  C1: 'Advanced',
+};
+
+const SKILL_ICON_PATH: Record<string, string> = {
+  // Open book - Grammar (structure/rules)
+  Grammar: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M4 19.5A2.5 2.5 0 0 0 6.5 22H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13Z',
+  // Speech bubble - Vocabulary (words/expression)
+  Vocabulary: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+};
+
 @Component({
   selector: 'app-test-result',
   imports: [RouterLink, MatButtonModule, MatProgressSpinnerModule],
@@ -31,6 +45,14 @@ export class TestResultPage implements OnInit {
 
   levelCssVar(level: CefrLevel): string {
     return `var(${LEVEL_CSS_VAR[level]})`;
+  }
+
+  levelName(level: CefrLevel | null): string {
+    return level ? LEVEL_NAME[level] : 'Just starting out';
+  }
+
+  skillIconPath(skill: string): string {
+    return SKILL_ICON_PATH[skill] ?? SKILL_ICON_PATH['Grammar'];
   }
 
   reinforcementPath(level: CefrLevel, skill: string): string[] {
