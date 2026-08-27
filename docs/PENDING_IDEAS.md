@@ -42,6 +42,20 @@ least at a first-pass level:
 - [ ] Dark mode toggle — fully wired in `ThemeProvider`, light stays the
       default until you say otherwise.
 
+## Rough edges worth revisiting
+
+- [ ] **Deploy loses the production connection string on every redeploy.**
+      `dotnet publish` regenerates `web.config` from scratch each time,
+      which wipes the manually-added `ConnectionStrings__AppDb`
+      environment variable — see HOSTING.md. Fragile (a redeploy that
+      forgets this step silently breaks the live site with a 500.30).
+      Worth finding whether MonsterASP has a persistent env-var/app-settings
+      panel outside `web.config`, or scripting the web.config edit so it's
+      one command instead of a manual step, before this trips someone up.
+- [ ] No CI — every deploy so far has been a manual `dotnet publish` +
+      `scp` from a local machine. Fine for now (single developer, low
+      frequency), revisit if that changes.
+
 ## Nice-to-haves mentioned along the way, not urgent
 
 - [ ] Admin/teacher-facing panel, only if this grows beyond a 2-person

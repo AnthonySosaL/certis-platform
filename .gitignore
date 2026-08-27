@@ -23,6 +23,7 @@ obj/
 *.user
 *.suo
 .vs/
+publish-output/
 
 # --- Editor / OS ---
 .vscode/*

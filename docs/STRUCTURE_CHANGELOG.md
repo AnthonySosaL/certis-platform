@@ -5,6 +5,21 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-26 — Backend deployed live: MonsterASP.NET
+
+`client-backend` is reachable at `https://english-c1-api.runasp.net`
+(FreeSite plan, EU datacenter, HTTPS via Let's Encrypt with HTTP->HTTPS
+redirect on). `/health` verified 200 over both HTTP (redirects) and
+HTTPS. Deployed via `dotnet publish` + `scp` (SFTP) to `wwwroot/` — chosen
+over WebDeploy (would've needed installing Web Deploy/msdeploy locally)
+and Git deploy (needs a GitHub repo, not set up yet). Full steps and the
+production-connection-string handling (env var injected into
+`web.config`, not committed anywhere) in
+[HOSTING.md](HOSTING.md#backend-hosting-monsteraspnet-live-decided-2026-08-26).
+Known fragility logged in [PENDING_IDEAS.md](PENDING_IDEAS.md#rough-edges-worth-revisiting):
+`web.config` gets regenerated (and the env var lost) on every fresh
+`dotnet publish`.
+
 ## 2026-08-26 — Backend renamed: NutriBoost.Client.* -> EnglishC1.Client.*
 
 Closed out the last tracked holdover from the scope mix-up (see
