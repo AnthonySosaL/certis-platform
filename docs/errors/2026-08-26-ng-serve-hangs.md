@@ -52,3 +52,35 @@ window itself no longer shows directly (traded away for reliability).
 If a future change to `start-dev.ps1` removes the output redirection
 "to see live logs again," expect this hang to come back — re-add it
 rather than assuming it was unrelated.
+
+## Update: the backend had a third cause too
+
+After the fixes above, the *frontend* came up reliably across several
+stop/start round-trips — but the **backend** then failed the same way
+(port 5223 never bound, window stayed open and idle). Its redirected log
+(once redirection was added there too, matching the frontend fix)
+revealed the real error: `dotnet : The command could not be loaded...
+No .NET SDKs were found`. This is the PATH issue from
+[docs/DEPENDENCIES.md](../DEPENDENCIES.md)'s "Known PATH gotcha" — but
+the *first* attempted fix for it (prepending
+`%USERPROFILE%\.dotnet` to `$env:Path` at the top of `start-dev.ps1`,
+guarded by `if ($env:Path -notlike "*$p*")`) turned out not to actually
+work: the guard's substring check matched an *existing* occurrence of
+the path elsewhere in the ambient PATH (e.g. `...\.dotnet\tools` already
+present satisfies a `-like "*...\.dotnet*"` check), so the script skipped
+prepending — but that existing occurrence was positioned *after*
+`C:\Program Files\dotnet` in PATH, so `dotnet` still resolved to the
+wrong (SDK-less) exe.
+
+**Real fix**: stopped trying to manipulate `$env:Path` ordering at all.
+`start-dev.ps1` now calls the SDK's `dotnet.exe` by its **full path**
+(`$env:USERPROFILE\.dotnet\dotnet.exe`) for the backend's `dotnet watch
+run`, which can't be affected by PATH ordering at all. Verified with two
+more clean stop/start round-trips, both times frontend + backend up
+within seconds.
+
+**Lesson**: when a fix is "prepend X so it's found first," verify the
+*actual resulting order*, not just "is X present somewhere" - a
+substring/presence check is not the same as a position check. Calling a
+known executable by its full path sidesteps the whole class of bug and
+is worth reaching for first, not just as a last resort.

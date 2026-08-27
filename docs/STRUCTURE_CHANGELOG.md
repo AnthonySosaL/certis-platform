@@ -5,6 +5,24 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-26 — Fixed backend hang too: dotnet.exe now called by full path
+
+Follow-up to the ng serve fixes below — once the frontend was reliable,
+the **backend** started hanging the same way (window open, port 5223
+never bound). Redirecting its output too (same trick as the frontend)
+revealed the real cause: a plain `dotnet` call in the spawned window was
+resolving to the wrong `dotnet.exe` (a machine-wide, SDK-less one at
+`C:\Program Files\dotnet`) instead of the per-user SDK. An earlier fix
+for this exact class of problem (prepending to `$env:Path`) didn't
+actually work — its "is the path already present" check matched a
+substring that existed *later* in PATH, so it skipped prepending and the
+wrong exe kept winning. Fixed for real by calling the SDK's `dotnet.exe`
+by its full path everywhere in the script, avoiding PATH resolution
+entirely. Full trail in
+[errors/2026-08-26-ng-serve-hangs.md](errors/2026-08-26-ng-serve-hangs.md#update-the-backend-had-a-third-cause-too).
+Verified: two clean stop/start round-trips, frontend + backend both up
+within seconds each time.
+
 ## 2026-08-26 — Fixed ng serve hanging on start
 
 Found (the frontend silently failed to come up after `start.bat`, twice)

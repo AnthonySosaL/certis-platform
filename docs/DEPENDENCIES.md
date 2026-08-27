@@ -14,15 +14,20 @@ history stays visible (per the notes' traceability requirement).
 | Docker Desktop | 29.4.3 (already installed) | Was local Postgres via `docker-compose.yml`. No longer used day to day — the app connects to the real MonsterASP.NET database now (see `docs/HOSTING.md`). Kept only as an offline fallback, not auto-started. | pre-existing, wired 2026-08-26, demoted to fallback same day once MonsterASP DB was live |
 | git | 2.53.0 (already installed) | Version control. | pre-existing |
 
-**Known PATH gotcha**: because the SDK is user-scoped, not machine-wide, a
-process tree that started before the PATH change won't see it (Explorer
-doesn't re-read env vars for already-open sessions until logoff/reboot).
-This bit `scripts/start-dev.ps1` — the backend window it spawned couldn't
-find `dotnet` at all. Fixed by having the script prepend
-`%USERPROFILE%\.dotnet` and `...\.dotnet\tools` to its own `$env:Path`
-before spawning anything, so it's self-contained regardless of ambient
-PATH staleness. If `dotnet` is ever "not found" in a fresh terminal, log
-off/on (or reboot) once to pick up the registry PATH everywhere.
+**Known PATH gotcha**: there's a second, machine-wide `dotnet.exe` at
+`C:\Program Files\dotnet` (runtime-only, no SDK — came with the machine).
+Depending on the ambient environment, it can resolve *before* the
+per-user SDK one in PATH, so a plain `dotnet` call silently runs the
+wrong exe ("No .NET SDKs were found") — this bit `scripts/start-dev.ps1`
+more than once, including a first attempted fix (prepending to
+`$env:Path`) that didn't reliably win the ordering. The real fix: the
+script now calls the SDK's `dotnet.exe` by its **full path**
+(`%USERPROFILE%\.dotnet\dotnet.exe`) everywhere, sidestepping PATH
+resolution entirely — see
+[errors/2026-08-26-ng-serve-hangs.md](errors/2026-08-26-ng-serve-hangs.md#update-the-backend-had-a-third-cause-too)
+for the debugging trail. If `dotnet` is ever "not found" or resolves to
+the wrong one in a **fresh terminal you're typing into yourself** (not
+the script), log off/on once, or just call the full path directly.
 
 ## `client-frontend` (Angular 22 + Material)
 

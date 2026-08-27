@@ -16,17 +16,17 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 
-# The .NET SDK is installed per-user (not machine-wide), and this process
-# may have been spawned before that PATH change was visible system-wide
-# (Explorer/desktop shortcuts don't pick up a PATH change until logoff or
-# reboot). Prepend it explicitly so "dotnet" always resolves here and in
-# any window this script spawns, regardless of ambient PATH staleness.
-$dotnetPaths = @("$env:USERPROFILE\.dotnet", "$env:USERPROFILE\.dotnet\tools")
-foreach ($p in $dotnetPaths) {
-    if ($env:Path -notlike "*$p*") {
-        $env:Path = "$p;$env:Path"
-    }
-}
+# The .NET SDK is installed per-user (not machine-wide). There's also a
+# machine-wide dotnet.exe (runtime-only, no SDK) at C:\Program Files\dotnet
+# that can end up earlier in PATH than the per-user one depending on the
+# ambient environment - a plain "dotnet" call then silently resolves to
+# the wrong one ("No .NET SDKs were found"). Prepending to $env:Path
+# turned out not to reliably fix the *order* (a previous version of this
+# fix skipped prepending whenever any dotnet path already appeared
+# anywhere in PATH, which didn't guarantee position). Calling the SDK's
+# dotnet.exe by its full path sidesteps PATH resolution entirely -
+# see $dotnetExe below, used for every `dotnet` invocation in this script.
+$dotnetExe = "$env:USERPROFILE\.dotnet\dotnet.exe"
 
 function Test-PortOpen($port) {
     return [bool](Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue)
@@ -59,9 +59,12 @@ if ($backendCsproj) {
         Write-Host "client-backend already running on :5223 - skipping." -ForegroundColor DarkYellow
     } else {
         Write-Host "Starting client-backend dev server..." -ForegroundColor Cyan
+        # Same fix as the frontend above - unredirected output to a
+        # detached console can hang the process outright.
+        $backendLog = "$env:TEMP\dotnet-watch.log"
         Start-Process powershell -ArgumentList @(
             '-NoExit', '-Command',
-            "`$host.ui.RawUI.WindowTitle = 'Project - client-backend'; Set-Location '$($backendCsproj.DirectoryName)'; dotnet watch run --urls http://localhost:5223"
+            "`$host.ui.RawUI.WindowTitle = 'Project - client-backend'; Set-Location '$($backendCsproj.DirectoryName)'; Write-Host 'Logging to $backendLog - tail it if this seems stuck.'; & '$dotnetExe' watch run --urls http://localhost:5223 *> '$backendLog'"
         )
     }
 } else {
