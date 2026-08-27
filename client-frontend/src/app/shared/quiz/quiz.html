@@ -1,22 +1,42 @@
 <div class="quiz">
-  <div class="quiz__progress">
+  <div class="quiz__topbar">
+    <div class="quiz__topbar-row">
+      <p class="quiz__progress-text">{{ answeredCount() }} / {{ questions().length }} answered</p>
+      <div class="quiz__timer" role="timer" aria-label="Time elapsed">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="13" r="8" /><path d="M12 9v4l3 2" /><path d="M9 2h6" />
+        </svg>
+        <span>{{ elapsedLabel() }}</span>
+      </div>
+    </div>
     <mat-progress-bar mode="determinate" [value]="progress()" />
-    <p class="quiz__progress-text">{{ answeredCount() }} / {{ questions().length }} answered</p>
   </div>
 
-  @for (question of questions(); track question.id; let i = $index) {
+  @for (question of questions(); track question.id) {
     <div class="quiz-question">
-      <p class="quiz-question__meta">Question {{ i + 1 }} &middot; {{ question.level }} &middot; {{ question.skillArea }}</p>
       <p class="quiz-question__text">{{ question.text }}</p>
-      <mat-radio-group
-        class="quiz-question__options"
-        [value]="selected(question.id)"
-        (change)="select(question.id, $event.value)"
-      >
-        @for (option of question.options; track option.id) {
-          <mat-radio-button [value]="option.id">{{ option.text }}</mat-radio-button>
+      <div class="quiz-question__options" role="radiogroup">
+        @for (option of question.options; track option.id; let i = $index) {
+          <button
+            type="button"
+            role="radio"
+            class="quiz-option"
+            [class.quiz-option--selected]="selected(question.id) === option.id"
+            [attr.aria-checked]="selected(question.id) === option.id"
+            (click)="select(question.id, option.id)"
+          >
+            <span class="quiz-option__letter">{{ letterFor(i) }}</span>
+            <span class="quiz-option__text">{{ option.text }}</span>
+            @if (selected(question.id) === option.id) {
+              <span class="quiz-option__check">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+              </span>
+            }
+          </button>
         }
-      </mat-radio-group>
+      </div>
     </div>
   }
 

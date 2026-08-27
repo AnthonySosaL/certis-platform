@@ -20,6 +20,7 @@ export class Reinforcement implements OnInit {
 
   protected readonly level = this.route.snapshot.paramMap.get('level') as CefrLevel;
   protected readonly skill = this.route.snapshot.paramMap.get('skill') as SkillArea;
+  protected readonly storageKey = `reinforcement-in-progress-${this.level}-${this.skill}`;
 
   protected readonly stage = signal<Stage>('loading');
   protected readonly questions = signal<Question[]>([]);
@@ -39,6 +40,7 @@ export class Reinforcement implements OnInit {
     this.stage.set('submitting');
     try {
       const result = await this.testApi.submitReinforcement(this.level, this.skill, answers);
+      localStorage.removeItem(this.storageKey);
       this.result.set(result);
       this.stage.set('result');
     } catch {

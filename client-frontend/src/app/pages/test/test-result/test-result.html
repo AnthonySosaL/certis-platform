@@ -11,10 +11,26 @@
     </div>
   } @else {
     @let r = result()!;
-    <div class="result__badge" [style.--level-color]="r.placementResult ? levelCssVar(r.placementResult) : '#94a3b8'">
+    <div class="result__badge-wrap">
       <span class="result__badge-label">Your level</span>
-      <span class="result__badge-level">{{ r.placementResult ?? 'Below A2' }}</span>
-      <span class="result__badge-score">{{ r.score }} / {{ r.totalQuestions }} correct</span>
+      <div class="result__badge" [style.--level-color]="r.placementResult ? levelCssVar(r.placementResult) : '#94a3b8'">
+        <div class="result__badge-glow"></div>
+        <svg viewBox="0 0 190 190" class="result__badge-ring">
+          <circle cx="95" cy="95" r="82" class="result__badge-ring-track" />
+          <circle
+            cx="95"
+            cy="95"
+            r="82"
+            class="result__badge-ring-fill"
+            stroke-dasharray="515.2"
+            [attr.stroke-dashoffset]="ringOffset(r.score, r.totalQuestions)"
+          />
+        </svg>
+        <div class="result__badge-inner">
+          <span class="result__badge-level">{{ r.placementResult ?? 'Below A2' }}</span>
+          <span class="result__badge-score">{{ r.score }} / {{ r.totalQuestions }}</span>
+        </div>
+      </div>
     </div>
 
     <section class="result__breakdown">

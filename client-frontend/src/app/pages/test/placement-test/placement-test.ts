@@ -8,6 +8,13 @@ import { Quiz } from '../../../shared/quiz/quiz';
 
 type Stage = 'loading' | 'intro' | 'taking' | 'submitting';
 
+// Answers + elapsed time persist under this key (see shared/quiz/quiz.ts)
+// so losing the connection mid-test and coming back doesn't lose
+// progress - the quiz was getting destroyed and recreated on every
+// stage change even before that, so this also fixes resuming after a
+// failed submit.
+const STORAGE_KEY = 'placement-test-in-progress';
+
 @Component({
   selector: 'app-placement-test',
   imports: [MatButtonModule, MatProgressSpinnerModule, RouterLink, Quiz],
@@ -18,6 +25,7 @@ export class PlacementTest implements OnInit {
   private readonly testApi = inject(TestApi);
   private readonly router = inject(Router);
 
+  protected readonly storageKey = STORAGE_KEY;
   protected readonly stage = signal<Stage>('loading');
   protected readonly previousResult = signal<TestResult | null>(null);
   protected readonly questions = signal<Question[]>([]);
@@ -47,6 +55,7 @@ export class PlacementTest implements OnInit {
     this.stage.set('submitting');
     try {
       await this.testApi.submitPlacementTest(answers);
+      localStorage.removeItem(STORAGE_KEY);
       await this.router.navigateByUrl('/test/results');
     } catch {
       this.errorMessage.set('Could not submit your answers. Please try again.');

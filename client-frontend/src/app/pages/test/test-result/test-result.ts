@@ -36,4 +36,11 @@ export class TestResultPage implements OnInit {
   reinforcementPath(level: CefrLevel, skill: string): string[] {
     return ['/test/reinforce', level, skill];
   }
+
+  // SVG ring: circumference of r=82 is ~515.2; dasharray/offset trace the score's share of it.
+  ringOffset(score: number, total: number): number {
+    const circumference = 515.2;
+    const share = total > 0 ? score / total : 0;
+    return circumference * (1 - share);
+  }
 }

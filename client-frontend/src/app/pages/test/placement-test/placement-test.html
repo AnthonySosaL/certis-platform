@@ -34,7 +34,12 @@
     @case ('taking') {
       <div class="placement__quiz">
         <h1>Placement test</h1>
-        <app-quiz [questions]="questions()" submitLabel="See my results" (submitted)="onSubmit($event)" />
+        <app-quiz
+          [questions]="questions()"
+          [storageKey]="storageKey"
+          submitLabel="See my results"
+          (submitted)="onSubmit($event)"
+        />
       </div>
     }
     @case ('submitting') {

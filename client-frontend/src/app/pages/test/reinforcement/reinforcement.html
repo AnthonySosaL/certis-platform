@@ -13,7 +13,12 @@
       </div>
     }
     @case ('taking') {
-      <app-quiz [questions]="questions()" submitLabel="Submit" (submitted)="onSubmit($event)" />
+      <app-quiz
+        [questions]="questions()"
+        [storageKey]="storageKey"
+        submitLabel="Submit"
+        (submitted)="onSubmit($event)"
+      />
     }
     @case ('submitting') {
       <div class="reinforce__loading">

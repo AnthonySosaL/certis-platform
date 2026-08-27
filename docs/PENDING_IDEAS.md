@@ -84,6 +84,30 @@ Still open, now that the first slice exists:
 - [ ] Carousels / scroll-triggered animations on the landing page, once
       there's real content to showcase.
 
+## Flagged for a future design pass (needs more direction first)
+
+Raised 2026-08-27 alongside the quiz redesign - real, but too open-ended
+to build without picking a direction first (see the changelog entry for
+what *was* built that session):
+
+- [ ] **"Ver cursos" - a course catalog.** Named once, no scope attached
+      yet: is this a list of future skill modules (reading, listening...)
+      shown as "coming soon," or an actual multi-course structure the
+      placement test would feed into? Needs a real decision, not a guess.
+- [ ] **Real imagery/illustrations**, not just inline SVG icons - the
+      site currently has none. Needs a source (stock, commissioned,
+      generated) and a place they'd actually earn their spot (the
+      landing hero is the obvious first candidate).
+- [ ] **Broader visual pass beyond the test module** - the redesign this
+      session focused on the quiz/results/navbar specifically. Home and
+      About got a content pass earlier (2026-08-27, design system entry)
+      but not this round's card/animation treatment.
+- [ ] Auto-resume: reloading mid-test currently lands back on the
+      `/test` intro screen, not straight into the in-progress quiz - the
+      answers and timer *are* preserved (see changelog), but the user
+      has to click "Retake the test" once to see them restored. A fully
+      seamless resume would skip that click.
+
 ## Done
 
 - [x] **Frontend deployed live.** `https://english-c1.runasp.net`, a

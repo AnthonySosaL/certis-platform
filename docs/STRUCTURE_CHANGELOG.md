@@ -5,6 +5,49 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Quiz redesign: timer, persistence, hidden difficulty, premium look
+
+Feedback after using the live test: felt mediocre for something meant to
+be sold eventually, the elapsed timer wasn't visible, progress was lost
+on a reload/reconnect, and each question openly showed its CEFR
+level/skill (undermining the whole point of a placement test). Used the
+`design` skill first to settle the visual direction before touching
+Angular code - a 2-artboard canvas (quiz screen + result badge),
+published at the design canvas link shared in chat.
+
+- `shared/quiz/quiz.ts`: dropped `mat-radio-group` for plain clickable
+  option "cards" (letter badge, fill + underline + checkmark on select,
+  a pop/draw-in animation) - re-skinning Material's MDC radio internals
+  fought the new look more than it helped. Added a visible elapsed timer
+  and, when a `storageKey` input is set, full persistence: answers and
+  start time survive a reload or the connection dropping mid-test,
+  restored on init and re-saved on every answer. Cleared only once the
+  parent confirms the submit actually succeeded, not on stage change -
+  the old behavior silently lost every answer if a submit failed, since
+  the quiz component gets destroyed the moment the page leaves the
+  "taking" stage.
+- Removed the per-question `{{ level }} · {{ skillArea }}` label
+  entirely - a placement test should not tell the test-taker which
+  questions are "harder" while they're answering.
+- `placement-test.ts`/`reinforcement.ts`: pass a `storageKey` down
+  (`placement-test-in-progress`, `reinforcement-in-progress-{level}-{skill}`)
+  and clear it directly after a confirmed successful submit.
+- `test-result.ts`/`.html`/`.scss`: the flat colored badge became an
+  animated SVG progress ring (radial glow, score-proportional arc) around
+  the CEFR letter - closer to a reward than a stat.
+- `layout/navbar/`: added a shadow, border, gradient logo mark, and an
+  animated underline on the active link - it was reading as flat and
+  unbranded before.
+- Verified in-browser: timer counts up and survives a reload (answers +
+  elapsed time both restored exactly), submitting clears the persisted
+  draft, level/skill no longer shown per question, navbar and result
+  badge render as designed.
+
+Not done this pass (explicitly flagged, larger/vaguer asks that need
+more direction before building): a course catalog ("ver cursos"), real
+downloaded imagery/illustrations beyond icons, and a broader visual
+pass across pages beyond the test module. See PENDING_IDEAS.md.
+
 ## 2026-08-27 — Frontend live in production too: english-c1.runasp.net
 
 The whole platform is now publicly reachable, not just the API. Full
