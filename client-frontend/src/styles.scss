@@ -88,3 +88,35 @@ html.dark body {
   border-radius: 0;
   overflow: visible;
 }
+
+// Toast (core/toast.ts) - lightweight confirmations, styled to match the
+// rest of the app's pill/rounded language instead of Material's default
+// squared-off snackbar. Success uses the same green as a passed CEFR
+// breakdown cell; error uses the Material system error color so it stays
+// theme-aware in dark mode without a separate override.
+.app-toast .mdc-snackbar__surface {
+  border-radius: 999px !important;
+  min-width: 0 !important;
+  padding-right: 0.5rem !important;
+}
+
+.app-toast .mdc-snackbar__label {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.app-toast--success .mdc-snackbar__surface {
+  background: var(--cefr-a2) !important;
+}
+
+.app-toast--success .mdc-snackbar__label {
+  color: white !important;
+}
+
+.app-toast--error .mdc-snackbar__surface {
+  background: var(--mat-sys-error) !important;
+}
+
+.app-toast--error .mdc-snackbar__label {
+  color: var(--mat-sys-on-error) !important;
+}

@@ -5,6 +5,43 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Toasts for lightweight confirmations (and another stale-docs fix)
+
+Third autonomous `/loop` iteration through `PENDING_IDEAS.md`.
+
+**Another stale line found**: "Dark mode toggle" had been sitting in the
+open list since the Angular switch, but it's been fully built and in
+active use the entire time (every dark-mode screenshot in this file used
+it) - moved to Done with a note instead of redone.
+
+**Real work**: `core/toast.ts` - a thin `Toast` service wrapping
+`MatSnackBar`, styled in `styles.scss` to match the app's pill/rounded
+language (`.app-toast*` classes) instead of Material's default squared
+snackbar. `success()` uses the same green as a passed CEFR cell;
+`error()` uses the Material system error color, both theme-aware without
+a separate dark-mode override.
+
+Wired into the three places in the app that already had a real
+"lightweight confirmation" gap - actions that succeeded with zero
+feedback beyond the underlying state changing:
+- Admin Content tab: "Question added" / "Question updated" / "Question
+  deleted" after the question-editor dialog or a delete.
+- Admin Access tab: "Access updated for {email}" after a role toggle
+  succeeds.
+
+Deliberately did not touch anything already showing inline
+success/error state (test submission, AI insight, etc.) - the pending
+item's own framing was "modals reserved for anything more consequential",
+which by extension means toasts are for gaps, not for wrapping feedback
+that already exists.
+
+Verified in-browser in both dark and light mode: added a real question
+through the Content tab and watched the green "Question added" toast
+render correctly (pill shape, right color, right message), confirmed the
+count updated, deleted it and confirmed the count reverted, and confirmed
+a role toggle round-trips successfully (network 200) through the same
+code path. Frontend build clean.
+
 ## 2026-08-27 — Real auto-resume for the placement test (and a stale-docs fix)
 
 Second autonomous `/loop` iteration through `PENDING_IDEAS.md`.

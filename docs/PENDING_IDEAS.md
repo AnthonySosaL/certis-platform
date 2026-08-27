@@ -44,8 +44,6 @@ Still open, now that the first slice exists:
       Angular rebuild yet; low priority, the platform's primary language
       is English by design. See ARCHITECTURE.md for the library options
       considered (`@angular/localize` vs `ngx-translate`).
-- [ ] Dark mode toggle — fully wired in the `Theme` service, light stays
-      the default until you say otherwise.
 
 ## Rough edges worth revisiting
 
@@ -78,8 +76,6 @@ Still open, now that the first slice exists:
 
 ## Nice-to-haves mentioned along the way, not urgent
 
-- [ ] Toasts for lightweight confirmations, modals reserved for anything
-      more consequential (e.g. submitting a graded exercise).
 - [ ] Carousels / scroll-triggered animations on the landing page, once
       there's real content to showcase.
 
@@ -103,6 +99,18 @@ what *was* built that session):
       but not this round's card/animation treatment.
 ## Done
 
+- [x] **Toasts for lightweight confirmations.** `core/toast.ts`
+      (`Toast` service over `MatSnackBar`, styled to match the app's
+      pill language). Wired into the three real gaps that existed -
+      Admin Content tab (question added/updated/deleted) and Admin
+      Access tab (role toggle) - all of which used to succeed silently.
+      See [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--toasts-for-lightweight-confirmations-and-another-stale-docs-fix). — 2026-08-27
+- [x] **Dark mode toggle.** Another stale line found while working this
+      list - fully wired in the `Theme` service since the Angular switch
+      (commit `4999c01`), and has been in active use every session since
+      (every dark-mode screenshot/verification in this changelog used
+      it). Nothing left to build; light just stays the default until
+      changed. — 2026-08-27
 - [x] **Auto-resume on the placement test.** A reload mid-test now lands
       straight back in the quiz - exact questions, answers, and timer
       restored - no more one click on "Retake the test" first. Also fixed

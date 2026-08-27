@@ -9,6 +9,7 @@ import { Auth } from '../../core/auth';
 import { AdminApi, Account, AdminQuestion, StudentSummary } from '../../core/admin-api';
 import { levelCode, levelCssVar, levelName } from '../../core/cefr';
 import { skillIconPath } from '../../core/skill-icons';
+import { Toast } from '../../core/toast';
 import { QuestionEditorDialog, QuestionEditorData } from './question-editor-dialog/question-editor-dialog';
 
 type Tab = 'students' | 'content' | 'access';
@@ -22,6 +23,7 @@ type Tab = 'students' | 'content' | 'access';
 export class AdminDashboard implements OnInit {
   private readonly adminApi = inject(AdminApi);
   private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(Toast);
   protected readonly auth = inject(Auth);
 
   protected readonly tab = signal<Tab>('students');
@@ -113,6 +115,7 @@ export class AdminDashboard implements OnInit {
       const current = this.questions();
       const index = current.findIndex((q) => q.id === saved.id);
       this.questions.set(index >= 0 ? current.map((q, i) => (i === index ? saved : q)) : [...current, saved]);
+      this.toast.success(index >= 0 ? 'Question updated' : 'Question added');
     });
   }
 
@@ -121,6 +124,7 @@ export class AdminDashboard implements OnInit {
     try {
       await this.adminApi.deleteQuestion(question.id);
       this.questions.set(this.questions().filter((q) => q.id !== question.id));
+      this.toast.success('Question deleted');
     } catch {
       this.questionsError.set('Could not delete this question.');
     }
@@ -133,6 +137,7 @@ export class AdminDashboard implements OnInit {
     try {
       const updated = await this.adminApi.setRoles(account.userId, request);
       this.accounts.set(this.accounts().map((a) => (a.userId === updated.userId ? updated : a)));
+      this.toast.success(`Access updated for ${updated.email}`);
     } catch (error) {
       const message =
         error instanceof HttpErrorResponse && error.error?.message
