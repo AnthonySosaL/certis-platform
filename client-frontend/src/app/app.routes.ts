@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 
 import { Home } from './pages/home/home';
 import { About } from './pages/about/about';
-import { AuthPage } from './pages/auth/auth-page';
 import { ForgotPassword } from './pages/forgot-password/forgot-password';
 import { PlacementTest } from './pages/test/placement-test/placement-test';
 import { TestResultPage } from './pages/test/test-result/test-result';
@@ -12,8 +11,6 @@ import { authGuard } from './core/auth.guard';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'about', component: About },
-  { path: 'login', component: AuthPage, data: { mode: 'login' } },
-  { path: 'register', component: AuthPage, data: { mode: 'register' } },
   { path: 'forgot-password', component: ForgotPassword },
   { path: 'test', component: PlacementTest, canActivate: [authGuard] },
   { path: 'test/results', component: TestResultPage, canActivate: [authGuard] },

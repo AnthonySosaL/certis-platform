@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 
 import { Auth } from '../../core/auth';
+import { AuthDialogService } from '../../core/auth-dialog.service';
 
 const STEPS = [
   {
@@ -35,11 +36,16 @@ const LEVELS: { level: string; cssVar: string; label: string }[] = [
 export class Home {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly authDialog = inject(AuthDialogService);
 
   protected readonly steps = STEPS;
   protected readonly levels = LEVELS;
 
   startTest(): void {
-    this.router.navigateByUrl(this.auth.isAuthenticated() ? '/test' : '/register');
+    if (this.auth.isAuthenticated()) {
+      this.router.navigateByUrl('/test');
+    } else {
+      this.authDialog.open('register', '/test');
+    }
   }
 }

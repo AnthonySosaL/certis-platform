@@ -6,6 +6,7 @@ import { MatMenuModule } from '@angular/material/menu';
 
 import { Theme } from '../../core/theme';
 import { Auth } from '../../core/auth';
+import { AuthDialogService } from '../../core/auth-dialog.service';
 
 type NavItem = { path: string; label: string };
 
@@ -25,8 +26,13 @@ export class Navbar {
   protected readonly theme = inject(Theme);
   protected readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly authDialog = inject(AuthDialogService);
 
   protected readonly navItems = NAV_ITEMS;
+
+  openSignIn(): void {
+    this.authDialog.open('login');
+  }
 
   signOut(): void {
     this.auth.logout();

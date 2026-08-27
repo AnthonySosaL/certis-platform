@@ -5,6 +5,46 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Auth is now a real modal (MatDialog); clearer below-A2 label
+
+Also from the same feedback round: the result badge's "—" for a
+below-A2 placement read as too vague ("I don't even know roughly what
+level I'm at") - changed to "Pre-A2" / "Beginner" (`test-result.ts`
+`levelCode()`/`levelName()`), a short, unambiguous label instead of a
+symbol.
+
+Correction to the entry right below: that version still routed to
+`/login`/`/register` on a full navigation - it *looked* like a modal but
+wasn't one. Rebuilt as an actual `MatDialog` overlay:
+
+- `pages/auth/auth-dialog.ts` (renamed from `auth-page.ts`) reads its
+  initial mode from `MAT_DIALOG_DATA` instead of route data, and closes
+  via `MatDialogRef` (with `{ redirectTo }` in the close result) instead
+  of calling the router itself.
+- `core/auth-dialog.service.ts` - `AuthDialogService.open(mode,
+  redirectTo?)` opens it; refuses to stack a second one if one's already
+  open.
+- `/login` and `/register` routes removed entirely - nothing routes to
+  auth anymore. The navbar's "Sign in" button, Home's test CTA, and the
+  auth guard all call the service directly.
+- `auth.guard.ts`: no longer returns a `UrlTree` to `/login` - it calls
+  `authDialog.open('login', state.url)` and returns `false`, blocking
+  the navigation so the user stays exactly where they were with the
+  modal now open over it (rather than landing on a route that doesn't
+  exist anymore).
+- Added `@angular/animations` + `provideAnimationsAsync()` -
+  `MatDialog`'s open/close transition needs it; wasn't installed before
+  since nothing used Material's overlay animations yet.
+- A global rule in `styles.scss` strips Material's own dialog surface
+  chrome (`.auth-dialog-panel .mdc-dialog__surface`) so
+  `auth-dialog.scss`'s own card (background/border/shadow/radius) isn't
+  boxed twice.
+- Verified: clicking "Sign in" opens the dialog with the URL unchanged
+  (`/` stays `/`); hitting a protected route while logged out opens the
+  dialog without ever navigating to the blocked route, and signing in
+  through it lands on the originally-requested page - both the navbar
+  and the guard path tested end-to-end.
+
 ## 2026-08-27 — Login/register merged into one modal-style page
 
 Separate `/login` and `/register` pages felt like a full context switch

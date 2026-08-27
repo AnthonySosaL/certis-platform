@@ -1,15 +1,23 @@
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
 
 import { Auth } from '../../core/auth';
 
 export type AuthMode = 'login' | 'register';
+export interface AuthDialogData {
+  mode: AuthMode;
+  redirectTo?: string;
+}
+export interface AuthDialogResult {
+  redirectTo?: string;
+}
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -27,26 +35,25 @@ function extractIdentityErrors(error: unknown): string[] {
   return Object.values(errors).flat();
 }
 
-// Sign in and register used to be two separate routed pages. Merged into
-// one component with an internal mode toggle (no navigation between the
-// two - the router isn't involved in switching) so it reads as a single
-// modal-style card that slides between panels, per the request. `/login`
-// and `/register` both still route here, just with a different initial
-// `mode` (route data) - deep links and the auth guard's `redirectTo`
-// keep working unchanged.
+// Opened via AuthDialogService (MatDialog), never routed to directly -
+// it's the real overlay behind "Sign in" / a blocked protected route,
+// not a page. Sign in and Register are two forms in one instance with
+// an internal `mode` toggle (a local signal, not navigation) so a CSS
+// slide animates between them.
 @Component({
-  imports: [ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButtonModule, MatProgressSpinnerModule],
-  selector: 'app-auth-page',
-  styleUrl: './auth-page.scss',
-  templateUrl: './auth-page.html',
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatProgressSpinnerModule],
+  selector: 'app-auth-dialog',
+  styleUrl: './auth-dialog.scss',
+  templateUrl: './auth-dialog.html',
 })
-export class AuthPage {
+export class AuthDialog {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(Auth);
+  private readonly dialogRef = inject(MatDialogRef<AuthDialog, AuthDialogResult>);
+  private readonly data = inject<AuthDialogData>(MAT_DIALOG_DATA);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
 
-  protected readonly mode = signal<AuthMode>((this.route.snapshot.data['mode'] as AuthMode) ?? 'login');
+  protected readonly mode = signal<AuthMode>(this.data.mode);
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
@@ -74,6 +81,15 @@ export class AuthPage {
     this.mode.set(mode);
   }
 
+  close(): void {
+    this.dialogRef.close();
+  }
+
+  goToForgotPassword(): void {
+    this.dialogRef.close();
+    this.router.navigateByUrl('/forgot-password');
+  }
+
   async onLoginSubmit(): Promise<void> {
     if (this.loginForm.invalid || this.isSubmitting()) return;
 
@@ -83,7 +99,7 @@ export class AuthPage {
 
     try {
       await this.auth.login(email, password);
-      await this.redirectAfterAuth();
+      this.dialogRef.close({ redirectTo: this.data.redirectTo ?? '/' });
     } catch {
       this.errorMessage.set('Invalid email or password.');
     } finally {
@@ -100,7 +116,7 @@ export class AuthPage {
 
     try {
       await this.auth.register(email, password);
-      await this.redirectAfterAuth();
+      this.dialogRef.close({ redirectTo: this.data.redirectTo ?? '/' });
     } catch (error) {
       const identityErrors = extractIdentityErrors(error);
       this.errorMessage.set(
@@ -111,10 +127,5 @@ export class AuthPage {
     } finally {
       this.isSubmitting.set(false);
     }
-  }
-
-  private async redirectAfterAuth(): Promise<void> {
-    const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
-    await this.router.navigateByUrl(redirectTo ?? '/');
   }
 }

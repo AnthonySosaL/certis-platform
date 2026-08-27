@@ -47,8 +47,12 @@ export class TestResultPage implements OnInit {
     return `var(${LEVEL_CSS_VAR[level]})`;
   }
 
+  levelCode(level: CefrLevel | null): string {
+    return level ?? 'Pre-A2';
+  }
+
   levelName(level: CefrLevel | null): string {
-    return level ? LEVEL_NAME[level] : 'Just starting out';
+    return level ? LEVEL_NAME[level] : 'Beginner';
   }
 
   skillIconPath(skill: string): string {

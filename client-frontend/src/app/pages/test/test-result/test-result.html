@@ -27,7 +27,7 @@
           />
         </svg>
         <div class="result__badge-inner">
-          <span class="result__badge-level">{{ r.placementResult ?? '—' }}</span>
+          <span class="result__badge-level">{{ levelCode(r.placementResult) }}</span>
           <span class="result__badge-name">{{ levelName(r.placementResult) }}</span>
           <span class="result__badge-score">{{ r.score }} / {{ r.totalQuestions }} correct</span>
         </div>
