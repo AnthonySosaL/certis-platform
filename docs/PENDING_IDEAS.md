@@ -72,16 +72,17 @@ Still open, needed before building the domain model:
 - [ ] **Deploy loses production secrets on every redeploy.**
       `dotnet publish` regenerates `web.config` from scratch each time,
       which wipes any manually-added environment variables —
-      `ConnectionStrings__AppDb` (see HOSTING.md) and now also
-      `Jwt__SigningKey`, needed the same way before auth works on the
-      live site at all. Fragile (a redeploy that forgets this step
-      silently breaks the live site — 500.30 for the DB, 500 for any
-      auth endpoint if the signing key's missing). Worth finding whether
-      MonsterASP has a persistent env-var/app-settings panel outside
-      `web.config`, or scripting the web.config edit so it's one command
-      instead of a manual step, before this trips someone up. The next
-      deploy needs to re-add *both* variables, not just the one from
-      last time.
+      `ConnectionStrings__AppDb` and `Jwt__SigningKey` (see HOSTING.md;
+      both are live and verified as of 2026-08-27). Still fragile going
+      forward — a redeploy that forgets this step silently breaks the
+      live site (500 for the DB, 500 for any auth endpoint if the
+      signing key's missing). Worth finding whether MonsterASP has a
+      persistent env-var/app-settings panel outside `web.config`, or
+      scripting the web.config edit so it's one command instead of a
+      manual step, before this trips someone up. Every future deploy
+      needs to re-add *both* variables, not just one — and should always
+      start from a clean `bin`/`obj`/`publish-output` (see
+      [errors/2026-08-27-stale-publish-output-dll-mismatch.md](errors/2026-08-27-stale-publish-output-dll-mismatch.md)).
 - [ ] No CI — every deploy so far has been a manual `dotnet publish` +
       `scp` from a local machine. Fine for now (single developer, low
       frequency), revisit if that changes.
@@ -105,9 +106,9 @@ Still open, needed before building the domain model:
       [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--frontend-auth-loginregister-pages-wired-end-to-end). — 2026-08-27
 - [x] **Backend auth: register/login/JWT.** ASP.NET Core Identity +
       JWT bearer, `AuthController` (`register`/`login`/`me`), migration
-      applied and verified end-to-end against the real database. Not
-      deployed to production yet (signing key missing from web.config —
-      see "Rough edges" above) and no Angular UI yet (see above). See
+      applied and verified end-to-end against the real database. Live in
+      production too as of 2026-08-27 — see
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--auth-live-in-production-jwt-signing-key--stale-dll-fix). See
       [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--backend-auth-registerloginjwt-first-real-domain-model). — 2026-08-27
 - [x] **Frontend switched to Angular.** React → Angular 22 + Material,
       deliberate (portfolio breadth), not a mistake. Same shell rebuilt

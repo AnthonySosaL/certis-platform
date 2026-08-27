@@ -5,6 +5,43 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — Auth live in production (JWT signing key + stale DLL fix)
+
+Finished what the previous entries left pending: the deployed API at
+`https://english-c1-api.runasp.net` now has working auth. Turned into a
+real debugging session, not just a config drop-in — full diagnosis in
+[errors/2026-08-27-stale-publish-output-dll-mismatch.md](errors/2026-08-27-stale-publish-output-dll-mismatch.md):
+
+- Added `Jwt__SigningKey` (a fresh, random, production-only value — never
+  shared with the local dev secret) to `wwwroot/web.config` alongside the
+  existing `ConnectionStrings__AppDb`.
+- First redeploy attempt revealed auth had never actually been deployed
+  at all — `/api/auth/*` 404'd because the live `.dll` predated
+  `AuthController`; only a one-off `web.config` edit had been pushed
+  before, never a full `dotnet publish` + upload since auth was built.
+- Second attempt (`scp -r`) partially failed: IIS had the running
+  process's own DLLs locked, so several core assemblies silently kept
+  their old versions. Fixed by uploading an empty `app_offline.htm`
+  first (stops the app, releases the locks), then re-uploading, then
+  deleting `app_offline.htm` via an interactive `sftp` session to bring
+  the site back.
+- That still 500'd on *every* request, including `/health`. Found via
+  MonsterASP's control panel **Logs → ASP.NET Core debug** (new
+  discovery this session, much faster than pulling raw log files over
+  SFTP): a `FileNotFoundException` for `System.IdentityModel.Tokens.Jwt,
+  Version=7.1.2.0` — the locally published copy of that one DLL was
+  stuck at an old `6.35.0` from reusing `publish-output/` across many
+  publishes this session without ever clearing it. Deleted every
+  `bin`/`obj`/`publish-output` folder in the backend, republished clean,
+  redeployed the same app_offline way.
+- Verified end-to-end against the live server: `/health` → 200,
+  `POST /api/auth/register` → 200 with a real JWT, against the real
+  production database.
+
+`docs/HOSTING.md` updated with the app_offline procedure, the
+clean-rebuild-before-deploy rule, and a pointer to the MonsterASP log
+panels for next time.
+
 ## 2026-08-27 — Reinstated password policy with a visible hint
 
 After the previous fix relaxed the policy to length-only (8+ chars, any
