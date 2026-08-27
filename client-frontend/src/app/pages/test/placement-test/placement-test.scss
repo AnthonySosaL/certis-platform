@@ -1,0 +1,71 @@
+.placement {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.placement__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 5rem 0;
+  opacity: 0.75;
+}
+
+.placement__intro h1 {
+  font-size: 1.85rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+}
+
+.placement__previous {
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+  margin-bottom: 1.5rem;
+}
+
+.placement__previous-label {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.placement__previous-level {
+  margin: 0.15rem 0 0.4rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.placement__previous-link {
+  color: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.placement__facts {
+  margin: 0 0 2rem;
+  padding-left: 1.25rem;
+  opacity: 0.8;
+  line-height: 1.8;
+}
+
+.placement__error {
+  color: var(--mat-sys-error);
+  margin: 0 0 1rem;
+}
+
+.placement__start {
+  padding: 0 1.75rem;
+  height: 3rem;
+  border-radius: 999px;
+  font-size: 1rem;
+}
+
+.placement__quiz h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem;
+}

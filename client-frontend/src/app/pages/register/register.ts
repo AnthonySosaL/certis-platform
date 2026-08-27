@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -43,6 +43,7 @@ export class Register {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -72,7 +73,8 @@ export class Register {
 
     try {
       await this.auth.register(email, password);
-      await this.router.navigateByUrl('/');
+      const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
+      await this.router.navigateByUrl(redirectTo ?? '/');
     } catch (error) {
       const identityErrors = extractIdentityErrors(error);
       this.errorMessage.set(

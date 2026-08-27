@@ -5,6 +5,86 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-27 — First real feature: placement test, end to end
+
+The first vertical slice beyond auth - a full CEFR placement test,
+decided and scoped in `docs/PENDING_IDEAS.md` weeks ago, built this
+session in one pass (domain model, API, Angular UI, verified in-browser).
+
+**Backend** (`client-backend/src/EnglishC1.Client.Domain/PlacementTest/`,
+`.../Application/PlacementTest/`, `.../Infrastructure/PlacementTest/`,
+`.../Api/PlacementTest/`):
+- Domain: `Question`/`QuestionOption`/`TestAttempt`/`TestAnswer` entities,
+  plus `PlacementScorer` - the actual scoring/placement algorithm, kept
+  as pure functions with zero EF Core dependency specifically so it's
+  unit-testable. 6 tests added in
+  `tests/EnglishC1.Client.Domain.Tests/PlacementTest/PlacementScorerTests.cs`,
+  covering the threshold, the "consecutive from A2" placement rule (a
+  weak A2 cell caps placement even with a perfect C1 score - the subtle
+  case worth locking in with a test), and the empty-input edge case.
+- **Format decided**: fixed-form (not adaptive) - 32 questions, one
+  sitting, 4 questions per (level, skill) cell across A2/B1/B2/C1 x
+  Grammar/Vocabulary. Chosen over adaptive because it's self-gradable
+  with no AI needed and far simpler to build correctly, per the tradeoff
+  noted in PENDING_IDEAS.
+- **Scoring decided**: a cell passes at >=60% correct. Placement = the
+  highest level where every cell from A2 up passed, consecutively - one
+  gap caps the result there, matching how CEFR placement is meant to
+  work. Any cell under 60%, anywhere, is flagged for reinforcement
+  independent of the overall placement.
+- Question bank: 32 hand-written multiple-choice items (not AI-generated
+  or copied), seeded once at startup via `QuestionSeeder` if the table's
+  empty. Options shuffle server-side per fetch so "the first option is
+  always right" isn't a discoverable pattern.
+- `TestController`: `GET placement/questions`, `POST placement/submit`,
+  `GET results/placement/latest`, `GET reinforcement/{level}/{skill}/questions`,
+  `POST reinforcement/{level}/{skill}/submit` - all `[Authorize]`.
+  Reinforcement attempts are logged via the same `TestAttempt` table
+  (`Kind` + `FocusLevel`/`FocusSkill`) rather than a second table, so
+  there's a free history without extra schema.
+- Enums now serialize as strings (`"B1"`, `"Grammar"`), not the JSON
+  default numeric index - added `JsonStringEnumConverter` in `Program.cs`.
+- New EF Core migration `AddPlacementTest`, applied to the real database.
+
+**Frontend** (`client-frontend/src/app/pages/test/`,
+`shared/quiz/`, `core/test-api.ts`, `core/auth.guard.ts`):
+- `shared/quiz/`: one reusable quiz-taking component (progress bar,
+  per-question radio groups, submit-when-complete) used by both the
+  placement test and every reinforcement quiz - real shared complexity,
+  not premature abstraction.
+- `/test`: shows the previous result (if any) or an intro, then the full
+  quiz; submits and routes to `/test/results`.
+- `/test/results`: CEFR badge (color-coded, see below), score, and a
+  breakdown grid - every weak cell gets a "Practice this" button routing
+  straight to its reinforcement quiz.
+- `/test/reinforce/:level/:skill`: a short targeted quiz for one cell,
+  immediate pass/fail feedback, retry inline.
+- All three routes guarded by a new `authGuard` (`core/auth.guard.ts`,
+  the first protected-route guard in the app) - unauthenticated visitors
+  bounce to `/login` with a `redirectTo` query param that `login.ts`/
+  `register.ts` now honor instead of always landing on `/`.
+- Verified in-browser end-to-end: answered all 32 (scored 3/32
+  deliberately with wrong answers) -> "Below A2" result with every cell
+  flagged -> clicked into A2 Grammar reinforcement -> answered correctly
+  -> "Nice - you've got this." Confirmed via the real API too (GET
+  `results/placement/latest` returns the persisted attempt).
+
+**Design pass** (`styles.scss`, `layout/navbar/`, `pages/home/`,
+`pages/about/`): replaced the generic Material green/blue starter
+palette with azure (primary) + orange (tertiary) - warmer, more
+education-associated, per the "needs color, needs to feel intuitive"
+feedback. Added CEFR band CSS variables (`--cefr-a2` etc.) reused
+everywhere a level displays. Home and About rewritten with real content
+(hero, "how it works" steps, level chips; methodology write-up) instead
+of scaffold placeholders. Navbar got a real icon instead of a "?" and a
+"Take the test" link.
+
+**Note on browser-testing Material radio buttons**: clicking a
+`mat-radio-button` host element directly does nothing - Angular Material
+only wires the click handler to the label and the native `<input>`
+inside it. Click one of those two, not the custom element itself, when
+scripting interactions.
+
 ## 2026-08-27 — Auth live in production (JWT signing key + stale DLL fix)
 
 Finished what the previous entries left pending: the deployed API at

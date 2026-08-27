@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using EnglishC1.Client.Application.PlacementTest;
 using EnglishC1.Client.Infrastructure.Identity;
 using EnglishC1.Client.Infrastructure.Persistence;
+using EnglishC1.Client.Infrastructure.PlacementTest;
 
 namespace EnglishC1.Client.Infrastructure;
 
@@ -45,6 +47,7 @@ public static class DependencyInjection
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddScoped<ITokenService, JwtTokenService>();
+        services.AddScoped<ITestService, TestService>();
 
         return services;
     }

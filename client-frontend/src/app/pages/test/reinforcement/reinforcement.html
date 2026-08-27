@@ -1,0 +1,36 @@
+<main class="reinforce">
+  <a routerLink="/test/results" class="reinforce__back">&larr; Back to results</a>
+  <h1>Reinforcement: {{ level }} {{ skill }}</h1>
+
+  @if (errorMessage()) {
+    <p class="reinforce__error">{{ errorMessage() }}</p>
+  }
+
+  @switch (stage()) {
+    @case ('loading') {
+      <div class="reinforce__loading">
+        <mat-spinner diameter="32" />
+      </div>
+    }
+    @case ('taking') {
+      <app-quiz [questions]="questions()" submitLabel="Submit" (submitted)="onSubmit($event)" />
+    }
+    @case ('submitting') {
+      <div class="reinforce__loading">
+        <mat-spinner diameter="32" />
+        <p>Grading…</p>
+      </div>
+    }
+    @case ('result') {
+      @let r = result()!;
+      <div class="reinforce__result" [class.reinforce__result--pass]="passed(r)">
+        <p class="reinforce__result-score">{{ r.score }} / {{ r.totalQuestions }}</p>
+        <p class="reinforce__result-label">{{ passed(r) ? "Nice - you've got this." : 'Still shaky - try again.' }}</p>
+        <div class="reinforce__result-actions">
+          <button mat-flat-button color="primary" type="button" (click)="retry()">Try again</button>
+          <a mat-button routerLink="/test/results">Back to results</a>
+        </div>
+      </div>
+    }
+  }
+</main>

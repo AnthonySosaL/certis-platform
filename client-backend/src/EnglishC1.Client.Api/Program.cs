@@ -1,15 +1,23 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using EnglishC1.Client.Infrastructure;
 using EnglishC1.Client.Infrastructure.Identity;
+using EnglishC1.Client.Infrastructure.Persistence;
+using EnglishC1.Client.Infrastructure.PlacementTest;
 
 var builder = WebApplication.CreateBuilder(args);
 
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
 
-builder.Services.AddControllers();
+// String enums (not the default numeric 0/1/2) - the placement test API
+// sends CefrLevel/SkillArea/AttemptKind to the Angular client, which
+// expects readable string literals ("B1", "Grammar"), not magic numbers.
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -76,5 +84,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+
+// Seeds the placement test question bank if empty. Requires the
+// PlacementTest migration to already be applied (`dotnet ef database
+// update`) - a no-op otherwise since the table won't exist yet.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    if ((await db.Database.GetAppliedMigrationsAsync()).Any())
+        await QuestionSeeder.SeedAsync(db);
+}
 
 app.Run();

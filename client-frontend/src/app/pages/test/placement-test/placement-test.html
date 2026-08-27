@@ -1,0 +1,47 @@
+<main class="placement">
+  @switch (stage()) {
+    @case ('loading') {
+      <div class="placement__loading">
+        <mat-spinner diameter="32" />
+      </div>
+    }
+    @case ('intro') {
+      <div class="placement__intro">
+        @if (previousResult(); as result) {
+          <div class="placement__previous">
+            <p class="placement__previous-label">You've already taken this test</p>
+            <p class="placement__previous-level">{{ result.placementResult ?? 'Below A2' }}</p>
+            <a routerLink="/test/results" class="placement__previous-link">View my results</a>
+          </div>
+        }
+
+        <h1>{{ previousResult() ? 'Retake the placement test' : 'Ready to start?' }}</h1>
+        <ul class="placement__facts">
+          <li>32 multiple-choice questions</li>
+          <li>Grammar and vocabulary, A2 to C1</li>
+          <li>About 15 minutes, answer at your own pace</li>
+        </ul>
+
+        @if (errorMessage()) {
+          <p class="placement__error">{{ errorMessage() }}</p>
+        }
+
+        <button mat-flat-button color="primary" class="placement__start" type="button" (click)="start()">
+          {{ previousResult() ? 'Retake the test' : 'Start the test' }}
+        </button>
+      </div>
+    }
+    @case ('taking') {
+      <div class="placement__quiz">
+        <h1>Placement test</h1>
+        <app-quiz [questions]="questions()" submitLabel="See my results" (submitted)="onSubmit($event)" />
+      </div>
+    }
+    @case ('submitting') {
+      <div class="placement__loading">
+        <mat-spinner diameter="32" />
+        <p>Grading your answers…</p>
+      </div>
+    }
+  }
+</main>

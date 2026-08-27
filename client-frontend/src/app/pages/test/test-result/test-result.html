@@ -1,0 +1,44 @@
+<main class="result">
+  @if (loading()) {
+    <div class="result__loading">
+      <mat-spinner diameter="32" />
+    </div>
+  } @else if (!result(); as _) {
+    <div class="result__empty">
+      <h1>No results yet</h1>
+      <p>You haven't taken the placement test yet.</p>
+      <a mat-flat-button color="primary" routerLink="/test">Take the test</a>
+    </div>
+  } @else {
+    @let r = result()!;
+    <div class="result__badge" [style.--level-color]="r.placementResult ? levelCssVar(r.placementResult) : '#94a3b8'">
+      <span class="result__badge-label">Your level</span>
+      <span class="result__badge-level">{{ r.placementResult ?? 'Below A2' }}</span>
+      <span class="result__badge-score">{{ r.score }} / {{ r.totalQuestions }} correct</span>
+    </div>
+
+    <section class="result__breakdown">
+      <h2>Breakdown by area</h2>
+      <div class="breakdown-grid">
+        @for (cell of r.breakdown; track cell.level + cell.skillArea) {
+          <div class="breakdown-cell" [class.breakdown-cell--weak]="cell.needsReinforcement">
+            <div class="breakdown-cell__head">
+              <span class="breakdown-cell__level" [style.--level-color]="levelCssVar(cell.level)">{{ cell.level }}</span>
+              <span class="breakdown-cell__skill">{{ cell.skillArea }}</span>
+            </div>
+            <p class="breakdown-cell__score">{{ cell.correct }} / {{ cell.total }}</p>
+            @if (cell.needsReinforcement) {
+              <a mat-flat-button class="breakdown-cell__cta" [routerLink]="reinforcementPath(cell.level, cell.skillArea)">
+                Practice this
+              </a>
+            } @else {
+              <span class="breakdown-cell__ok">Solid</span>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <a mat-flat-button color="primary" class="result__retake" routerLink="/test">Retake the full test</a>
+  }
+</main>

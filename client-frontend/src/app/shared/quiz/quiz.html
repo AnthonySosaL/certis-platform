@@ -1,0 +1,33 @@
+<div class="quiz">
+  <div class="quiz__progress">
+    <mat-progress-bar mode="determinate" [value]="progress()" />
+    <p class="quiz__progress-text">{{ answeredCount() }} / {{ questions().length }} answered</p>
+  </div>
+
+  @for (question of questions(); track question.id; let i = $index) {
+    <div class="quiz-question">
+      <p class="quiz-question__meta">Question {{ i + 1 }} &middot; {{ question.level }} &middot; {{ question.skillArea }}</p>
+      <p class="quiz-question__text">{{ question.text }}</p>
+      <mat-radio-group
+        class="quiz-question__options"
+        [value]="selected(question.id)"
+        (change)="select(question.id, $event.value)"
+      >
+        @for (option of question.options; track option.id) {
+          <mat-radio-button [value]="option.id">{{ option.text }}</mat-radio-button>
+        }
+      </mat-radio-group>
+    </div>
+  }
+
+  <button
+    mat-flat-button
+    color="primary"
+    class="quiz__submit"
+    type="button"
+    [disabled]="!allAnswered() || submitting()"
+    (click)="submit()"
+  >
+    {{ submitLabel() }}
+  </button>
+</div>

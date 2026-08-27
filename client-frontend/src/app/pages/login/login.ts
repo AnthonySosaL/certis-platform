@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +25,7 @@ export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -43,7 +44,8 @@ export class Login {
 
     try {
       await this.auth.login(email, password);
-      await this.router.navigateByUrl('/');
+      const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
+      await this.router.navigateByUrl(redirectTo ?? '/');
     } catch {
       this.errorMessage.set('Invalid email or password.');
     } finally {

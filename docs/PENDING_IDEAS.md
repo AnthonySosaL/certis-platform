@@ -4,39 +4,31 @@ A running list so nothing gets lost while other things get built first.
 Move an item to "Done" (with a date and a link to the changelog entry)
 instead of deleting it.
 
-## Feature scope — first slice decided
+## Feature scope — placement test shipped, what's next
 
-The first real feature is now defined at a first-pass level: a
-**placement/evaluation test**. Concretely:
+The placement test (see "Done" below) answered the questions that used
+to sit here as open decisions:
 
-- Registration is required to take it (ties results to a person, needed
-  for progress tracking and for "guide me from here" follow-up).
-- Both the user and their partner take it — this is the two-person
-  private tool's actual starting point, not a hypothetical.
-- Result: places the test-taker on a CEFR band (currently estimated
-  around A2/B1-B2 heading toward C1) and the platform guides next steps
-  from there.
-- Explicitly wanted for the user's own portfolio — build it with real
-  rigor, not a throwaway demo.
-- The page also needs a visible "how it works" / methodology section
-  (see the About page placeholder) — framed partly for future
-  institutional visitors evaluating the platform's credibility.
+- **Format**: fixed-form, not adaptive - 32 multiple-choice questions, one
+  sitting. Self-gradable, no AI needed, far simpler to get right than
+  adaptive branching for a v1.
+- **Scoring**: a fixed 60% pass threshold per (level, skill) cell;
+  placement = highest level passed consecutively from A2.
+- **Content authoring**: hand-written, stored in the database, seeded at
+  startup (`QuestionSeeder`) - not AI-generated.
 
-Still open, needed before building the domain model:
+Still open, now that the first slice exists:
 
-- [ ] **Test format.** Multiple choice / gap-fill (self-gradable, no AI
-      needed) was the earlier working assumption for a first slice — is
-      that still right for a placement test specifically, or does
-      placement need something more adaptive (e.g. question difficulty
-      responds to answers so far)?
-- [ ] **CEFR band scoring.** How do raw answers map to an A2-C1 estimate —
-      a fixed scoring table, item-response-theory-style weighting, or
-      something simpler for v1?
 - [ ] Beyond the placement test: which skills come next (reading,
-      writing, listening, speaking, vocabulary/grammar drills, full mock
-      exams)?
-- [ ] How is content authored — written/curated by hand and stored in the
-      database, generated on demand (e.g. via an AI model), or both?
+      writing, listening, speaking - only Grammar/Vocabulary exist so
+      far)?
+- [ ] Should a reinforcement attempt that's passed update anything about
+      the original placement, or stay purely a practice log forever? No
+      auto-update exists yet - retaking the full placement test is
+      currently the only way to change your recorded level.
+- [ ] Bigger question bank - 4 questions per (level, skill) cell is thin
+      for anything beyond a first estimate (already flagged honestly on
+      the About page).
 
 ## Blocked on you / needs a decision
 
@@ -47,10 +39,6 @@ Still open, needed before building the domain model:
 
 ## Scaffolded structurally, not implemented
 
-- [ ] `client-backend` — layered scaffold exists, builds, and is verified
-      end-to-end against the real MonsterASP.NET SQL Server database
-      (see HOSTING.md). Domain model so far is auth (Identity's own
-      tables) — the actual English-practice entities still don't exist.
 - [ ] **Password reset + email confirmation.** Needs an email
       sender (SendGrid free tier, or similar) before it can work at all —
       `AddDefaultTokenProviders()` isn't even called yet. Not urgent for
@@ -98,6 +86,12 @@ Still open, needed before building the domain model:
 
 ## Done
 
+- [x] **Placement test, end to end.** Backend (domain model, scoring
+      algorithm with 6 unit tests, API) + Angular UI (test-taking,
+      results with a color-coded CEFR badge, per-area breakdown,
+      targeted reinforcement quizzes) + a design pass replacing the
+      generic starter theme. Verified in-browser and via the API. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-27--first-real-feature-placement-test-end-to-end). — 2026-08-27
 - [x] **Frontend auth: login/register pages, wired end-to-end.** Auth
       service, HTTP interceptor, Login/Register pages (Reactive Forms +
       Material), Navbar reflects real session state. Verified in the

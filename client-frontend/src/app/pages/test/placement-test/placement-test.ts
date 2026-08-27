@@ -1,0 +1,56 @@
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+import { Question, SubmitAnswer, TestApi, TestResult } from '../../../core/test-api';
+import { Quiz } from '../../../shared/quiz/quiz';
+
+type Stage = 'loading' | 'intro' | 'taking' | 'submitting';
+
+@Component({
+  selector: 'app-placement-test',
+  imports: [MatButtonModule, MatProgressSpinnerModule, RouterLink, Quiz],
+  templateUrl: './placement-test.html',
+  styleUrl: './placement-test.scss',
+})
+export class PlacementTest implements OnInit {
+  private readonly testApi = inject(TestApi);
+  private readonly router = inject(Router);
+
+  protected readonly stage = signal<Stage>('loading');
+  protected readonly previousResult = signal<TestResult | null>(null);
+  protected readonly questions = signal<Question[]>([]);
+  protected readonly errorMessage = signal<string | null>(null);
+
+  async ngOnInit(): Promise<void> {
+    try {
+      this.previousResult.set(await this.testApi.getLatestPlacementResult());
+    } catch {
+      // Best-effort - if this fails, we just skip straight to "no previous result" state.
+    }
+    this.stage.set('intro');
+  }
+
+  async start(): Promise<void> {
+    this.stage.set('loading');
+    try {
+      this.questions.set(await this.testApi.getPlacementQuestions());
+      this.stage.set('taking');
+    } catch {
+      this.errorMessage.set('Could not load the test questions. Please try again.');
+      this.stage.set('intro');
+    }
+  }
+
+  async onSubmit(answers: SubmitAnswer[]): Promise<void> {
+    this.stage.set('submitting');
+    try {
+      await this.testApi.submitPlacementTest(answers);
+      await this.router.navigateByUrl('/test/results');
+    } catch {
+      this.errorMessage.set('Could not submit your answers. Please try again.');
+      this.stage.set('taking');
+    }
+  }
+}

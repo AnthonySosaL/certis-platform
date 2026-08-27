@@ -5,14 +5,18 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
+// Azure (trustworthy, education-associated) + orange (energetic accent
+// for CTAs and highlights) - picked 2026-08-27 to replace the generic
+// Material green/blue starter palette with something warmer and more
+// inviting, per the "needs color, needs to feel intuitive" feedback.
 html {
   height: 100%;
   @include mat.theme(
     (
       color: (
         theme-type: light,
-        primary: mat.$green-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$azure-palette,
+        tertiary: mat.$orange-palette,
       ),
       typography: Roboto,
       density: 0,
@@ -27,13 +31,29 @@ html.dark {
     (
       color: (
         theme-type: dark,
-        primary: mat.$green-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$azure-palette,
+        tertiary: mat.$orange-palette,
       ),
       typography: Roboto,
       density: 0,
     )
   );
+}
+
+// CEFR band colors - used to color-code results/badges consistently
+// everywhere a level shows up (test results, reinforcement prompts,
+// future progress views). Not tied to the Material theme itself since
+// these are semantic (a level's color stays the same in light or dark
+// mode), unlike the primary/tertiary brand colors above.
+:root {
+  --cefr-a2: #16a34a;
+  --cefr-a2-bg: #dcfce7;
+  --cefr-b1: #2563eb;
+  --cefr-b1-bg: #dbeafe;
+  --cefr-b2: #7c3aed;
+  --cefr-b2-bg: #ede9fe;
+  --cefr-c1: #d97706;
+  --cefr-c1-bg: #fef3c7;
 }
 
 body {

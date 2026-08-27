@@ -1,10 +1,38 @@
 <main class="home">
   <section class="home__hero">
-    <h1>Practice. Track. Reach C1.</h1>
+    <span class="home__eyebrow">Free placement test</span>
+    <h1>Find your English level. Then close the gaps.</h1>
     <p>
-      This is a scaffold - the navbar, theming, and layout are ready. Real
-      content (placement test, exercises, progress tracking) lands next.
+      A short placement test tells you your CEFR level - A2 to C1 - and exactly
+      which grammar and vocabulary areas need work. Fail an area and a focused
+      reinforcement quiz unlocks for it, so you always know what to practice next.
     </p>
-    <button mat-flat-button color="primary">Get started</button>
+    <button mat-flat-button color="primary" class="home__cta" (click)="startTest()">
+      Start the placement test
+    </button>
+  </section>
+
+  <section class="home__levels" aria-label="CEFR levels covered">
+    @for (item of levels; track item.level) {
+      <div class="level-chip" [style.--chip-color]="'var(' + item.cssVar + ')'">
+        <span class="level-chip__code">{{ item.level }}</span>
+        <span class="level-chip__label">{{ item.label }}</span>
+      </div>
+    }
+  </section>
+
+  <section class="home__how" aria-label="How it works">
+    <h2>How it works</h2>
+    <ol class="steps">
+      @for (step of steps; track step.title; let i = $index) {
+        <li class="step">
+          <span class="step__number">{{ i + 1 }}</span>
+          <div>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.text }}</p>
+          </div>
+        </li>
+      }
+    </ol>
   </section>
 </main>
