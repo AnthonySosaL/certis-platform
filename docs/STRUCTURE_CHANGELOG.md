@@ -5,6 +5,37 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-26 — Frontend switched: React -> Angular 22 + Material
+
+Deliberate change, not a correction — the user has many existing React
+projects and wants portfolio breadth. Blazor (writing the frontend in C#
+too, leaning fully into the .NET-skills goal) was floated first and
+briefly started, but the user chose Angular by name after weighing it, so
+that's what got built.
+
+- Deleted `client-frontend` (React) and rebuilt it from scratch with
+  `ng new client-frontend --routing --style=scss --ssr=false`, then
+  `ng add @angular/material` (Material 3 theming via `mat.theme()`,
+  palette retargeted from the default azure-blue to green to match the
+  brand accent the React version used).
+- Rebuilt the same shell the React version had: `Navbar` (responsive —
+  horizontal nav >= 768px, `mat-menu` mobile dropdown below that),
+  `Footer`, a placeholder `Home` page, and a signal-based `Theme` service
+  (`src/app/core/theme.ts`) — light default, dark mode fully wired via an
+  `html.dark` class.
+- Icons: inline SVG (menu, sun/moon) instead of a package — `lucide-angular`
+  doesn't support Angular 22 yet (peer dependency conflict), and inline
+  SVG was simplest not to block on that.
+- Had to update Node.js (v22.22.0 -> v22.22.3 via the already-installed
+  `nvm4w`) — the latest Angular CLI refused to run on the older patch
+  version. See `docs/DEPENDENCIES.md`.
+- Updated `scripts/start-dev.ps1` / `stop-dev.ps1` (port 5173 -> 4200) and
+  `.claude/launch.json` / `scripts/dev-frontend.cmd` for the preview
+  tooling. Verified end-to-end: build clean, dev server serves correctly,
+  dark mode toggle works, mobile breakpoint correctly collapses the nav.
+- Old React code isn't lost — fully recoverable from git history — but is
+  not part of the active codebase.
+
 ## 2026-08-26 — Backend deployed live: MonsterASP.NET
 
 `client-backend` is reachable at `https://english-c1-api.runasp.net`

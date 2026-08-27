@@ -10,7 +10,7 @@ history stays visible (per the notes' traceability requirement).
 | Tool | Version | Why | Added |
 |---|---|---|---|
 | .NET SDK | 8.0.424 (LTS) | Backend runtime + CLI (`dotnet new`, EF Core migrations). Only the runtime was preinstalled. First tried `winget install Microsoft.DotNet.SDK.8`, but that install requires admin elevation and hung indefinitely waiting on a UAC prompt with no interactive desktop to show it to — killed it and installed to the user profile instead (`dotnet-install.ps1 -InstallDir %USERPROFILE%\.dotnet`, no admin needed). `PATH` and `DOTNET_ROOT` (User scope) point there now. If `dotnet --list-sdks` ever stops showing 8.0.424, check those two env vars first. | 2026-08-26 |
-| Node.js | v22.22.0 (already installed) | Frontend tooling (npm, Vite). | pre-existing |
+| Node.js | v22.22.3 (via `nvm4w`, already installed) | Frontend tooling. Updated from v22.22.0 — the latest Angular CLI requires >=22.22.3. `nvm4w` was already on this machine (`nvm install 22.22.3` + `nvm use 22.22.3`, no elevation needed). | pre-existing, updated 2026-08-26 |
 | Docker Desktop | 29.4.3 (already installed) | Was local Postgres via `docker-compose.yml`. No longer used day to day — the app connects to the real MonsterASP.NET database now (see `docs/HOSTING.md`). Kept only as an offline fallback, not auto-started. | pre-existing, wired 2026-08-26, demoted to fallback same day once MonsterASP DB was live |
 | git | 2.53.0 (already installed) | Version control. | pre-existing |
 
@@ -24,21 +24,28 @@ before spawning anything, so it's self-contained regardless of ambient
 PATH staleness. If `dotnet` is ever "not found" in a fresh terminal, log
 off/on (or reboot) once to pick up the registry PATH everywhere.
 
-## `client-frontend` (React + Vite)
+## `client-frontend` (Angular 22 + Material)
+
+Switched from React on 2026-08-26 — see "Removed" below for what it
+replaced and why.
 
 | Package | Why |
 |---|---|
-| `react`, `react-dom` | UI framework — scaffolded by `create-vite`. |
-| `typescript` | Type safety. |
-| `vite`, `@vitejs/plugin-react` | Dev server / bundler. |
-| `tailwindcss` v4, `@tailwindcss/vite` | Utility CSS, required by shadcn/ui. |
-| `shadcn` CLI (`radix-ui` base, "Nova" preset) | Component library, chosen for reusable/consistent components from the start. Generates owned source in `src/components/ui`, not an opaque dependency. |
-| `lucide-react` | Icon set — SVG only, no emoji/text-icons. Pulled in automatically by the shadcn "Nova" preset. |
-| `@fontsource-variable/geist` | Self-hosted variable font, no external font CDN request. |
-| `react-router-dom` | Client-side routing. |
-| `motion` | Animation (the renamed/current Framer Motion package). |
-| `i18next`, `react-i18next`, `i18next-browser-languagedetector` | i18n scaffold — English active (the platform's primary language), Spanish resource file present for the app's own UI chrome if ever needed. |
-| `@types/node` (dev) | Needed for `import.meta.dirname` path aliasing in `vite.config.ts`. |
+| `@angular/core`, `@angular/router`, `@angular/cli` | Framework + CLI, `ng new` default. Standalone components, signals. |
+| `@angular/material`, `@angular/cdk` | Component library — added via `ng add @angular/material` (theme: initially azure-blue, retargeted to a green Material 3 palette in `src/styles.scss` to match the brand accent the React version used). |
+| TypeScript, Vite (bundler, used internally by the Angular 22 CLI) | Scaffolded by `ng new`. |
+
+No icon package — a handful of inline SVGs in `navbar.html` (menu,
+sun/moon) instead. `lucide-angular`'s peer dependency range doesn't cover
+Angular 22 yet (too new, `npm install` failed with an ERESOLVE conflict);
+inline SVG sidesteps that without waiting on an upstream update, and stays
+true to the "SVG, not an icon font" preference either way.
+
+**Known gotcha**: `ng serve` can hang indefinitely after several
+interrupted runs (stuck rebuilding, port never binds) — clearing the
+`.angular/` cache directory in `client-frontend` and restarting fixes it.
+Not a real bug, just what happened during this session's repeated manual
+testing; unlikely to matter for normal day-to-day use.
 
 ## `client-backend` (ASP.NET Core, layered: Domain/Application/Infrastructure/Api)
 
@@ -85,3 +92,4 @@ used" like any other tool:
 |---|---|---|
 | `Product` domain entity, `ProductsController`, `IProductRepository`/`ProductRepository`, `InitialCreate` migration | Wrong-project scope (e-commerce domain) — see [errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md). Migration rolled back before deletion. | 2026-08-26 |
 | `Npgsql.EntityFrameworkCore.PostgreSQL` | Switched to `Microsoft.EntityFrameworkCore.SqlServer` once the real database was created on MonsterASP.NET (SQL Server, not Postgres). | 2026-08-26 |
+| Entire React `client-frontend` (`react`, `react-router-dom`, `shadcn`/Radix components, `motion`, `i18next`, `@fontsource-variable/geist`, `tailwindcss`) | Deliberate framework switch to Angular, not a mistake — the user has many existing React projects and wants portfolio breadth. Fully recoverable from git history if ever needed (nothing lost, just not the active choice). Blazor was also briefly considered/started as a "C# frontend" option before the user chose Angular by name. | 2026-08-26 |

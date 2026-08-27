@@ -19,20 +19,20 @@ waiting for that decision.
 
 | Layer | Choice | Why |
 |---|---|---|
-| Backend | **ASP.NET Core 8 (C#) Web API** | Explicitly requested — partly to learn C#/.NET, which is widely asked for in job postings. LTS version. |
-| Frontend | **React 18 + TypeScript + Vite** | Pairs with shadcn/ui (see below). |
-| Component library | **shadcn/ui** (Radix primitives, Tailwind CSS v4, "Nova" preset — Lucide icons, Geist font) | Reusable, consistent components from the start; owned source code, not an opaque dependency. |
+| Backend | **ASP.NET Core 8 (C#) Web API** | Explicitly requested — partly to learn C#/.NET, which is widely asked for in job postings. LTS version. Live at `https://english-c1-api.runasp.net` — see [HOSTING.md](HOSTING.md). |
+| Frontend | **Angular 22 + TypeScript** | Switched from React on 2026-08-26 — deliberate choice, not a mistake: the user already has "a ton" of React projects and wants portfolio breadth. Angular over Blazor (a C#-frontend option that was also considered and briefly started) because the user explicitly asked for Angular by name after weighing it. |
+| Component library | **Angular Material** (Material 3 theming via `mat.theme()`) | Official, best-integrated Angular UI kit — analogous role to what shadcn played for the React version. |
 | ORM | **EF Core** | The direct .NET equivalent of Prisma-style "controlled, tracked schema changes" — migrations live in source control. |
-| Database | **PostgreSQL** | Free-tier friendly, works cleanly with EF Core. |
-| Animation | **Motion** (the current Framer Motion package) | For a non-static, well-designed UI. |
-| Auth | Not built yet | Needs a decision on user model first (just the two of you vs. accounts for others later) — see PENDING_IDEAS.md. |
+| Database | **SQL Server** (MonsterASP.NET, free tier) | Switched from PostgreSQL on 2026-08-26 once a real database was created — see [HOSTING.md](HOSTING.md). |
+| Icons | **Inline SVG**, hand-written | `lucide-angular`'s peer dependency range doesn't yet cover Angular 22 (too new); a handful of small inline SVGs (menu, sun/moon) avoids both the version conflict and an icon web font. |
+| Auth | Not built yet | Needs a decision on user model first (just the two of you vs. accounts for others later) — see PENDING_IDEAS.md. Per [AI_WORKFLOW.md](AI_WORKFLOW.md), security-sensitive design (registration/login/password reset) gets a Fable 5 pass before implementation. |
 
 ## Repo layout
 
 ```
 english-c1-platform/   (folder name — placeholder, see NAMING.md)
-├── client-frontend/    React + TS + Vite + shadcn — UI shell exists, no real pages yet
-├── client-backend/     ASP.NET Core Web API — layered, builds and runs, no domain model yet
+├── client-frontend/    Angular 22 + Material — UI shell exists, no real pages yet
+├── client-backend/     ASP.NET Core Web API — layered, builds and runs, live on MonsterASP.NET, no domain model yet
 ├── docs/                this folder
 └── scripts/             local dev start/stop helpers
 ```
@@ -73,38 +73,42 @@ holdover on 2026-08-26; see
 ## Frontend structure
 
 ```
-src/
-├── app/            App shell: routing, providers (theme, etc.)
-├── components/
-│   ├── ui/         shadcn primitives (generated — don't hand-edit heavily)
-│   └── layout/     Navbar, Footer, and other structural, reused components
-├── features/       Feature-based modules, once features are defined
-├── i18n/           Translation resources (English active, Spanish scaffolded)
-├── lib/            Shared utilities (shadcn's cn() helper, etc.)
-└── pages/          Route-level components (currently a placeholder Home)
+src/app/
+├── layout/          Navbar, Footer — structural, reused components
+├── pages/           Route-level standalone components (Home, About, Contact — placeholders)
+├── core/            Cross-cutting services (Theme, auth later)
+├── app.routes.ts    Route table
+└── app.ts/.html     App shell (renders Navbar + <router-outlet /> + Footer)
 ```
 
-Component rule carried over from the reference notes (still applies
-generically): build reusable components from the start, prefer cards over
-extra tabs/pages where content allows it, no emoji/text-icons — Lucide SVG
-icons only, sized responsively.
+Standalone components throughout (no NgModules) — Angular 22's default and
+recommended style. Component rule carried over from the original project
+notes (still applies generically regardless of framework): build reusable
+components from the start, prefer cards over extra tabs/pages where
+content allows it, no emoji/text-icons — SVG icons only, sized
+responsively.
 
 ## Cross-cutting concerns staged for later (not built yet)
 
 - **Theming**: light mode is the default and only active mode; the full
-  dark-mode CSS variable set already exists (`.dark` class, toggled via
-  `ThemeProvider`) — flipping the default later is a one-line change.
-- **i18n**: English is the only language wired into the UI (the platform's
-  primary language, since it's for English practice), but the `i18next`
-  setup and a Spanish resource file exist side by side for the app's own
-  UI chrome (nav labels etc.) if that's ever needed.
+  Material 3 dark theme already exists (`html.dark`, toggled via the
+  `Theme` service — `src/app/core/theme.ts`) — flipping the default later
+  is a one-line change.
+- **i18n**: English only for now, no i18n library wired in yet (the React
+  version had `i18next`; Angular's equivalent — `@angular/localize` for
+  build-time, or `ngx-translate` for a runtime-switchable setup closer to
+  what `i18next` did — isn't set up yet since the platform's primary
+  language is English by design). Add if/when a language switcher is
+  actually needed.
 - **Auth**: not designed yet. Needs the user-model decision first (private
-  2-person tool vs. something with real accounts).
+  2-person tool vs. something with real accounts) and a Fable 5 security
+  pass before implementation — see AI_WORKFLOW.md.
 
 ## Design patterns in play so far
 
-- **Provider pattern** for cross-cutting UI state (`ThemeProvider`).
-- **Composition over configuration** for shadcn components (owned source
-  code, not an opaque npm dependency).
+- **Signals** for reactive UI state (`Theme.mode`), Angular's current
+  recommended default over RxJS `BehaviorSubject` for simple state.
+- **Standalone components** — no NgModules, direct `imports: []` per
+  component.
 - **Repository pattern** (planned) for the backend's Infrastructure layer,
   once there's a real domain to persist.

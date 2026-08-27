@@ -1,4 +1,4 @@
-# Starts the local dev environment: the frontend dev server (Vite,
+# Starts the local dev environment: the frontend dev server (Angular CLI,
 # hot-reloads on save), the backend dev server (dotnet watch, hot-reloads
 # on save), and the task widget. The backend connects straight to the real
 # MonsterASP.NET SQL Server database (via user-secrets) - local Docker
@@ -32,13 +32,13 @@ function Test-PortOpen($port) {
     return [bool](Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue)
 }
 
-if (Test-PortOpen 5173) {
-    Write-Host "client-frontend already running on :5173 - skipping." -ForegroundColor DarkYellow
+if (Test-PortOpen 4200) {
+    Write-Host "client-frontend already running on :4200 - skipping." -ForegroundColor DarkYellow
 } else {
     Write-Host "Starting client-frontend dev server..." -ForegroundColor Cyan
     Start-Process powershell -ArgumentList @(
         '-NoExit', '-Command',
-        "`$host.ui.RawUI.WindowTitle = 'Project - client-frontend'; Set-Location '$root\client-frontend'; npm run dev"
+        "`$host.ui.RawUI.WindowTitle = 'Project - client-frontend'; Set-Location '$root\client-frontend'; npx ng serve"
     )
 }
 
@@ -78,5 +78,5 @@ if ($widgetAlreadyOpen) {
 }
 
 Write-Host ""
-Write-Host "Done. Frontend: http://localhost:5173  |  Backend: http://localhost:5223/swagger" -ForegroundColor Green
+Write-Host "Done. Frontend: http://localhost:4200  |  Backend: http://localhost:5223/swagger" -ForegroundColor Green
 Write-Host "Both auto-reload on save - just edit and save, no need to re-run this." -ForegroundColor Green

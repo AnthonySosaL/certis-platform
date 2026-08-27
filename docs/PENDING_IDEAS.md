@@ -4,24 +4,39 @@ A running list so nothing gets lost while other things get built first.
 Move an item to "Done" (with a date and a link to the changelog entry)
 instead of deleting it.
 
-## Feature scope — not yet decided
+## Feature scope — first slice decided
 
-This is the biggest open item: what does "practice and evaluate English
-toward C1" actually consist of, concretely? Nothing below can be built
-correctly (domain model, database schema, UI) until this is answered, at
-least at a first-pass level:
+The first real feature is now defined at a first-pass level: a
+**placement/evaluation test**. Concretely:
 
-- [ ] Which skills does the platform cover first — reading, writing,
-      listening, speaking, vocabulary/grammar drills, full mock C1 exams,
-      some combination?
+- Registration is required to take it (ties results to a person, needed
+  for progress tracking and for "guide me from here" follow-up).
+- Both the user and their partner take it — this is the two-person
+  private tool's actual starting point, not a hypothetical.
+- Result: places the test-taker on a CEFR band (currently estimated
+  around A2/B1-B2 heading toward C1) and the platform guides next steps
+  from there.
+- Explicitly wanted for the user's own portfolio — build it with real
+  rigor, not a throwaway demo.
+- The page also needs a visible "how it works" / methodology section
+  (see the About page placeholder) — framed partly for future
+  institutional visitors evaluating the platform's credibility.
+
+Still open, needed before building the domain model:
+
+- [ ] **Test format.** Multiple choice / gap-fill (self-gradable, no AI
+      needed) was the earlier working assumption for a first slice — is
+      that still right for a placement test specifically, or does
+      placement need something more adaptive (e.g. question difficulty
+      responds to answers so far)?
+- [ ] **CEFR band scoring.** How do raw answers map to an A2-C1 estimate —
+      a fixed scoring table, item-response-theory-style weighting, or
+      something simpler for v1?
+- [ ] Beyond the placement test: which skills come next (reading,
+      writing, listening, speaking, vocabulary/grammar drills, full mock
+      exams)?
 - [ ] How is content authored — written/curated by hand and stored in the
       database, generated on demand (e.g. via an AI model), or both?
-- [ ] What does "evaluate" mean concretely — self-scored exercises,
-      AI-graded writing/speaking, a mock exam with a C1-equivalent score,
-      progress tracking over time comparing you and your friend?
-- [ ] Who can use it right now — just the two of you (simple private
-      login is enough), or does it need to support other users from day
-      one even before the "sell to institutions" idea is pursued?
 
 ## Blocked on you / needs a decision
 
@@ -29,18 +44,29 @@ least at a first-pass level:
       [NAMING.md](NAMING.md) — pick one, reject all three, or hold off
       until the feature scope above is clearer (recommended, since a
       C1-specific name is a poor fit if scope grows beyond C1 later).
+
 ## Scaffolded structurally, not implemented
 
 - [ ] `client-backend` — layered scaffold exists, builds, and is verified
       end-to-end against the real MonsterASP.NET SQL Server database
       (see HOSTING.md), but there's no domain model (`AppDbContext` has
       zero `DbSet`s) and no auth yet.
-- [ ] Spanish translations for the app's own UI chrome (nav labels etc.)
-      — resources exist in `client-frontend/src/i18n/locales/es`, not
-      exposed via a switcher. Low priority: the platform's primary
-      language is English by design.
-- [ ] Dark mode toggle — fully wired in `ThemeProvider`, light stays the
-      default until you say otherwise.
+- [ ] **Auth (registration/login).** Needed before the placement test can
+      exist (results must tie to a person). Per
+      [AI_WORKFLOW.md](AI_WORKFLOW.md), the notes this project inherited
+      from an earlier reference project explicitly want a Fable 5 pass on
+      auth/security design before implementation — worth doing even
+      though this is a much smaller, private tool than that reference
+      project was, since password/account handling mistakes are costly
+      regardless of scale.
+- [ ] "How it works" / methodology content on the About page — currently
+      just a placeholder ("Coming soon").
+- [ ] i18n (Spanish for the app's own UI chrome) — not set up in the
+      Angular rebuild yet; low priority, the platform's primary language
+      is English by design. See ARCHITECTURE.md for the library options
+      considered (`@angular/localize` vs `ngx-translate`).
+- [ ] Dark mode toggle — fully wired in the `Theme` service, light stays
+      the default until you say otherwise.
 
 ## Rough edges worth revisiting
 
@@ -67,6 +93,14 @@ least at a first-pass level:
 
 ## Done
 
+- [x] **Frontend switched to Angular.** React → Angular 22 + Material,
+      deliberate (portfolio breadth), not a mistake. Same shell rebuilt
+      (Navbar/Footer/theme). See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-26--frontend-switched-react---angular-22--material)
+      and [ARCHITECTURE.md](ARCHITECTURE.md). — 2026-08-26
+- [x] **Backend deployed live.** `https://english-c1-api.runasp.net` on
+      MonsterASP.NET, HTTPS with redirect, connected to the real database.
+      See [HOSTING.md](HOSTING.md). — 2026-08-26
 - [x] **Database hosting.** Created on MonsterASP.NET's free plan (SQL
       Server 2025, EU datacenter). Backend switched from Npgsql/Postgres
       to `Microsoft.EntityFrameworkCore.SqlServer`, connected and verified

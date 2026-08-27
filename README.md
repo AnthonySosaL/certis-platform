@@ -12,16 +12,16 @@ infrastructure and a UI shell, not the actual English-practice features.
 
 ## Stack
 
-React + TypeScript + Vite + shadcn/ui (frontend) · ASP.NET Core 8 + EF Core
-+ SQL Server (backend, hosted free on MonsterASP.NET — see
+Angular 22 + TypeScript + Angular Material (frontend) · ASP.NET Core 8 +
+EF Core + SQL Server (backend, hosted free on MonsterASP.NET — see
 [docs/HOSTING.md](docs/HOSTING.md)). Full rationale in
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Repo layout
 
 ```
-client-frontend/   React app — has a working Navbar/Footer/theme shell, no real pages yet
-client-backend/    ASP.NET Core API, layered — builds and runs, no domain model yet, connects to the real cloud DB
+client-frontend/   Angular app — has a working Navbar/Footer/theme shell, no real pages yet
+client-backend/    ASP.NET Core API, layered — builds and runs, no domain model yet, live on MonsterASP.NET
 docs/              architecture, dependencies, hosting, naming, pending ideas, error log
 scripts/           local dev start/stop helpers
 widget/            local pending/done task tracker (opens with start-dev.ps1)
@@ -43,7 +43,7 @@ Manually:
 # 1. Frontend
 cd client-frontend
 npm install   # first time only
-npm run dev   # http://localhost:5173
+npx ng serve  # http://localhost:4200
 
 # 2. Backend (needs ConnectionStrings:AppDb in user-secrets first —
 #    see client-backend/README.md)

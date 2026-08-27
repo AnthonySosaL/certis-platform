@@ -45,7 +45,7 @@ function Stop-Port($port, $label) {
     }
 }
 
-Stop-Port 5173 "client-frontend"
+Stop-Port 4200 "client-frontend"
 Stop-Port 5223 "client-backend"
 
 $widgetProcs = Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" -ErrorAction SilentlyContinue |
