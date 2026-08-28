@@ -114,13 +114,25 @@ public class PlacementScorerTests
     }
 
     [Theory]
-    [InlineData(3, false)] // 3/4 = 75% >= 60% -> passes
-    [InlineData(2, true)] // 2/4 = 50% < 60% -> needs reinforcement
-    public void SixtyPercentThreshold_IsAppliedPerCell(int correctCount, bool expectedNeedsReinforcement)
+    [InlineData(3, false)] // 3/4 = 75% >= 70% -> passes
+    [InlineData(2, true)] // 2/4 = 50% < 70% -> needs reinforcement
+    public void SeventyPercentThreshold_IsAppliedPerCell(int correctCount, bool expectedNeedsReinforcement)
     {
         var breakdown = Score(new() { [(CefrLevel.A2, SkillArea.Grammar)] = correctCount });
 
         Assert.Equal(expectedNeedsReinforcement, breakdown.Single().NeedsReinforcement);
+    }
+
+    [Theory]
+    [InlineData(4, 10.0)]
+    [InlineData(3, 7.5)]
+    [InlineData(2, 5.0)]
+    [InlineData(0, 0.0)]
+    public void Grade_IsOutOfTenRoundedToOneDecimal(int correctCount, double expectedGrade)
+    {
+        var breakdown = Score(new() { [(CefrLevel.A2, SkillArea.Grammar)] = correctCount });
+
+        Assert.Equal(expectedGrade, breakdown.Single().Grade);
     }
 
     [Fact]

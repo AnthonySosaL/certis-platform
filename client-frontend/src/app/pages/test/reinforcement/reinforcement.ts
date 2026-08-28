@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { CefrLevel, Question, SkillArea, SubmitAnswer, TestApi, TestResult } from '../../../core/test-api';
+import { passed as isPassed } from '../../../core/grading';
 import { Quiz } from '../../../shared/quiz/quiz';
 
 type Stage = 'loading' | 'taking' | 'submitting' | 'result';
@@ -50,7 +51,7 @@ export class Reinforcement implements OnInit {
   }
 
   passed(result: TestResult): boolean {
-    return result.totalQuestions > 0 && result.score / result.totalQuestions >= 0.6;
+    return isPassed(result.score, result.totalQuestions);
   }
 
   async retry(): Promise<void> {

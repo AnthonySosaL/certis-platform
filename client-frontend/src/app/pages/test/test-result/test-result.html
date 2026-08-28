@@ -52,6 +52,7 @@
                 </div>
                 <p class="breakdown-cell__score">{{ cell.correct }} / {{ cell.total }} correct</p>
               </div>
+              <span class="breakdown-cell__grade">{{ cell.grade }}<small>/10</small></span>
             </div>
             @if (cell.needsReinforcement) {
               <a mat-flat-button color="primary" class="breakdown-cell__cta" [routerLink]="reinforcementPath(cell.level, cell.skillArea)">

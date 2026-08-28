@@ -7,6 +7,7 @@ import { TestApi, TestResult } from '../../core/test-api';
 import { Auth } from '../../core/auth';
 import { levelCode, levelCssVar, levelName } from '../../core/cefr';
 import { skillIconPath } from '../../core/skill-icons';
+import { passed as isPassed } from '../../core/grading';
 
 @Component({
   selector: 'app-dashboard',
@@ -40,7 +41,7 @@ export class Dashboard implements OnInit {
   }
 
   passed(result: TestResult): boolean {
-    return result.totalQuestions > 0 && result.score / result.totalQuestions >= 0.6;
+    return isPassed(result.score, result.totalQuestions);
   }
 
   formatDate(iso: string): string {

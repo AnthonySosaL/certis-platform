@@ -16,7 +16,7 @@ const STEPS = [
   },
   {
     title: 'Reinforce your weak spots',
-    text: "Anything you scored under 60% on unlocks a short, focused quiz just for that topic. Retake it whenever you're ready.",
+    text: "Anything graded under 7/10 unlocks a short, focused quiz just for that topic. Retake it whenever you're ready.",
   },
 ];
 

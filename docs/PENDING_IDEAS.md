@@ -41,16 +41,6 @@ by this: **Reading and Listening**, explicitly named.
       insight feature). Needs a validation step before showing a
       generated question to anyone - a malformed/off-topic generation
       has to be caught and retried or discarded, not shown as-is.
-- [ ] **Early-warning threshold reworked to a 0-10 school-style grade,
-      below 7 = priority.** Explicit decision from the user ("como en
-      los colegios evalúan... si ya está menos de 7"), replacing the
-      current 60% pass threshold per (level, skill) cell
-      (`PlacementScorer.PassThreshold`). Raises the bar from 60% to 70%
-      and should show as a familiar /10 grade (not just a percentage)
-      wherever a score displays - test result, dashboard, admin Students
-      tab. Unblocked, no external dependency, but touches scoring logic
-      shared by placement/reinforcement/the admin early-warning flag, so
-      needs care + the unit tests updated.
 - [ ] **Reading comprehension as a real skill.** A new `SkillArea` value
       needs a short passage + a question about it, not just a bare MCQ -
       a bigger content shape than Grammar/Vocabulary's one-liners.
@@ -170,6 +160,15 @@ what *was* built that session):
       but not this round's card/animation treatment.
 ## Done
 
+- [x] **Early-warning threshold reworked to a 0-10 school-style grade,
+      below 7 = priority.** Explicit decision from the user. Raised the
+      pass bar from 60% to 70% (`PlacementScorer.PassThreshold`), added
+      a computed `Grade` (/10) to `SkillBreakdown` and `TestResultDto`,
+      shown as a badge on every breakdown card. Pulled the threshold out
+      of three separate hardcoded `0.6`s into a shared `core/grading.ts`
+      on the frontend while doing it. About/Home copy updated to say
+      "7/10" instead of "60%". See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-28--school-style-0-10-grading-pass-threshold-raised-to-710). — 2026-08-28
 - [x] **Toasts for lightweight confirmations.** `core/toast.ts`
       (`Toast` service over `MatSnackBar`, styled to match the app's
       pill language). Wired into the three real gaps that existed -

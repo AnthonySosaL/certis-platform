@@ -192,10 +192,11 @@ public class TestService(AppDbContext db) : ITestService
         attempt.Kind,
         attempt.Score,
         attempt.TotalQuestions,
+        attempt.TotalQuestions > 0 ? Math.Round((double)attempt.Score / attempt.TotalQuestions * 10, 1) : 0,
         attempt.PlacementResult,
         attempt.CompletedAtUtc ?? attempt.StartedAtUtc,
         breakdown
-            .Select(b => new SkillBreakdownDto(b.Level, b.SkillArea, b.Correct, b.Total, b.NeedsReinforcement))
+            .Select(b => new SkillBreakdownDto(b.Level, b.SkillArea, b.Correct, b.Total, b.NeedsReinforcement, b.Grade))
             .ToList(),
         BuildMissedQuestions(attempt.Answers, questionsById));
 

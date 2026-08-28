@@ -9,7 +9,7 @@ public record QuestionOptionDto(Guid Id, string Text);
 
 public record SubmitAnswerDto(Guid QuestionId, Guid SelectedOptionId);
 
-public record SkillBreakdownDto(CefrLevel Level, SkillArea SkillArea, int Correct, int Total, bool NeedsReinforcement);
+public record SkillBreakdownDto(CefrLevel Level, SkillArea SkillArea, int Correct, int Total, bool NeedsReinforcement, double Grade);
 
 // Only built for questions the test-taker got wrong - shown after
 // submission so a failed attempt teaches something instead of just
@@ -28,6 +28,7 @@ public record TestResultDto(
     AttemptKind Kind,
     int Score,
     int TotalQuestions,
+    double Grade,
     CefrLevel? PlacementResult,
     DateTime CompletedAtUtc,
     List<SkillBreakdownDto> Breakdown,

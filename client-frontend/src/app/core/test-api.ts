@@ -32,6 +32,7 @@ export interface SkillBreakdown {
   correct: number;
   total: number;
   needsReinforcement: boolean;
+  grade: number;
 }
 
 export interface MissedQuestion {
@@ -51,6 +52,7 @@ export interface TestResult {
   kind: AttemptKind;
   score: number;
   totalQuestions: number;
+  grade: number;
   placementResult: CefrLevel | null;
   completedAtUtc: string;
   breakdown: SkillBreakdown[];

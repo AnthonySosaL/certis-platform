@@ -5,6 +5,42 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-28 — School-style 0-10 grading; pass threshold raised to 7/10
+
+Fourth `/loop` batch, first item from the 2026-08-28 request (AI
+exercises, new skills, tutor assignment - see the changelog entry for
+the whole list). Picked this one first since several of the others
+(AI-generated exercises, new skills) would otherwise need touching the
+same scoring code again later.
+
+Explicit decision from the user: base the early-warning system on a
+school-style grade, below 7/10 gets priority - not the previous 60% pass
+threshold.
+
+- `PlacementScorer.PassThreshold`: `0.6` → `0.7` (single source of truth
+  already - `AdminService`'s early-warning check reads this constant, so
+  it picked up the new bar for free).
+- `SkillBreakdown` (domain) gained a computed `Grade` property
+  (`Correct/Total * 10`, rounded to 1 decimal) - threaded through
+  `SkillBreakdownDto` and a new top-level `TestResultDto.Grade` so a
+  grade is available per skill area *and* for the whole attempt.
+- Frontend: `core/grading.ts` is the new single source for
+  `PASS_THRESHOLD` and a `passed()` helper - pulled out because the old
+  `0.6` was hardcoded in three places (`dashboard.ts`, `reinforcement.ts`,
+  and implicitly the backend). Test-result breakdown cards now show an
+  "X.X/10" grade badge next to each skill area, color-coded by level.
+  About/Home copy that said "60%" now says "7/10" instead.
+- Unit tests: renamed `SixtyPercentThreshold_IsAppliedPerCell` →
+  `SeventyPercentThreshold_IsAppliedPerCell` (assertions didn't need to
+  change - the 4-question test cells' fractions all fall clearly on one
+  side of both 60% and 70%), added `Grade_IsOutOfTenRoundedToOneDecimal`.
+
+Verified in-browser: breakdown cards render the grade badges correctly
+(e.g. "5/10", "2.5/10"); About page reads "7/10" not "60%"; a real
+reinforcement submit came back with `grade: 3.8` for `3/8` correct
+(37.5%, correctly rounded) and `needsReinforcement: true` (37.5% < 70%).
+Backend unit tests: 10/10 green (6 original + 4 new).
+
 ## 2026-08-27 — Toasts for lightweight confirmations (and another stale-docs fix)
 
 Third autonomous `/loop` iteration through `PENDING_IDEAS.md`.

@@ -4,11 +4,13 @@ namespace EnglishC1.Client.Domain.PlacementTest;
 // infrastructure dependency so it's cheaply unit-testable - see
 // EnglishC1.Client.Domain.Tests/PlacementTest/PlacementScorerTests.cs.
 // See docs/errors or STRUCTURE_CHANGELOG.md (2026-08-27) for the
-// reasoning behind the "consecutive from A2" placement rule and the 60%
-// pass threshold.
+// reasoning behind the "consecutive from A2" placement rule. The pass
+// threshold (2026-08-28: raised from 60% to 70%) is a school-style
+// "below 7/10 needs attention" bar, explicitly requested - see
+// SkillBreakdown.Grade for the /10 display this pairs with.
 public static class PlacementScorer
 {
-    public const double PassThreshold = 0.6;
+    public const double PassThreshold = 0.7;
     public static readonly CefrLevel[] LevelOrder = [CefrLevel.A2, CefrLevel.B1, CefrLevel.B2, CefrLevel.C1];
 
     public static List<SkillBreakdown> BuildBreakdown(IEnumerable<TestAnswer> answers, IReadOnlyDictionary<Guid, Question> questionsById)

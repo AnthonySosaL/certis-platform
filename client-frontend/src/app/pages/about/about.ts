@@ -15,13 +15,13 @@ const SECTIONS: Section[] = [
   },
   {
     title: 'How the level is calculated',
-    text: 'Each (level, skill) group counts as "passed" at 60% or higher. Your placement is the highest level where every group from A2 up to that level was passed, consecutively. Scoring well on C1 vocabulary doesn\'t place you at C1 if there are real gaps in B1 grammar - CEFR placement is meant to reflect a consistent level, not a single strong area.',
+    text: 'Each (level, skill) group is graded out of 10, school-style, and counts as "passed" at 7/10 or higher. Your placement is the highest level where every group from A2 up to that level was passed, consecutively. Scoring well on C1 vocabulary doesn\'t place you at C1 if there are real gaps in B1 grammar - CEFR placement is meant to reflect a consistent level, not a single strong area.',
     // Ascending bars / scale
     iconPath: 'M4 20V12M10 20V4M16 20V9M22 20V14',
   },
   {
     title: 'Reinforcement',
-    text: 'Any (level, skill) group scored under 60% - even above your overall placement - is flagged for reinforcement. Each flagged area unlocks a short, focused quiz covering just that topic, so practice time goes toward specific, identified gaps instead of a generic review.',
+    text: 'Any (level, skill) group graded under 7/10 - even above your overall placement - is flagged for reinforcement. Each flagged area unlocks a short, focused quiz covering just that topic, so practice time goes toward specific, identified gaps instead of a generic review.',
     // Target
     iconPath: 'M12 2v4M12 18v4M2 12h4M18 12h4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z',
   },
