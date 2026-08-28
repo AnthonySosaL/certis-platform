@@ -9,9 +9,11 @@ instead of deleting it.
 The placement test (see "Done" below) answered the questions that used
 to sit here as open decisions:
 
-- **Format**: fixed-form, not adaptive - 32 multiple-choice questions, one
-  sitting. Self-gradable, no AI needed, far simpler to get right than
-  adaptive branching for a v1.
+- **Format**: fixed-form, not adaptive - one sitting, self-gradable, no
+  AI needed, far simpler to get right than adaptive branching for a v1.
+  Started at 32 multiple-choice questions (Grammar + Vocabulary only);
+  now 48 after Reading joined the assessed skills (2026-08-28) - see
+  "Done" below.
 - **Scoring**: a fixed 60% pass threshold per (level, skill) cell;
   placement = highest level passed consecutively from A2.
 - **Content authoring**: hand-written, stored in the database, seeded at
@@ -31,12 +33,6 @@ them one at a time instead of trying to swallow all of it at once. Which
 skills come next (the open question right above, until now) is answered
 by this: **Reading and Listening**, explicitly named.
 
-- [ ] **Reading comprehension as a real skill.** A new `SkillArea` value
-      needs a short passage + a question about it, not just a bare MCQ -
-      a bigger content shape than Grammar/Vocabulary's one-liners.
-      Unblocked (no external service needed - can be hand-written same
-      as the rest of the bank, or AI-generated per the item above once
-      that exists).
 - [ ] **Listening comprehension as a real skill.** Needs generated
       audio. **Investigate Groq's own TTS model
       (`canopylabs/orpheus-v1-english`, confirmed present in
@@ -139,6 +135,17 @@ what *was* built that session):
       but not this round's card/animation treatment.
 ## Done
 
+- [x] **Reading comprehension as a real skill.** New `SkillArea.Reading`
+      + `Question.Passage`; 16 hand-written passage-based questions (4
+      per level). Placement test grew from 32 to 48 questions as an
+      intended consequence (a CEFR result that ignored Reading wouldn't
+      reflect reading ability) - intro copy and About page updated to
+      match. Admin question editor shows/validates the Passage field
+      reactively. AI-generated reinforcement doesn't support Reading yet
+      (would need a passage-aware prompt) - the "AI-generated" button is
+      hidden for Reading rather than generating a passage-less
+      pseudo-reading question. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-28--reading-comprehension-the-first-new-skill-beyond-grammarvocabulary). — 2026-08-28
 - [x] **Tutor-student assignment, with a seeded "AI Tutor" persona.**
       `ApplicationUser.TutorId` (self-referencing, one tutor per student)
       + a real seeded `ai-tutor@certis.local` account (Tutor role, no

@@ -5,6 +5,64 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-28 — Reading comprehension: the first new skill beyond Grammar/Vocabulary
+
+Fourth item from the 2026-08-28 request batch, and the first of the two
+explicitly-named new skills (Reading and Listening).
+
+- `SkillArea` gained a third value, `Reading`. Since the app already
+  serializes enums as strings (`JsonStringEnumConverter`, set up
+  2026-08-27) and EF Core stores it as an int appended at the end, this
+  needed no migration of its own and didn't touch any existing stored
+  `Grammar`/`Vocabulary` rows.
+- `Question.Passage` (nullable, new migration `AddQuestionPassage`) - a
+  short paragraph shown above the question, used only by Reading.
+  Threaded through `QuestionDto`, `AdminQuestionDto`, and
+  `UpsertQuestionRequest`.
+- 16 new hand-written questions (`ReadingBank`, `QuestionSeeder.cs`) - 4
+  per CEFR level, each a short passage plus one comprehension question.
+  Passages grow in register with level: simple present-tense narration
+  at A2, up to dense academic-argument prose at C1. Kept as a *separate*
+  array from the existing `Bank` rather than adding a `Passage` element
+  to `Bank`'s tuple shape - that would have meant appending a trailing
+  `null` to all 64 existing entries for a field only Reading uses.
+- Frontend: `Quiz` renders the passage above the question text when
+  present (own card style, `quiz-question__passage`). Admin's question
+  editor dialog shows a Passage field that appears/disappears reactively
+  as the Skill dropdown changes, and validates it's required (frontend
+  and backend) when the skill is Reading. New skill icon
+  (`skill-icons.ts`) - a document-with-lines glyph, distinct from
+  Grammar's open book.
+- **The placement test grew from 32 to 48 questions as a direct,
+  intended consequence** - `GetPlacementQuestionsAsync` groups by
+  `(Level, SkillArea)` and was already skill-agnostic, so it picked up
+  the new cells automatically once seeded. Unlike the earlier
+  question-bank-doubling entry (deliberately kept the test at a fixed
+  length, since that was the *same* skills getting a bigger pool),
+  this is a genuinely new skill joining the platform's assessed scope -
+  a CEFR placement that ignored Reading entirely wouldn't reflect
+  reading ability at all. Updated the "32 questions... ~15 minutes"
+  intro copy to "48 questions... ~20 minutes" to match. About page's
+  "Scope, honestly" section updated too (Reading dropped from the
+  not-yet-assessed list; also corrected the now-stale "hand-written, not
+  machine-generated" claim now that AI-generated reinforcement exists).
+- **Known gap, not silently shipped**: the AI-generated-reinforcement
+  feature (previous changelog entry) doesn't produce passages yet -
+  `GroqQuestionGeneratorService`'s prompt only asks for a bare MCQ. Hid
+  the "Practice different questions (AI-generated)" button specifically
+  for Reading reinforcement rather than let it generate a passage-less
+  "reading" question that wouldn't actually test reading comprehension.
+
+Verified end-to-end for real: confirmed via the API that the placement
+endpoint returns exactly 48 questions (32 with `passage: null`, 16 with
+real passage text); loaded the actual placement test in the browser and
+saw a passage rendered inside a question card; created a real Reading
+question with a passage through the admin Content tab (count went
+84→85), confirmed it saved and deleted it again; confirmed the
+reinforcement page for `A2/Reading` shows 4 questions each with a
+passage and no AI-generate button. Migration applied to the real shared
+database. Backend build + 10/10 unit tests, frontend build, both clean.
+
 ## 2026-08-28 — Tutor-student assignment, with a seeded "AI Tutor" persona
 
 Third item from the 2026-08-28 request batch. A student can now have an

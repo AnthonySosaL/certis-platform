@@ -54,6 +54,7 @@ public class ContentService(AppDbContext db) : IContentService
         existing.Level = request.Level;
         existing.SkillArea = request.SkillArea;
         existing.Explanation = request.Explanation;
+        existing.Passage = request.Passage;
         existing.Options = newOptions;
         existing.CorrectOptionId = newOptions[request.CorrectOptionIndex].Id;
 
@@ -80,6 +81,7 @@ public class ContentService(AppDbContext db) : IContentService
             Level = request.Level,
             SkillArea = request.SkillArea,
             Explanation = request.Explanation,
+            Passage = request.Passage,
         };
         question.Options = request.Options
             .Select(text => new QuestionOption { Id = Guid.NewGuid(), QuestionId = id, Text = text })
@@ -96,5 +98,6 @@ public class ContentService(AppDbContext db) : IContentService
         q.Explanation,
         q.Options.Select(o => new AdminQuestionOptionDto(o.Id, o.Text)).ToList(),
         q.CorrectOptionId,
-        q.IsAiGenerated);
+        q.IsAiGenerated,
+        q.Passage);
 }

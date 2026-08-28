@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { API_BASE_URL } from './api-config';
 
 export type CefrLevel = 'A2' | 'B1' | 'B2' | 'C1';
-export type SkillArea = 'Grammar' | 'Vocabulary';
+export type SkillArea = 'Grammar' | 'Vocabulary' | 'Reading';
 export type AttemptKind = 'Placement' | 'Reinforcement';
 
 export interface QuestionOption {
@@ -19,6 +19,9 @@ export interface Question {
   skillArea: SkillArea;
   level: CefrLevel;
   options: QuestionOption[];
+  // Only set for Reading questions - a short paragraph shown above the
+  // question text.
+  passage: string | null;
 }
 
 export interface SubmitAnswer {

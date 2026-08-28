@@ -16,7 +16,7 @@ export interface QuestionEditorData {
 }
 
 const LEVELS: CefrLevel[] = ['A2', 'B1', 'B2', 'C1'];
-const SKILLS: SkillArea[] = ['Grammar', 'Vocabulary'];
+const SKILLS: SkillArea[] = ['Grammar', 'Vocabulary', 'Reading'];
 
 @Component({
   selector: 'app-question-editor-dialog',
@@ -49,6 +49,7 @@ export class QuestionEditorDialog {
     level: [this.data.question?.level ?? 'A2', Validators.required],
     skillArea: [this.data.question?.skillArea ?? 'Grammar', Validators.required],
     explanation: [this.data.question?.explanation ?? ''],
+    passage: [this.data.question?.passage ?? ''],
     options: this.fb.array(
       (this.data.question?.options ?? [{ text: '' }, { text: '' }]).map((o) =>
         this.fb.nonNullable.control(o.text, Validators.required),
@@ -56,6 +57,12 @@ export class QuestionEditorDialog {
     ),
     correctOptionIndex: [this.initialCorrectIndex(), Validators.required],
   });
+
+  protected readonly isReading = signal(this.form.controls.skillArea.value === 'Reading');
+
+  constructor() {
+    this.form.controls.skillArea.valueChanges.subscribe((skill) => this.isReading.set(skill === 'Reading'));
+  }
 
   private initialCorrectIndex(): number {
     if (!this.data.question) return 0;
@@ -90,11 +97,17 @@ export class QuestionEditorDialog {
     }
 
     const value = this.form.getRawValue();
+    if (value.skillArea === 'Reading' && value.passage.trim() === '') {
+      this.errorMessage.set('Reading questions need a passage.');
+      return;
+    }
+
     const request: UpsertQuestionRequest = {
       text: value.text,
       level: value.level,
       skillArea: value.skillArea,
       explanation: value.explanation.trim() === '' ? null : value.explanation,
+      passage: value.passage.trim() === '' ? null : value.passage,
       options: value.options,
       correctOptionIndex: value.correctOptionIndex,
     };

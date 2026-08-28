@@ -13,15 +13,17 @@
       </div>
     }
     @case ('taking') {
-      <div class="reinforce__ai-toggle">
-        @if (usingAiQuestions()) {
-          <span class="reinforce__ai-badge">AI-generated practice</span>
-        } @else {
-          <button mat-stroked-button color="primary" type="button" (click)="practiceWithAi()">
-            Practice different questions (AI-generated)
-          </button>
-        }
-      </div>
+      @if (skill !== 'Reading') {
+        <div class="reinforce__ai-toggle">
+          @if (usingAiQuestions()) {
+            <span class="reinforce__ai-badge">AI-generated practice</span>
+          } @else {
+            <button mat-stroked-button color="primary" type="button" (click)="practiceWithAi()">
+              Practice different questions (AI-generated)
+            </button>
+          }
+        </div>
+      }
       <app-quiz
         [questions]="questions()"
         [storageKey]="storageKey"

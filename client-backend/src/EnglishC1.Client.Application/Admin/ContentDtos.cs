@@ -13,7 +13,8 @@ public record AdminQuestionDto(
     string? Explanation,
     List<AdminQuestionOptionDto> Options,
     Guid CorrectOptionId,
-    bool IsAiGenerated);
+    bool IsAiGenerated,
+    string? Passage);
 
 public record AdminQuestionOptionDto(Guid Id, string Text);
 
@@ -23,4 +24,5 @@ public record UpsertQuestionRequest(
     SkillArea SkillArea,
     string? Explanation,
     List<string> Options,
-    int CorrectOptionIndex);
+    int CorrectOptionIndex,
+    string? Passage);

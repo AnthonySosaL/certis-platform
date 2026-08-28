@@ -14,6 +14,9 @@
 
   @for (question of questions(); track question.id) {
     <div class="quiz-question">
+      @if (question.passage) {
+        <p class="quiz-question__passage">{{ question.passage }}</p>
+      }
       <p class="quiz-question__text">{{ question.text }}</p>
       <div class="quiz-question__options" role="radiogroup">
         @for (option of question.options; track option.id; let i = $index) {

@@ -20,10 +20,11 @@ public static class QuestionSeeder
     public static async Task SeedAsync(AppDbContext db)
     {
         var existingTexts = (await db.Questions.Select(q => q.Text).ToListAsync()).ToHashSet();
-        var newEntries = Bank.Where(b => !existingTexts.Contains(b.Text)).ToList();
 
-        foreach (var (text, level, skill, options, correctIndex, explanation) in newEntries)
+        foreach (var (text, level, skill, options, correctIndex, explanation) in Bank)
         {
+            if (existingTexts.Contains(text)) continue;
+
             var question = new Question
             {
                 Id = Guid.NewGuid(),
@@ -40,15 +41,41 @@ public static class QuestionSeeder
             db.Questions.Add(question);
         }
 
-        if (newEntries.Count > 0)
-            await db.SaveChangesAsync();
+        // Reading is a separate array (see ReadingBank) rather than
+        // folded into Bank's tuple shape - Bank's 6-element tuple has 64
+        // existing entries that would all need a trailing null Passage
+        // appended for no benefit, since Passage only ever applies here.
+        foreach (var (passage, text, level, options, correctIndex, explanation) in ReadingBank)
+        {
+            if (existingTexts.Contains(text)) continue;
 
+            var question = new Question
+            {
+                Id = Guid.NewGuid(),
+                Text = text,
+                Level = level,
+                SkillArea = SkillArea.Reading,
+                Explanation = explanation,
+                Passage = passage,
+            };
+            question.Options = options
+                .Select(optionText => new QuestionOption { Id = Guid.NewGuid(), QuestionId = question.Id, Text = optionText })
+                .ToList();
+            question.CorrectOptionId = question.Options[correctIndex].Id;
+
+            db.Questions.Add(question);
+        }
+
+        await db.SaveChangesAsync();
         await BackfillExplanationsAsync(db);
     }
 
     private static async Task BackfillExplanationsAsync(AppDbContext db)
     {
         var explanationByText = Bank.ToDictionary(b => b.Text, b => b.Explanation);
+        foreach (var (_, text, _, _, _, explanation) in ReadingBank)
+            explanationByText[text] = explanation;
+
         var questions = await db.Questions.Where(q => q.Explanation == null).ToListAsync();
         if (questions.Count == 0) return;
 
@@ -224,5 +251,85 @@ public static class QuestionSeeder
             "\"Tenacious\" describes holding firmly onto something, especially not giving up easily."),
         ("Something \"ephemeral\" is ___.", CefrLevel.C1, SkillArea.Vocabulary, ["short-lived", "permanent", "expensive", "dangerous"], 0,
             "\"Ephemeral\" describes something that lasts only a very short time."),
+    ];
+
+    // Reading comprehension (2026-08-28, first new skill beyond
+    // Grammar/Vocabulary) - 4 passages per level, each with one
+    // comprehension question. Passages grow in length/register with
+    // level: simple present-tense narration at A2, up to dense
+    // academic-register argument at C1.
+    private static readonly (string Passage, string Text, CefrLevel Level, string[] Options, int CorrectIndex, string Explanation)[] ReadingBank =
+    [
+        // A2
+        ("Maria works in a small bakery in the city center. She starts work at six o'clock every morning and finishes at two in the afternoon. On Saturdays, the bakery is very busy because many people buy bread for the weekend.",
+            "What time does Maria finish work?", CefrLevel.A2,
+            ["At two in the afternoon", "At six in the morning", "At six in the evening", "She doesn't work on Saturdays"], 0,
+            "The passage says she \"finishes at two in the afternoon.\""),
+        ("Tom has a dog called Max. Every evening, Tom takes Max for a walk in the park near his house. Max loves to run and play with other dogs. After the walk, Tom gives Max some food and water.",
+            "Where does Tom walk his dog?", CefrLevel.A2,
+            ["In the park near his house", "At the bakery", "At school", "In the kitchen"], 0,
+            "The passage states Tom takes Max \"for a walk in the park near his house.\""),
+        ("The weather this week is cold and windy. On Monday and Tuesday, it will rain a lot. On Wednesday, the sun will come out, but it will still be cold. Remember to bring an umbrella on Monday.",
+            "What should you bring on Monday?", CefrLevel.A2,
+            ["An umbrella", "Sunglasses", "A swimsuit", "A fan"], 0,
+            "The passage advises to \"bring an umbrella on Monday\" because it will rain."),
+        ("Anna's favorite subject at school is art. She draws pictures every day after school. Her teacher says she is very talented. Next month, Anna's paintings will be shown at the school exhibition.",
+            "What is Anna's favorite subject?", CefrLevel.A2,
+            ["Art", "Math", "Science", "History"], 0,
+            "The passage says \"Anna's favorite subject at school is art.\""),
+
+        // B1
+        ("Last summer, James decided to learn how to cook. He had never made a meal before, so he started with simple recipes. After a few months of practice, he could prepare full dinners for his family. Now his friends often ask him for cooking advice.",
+            "What can we infer about James's cooking skills?", CefrLevel.B1,
+            ["They have improved a lot since last summer", "They have not changed at all", "He learned to cook from his friends", "He still can't cook a full dinner"], 0,
+            "The passage shows progress from never cooking to preparing full dinners and giving advice - his skills clearly improved."),
+        ("The city council has announced plans to build a new library downtown. The project will take about two years to complete and will include a large reading area, computer rooms, and a café. Local residents have reacted positively to the news, saying the area needs more public spaces.",
+            "How have local residents reacted to the announcement?", CefrLevel.B1,
+            ["Positively, because the area needs more public spaces", "Negatively, because they don't want a library", "They haven't reacted yet", "They are worried about the cost"], 0,
+            "The passage says residents \"reacted positively... saying the area needs more public spaces.\""),
+        ("Emma has worked as a nurse for over ten years. Although the job can be stressful, she says she has never regretted her choice of career. She finds it rewarding to help patients recover and often stays in touch with them after they leave the hospital.",
+            "Why does Emma find her job rewarding?", CefrLevel.B1,
+            ["Because she helps patients recover", "Because the job is not stressful", "Because she doesn't work long hours", "Because she wants to change careers"], 0,
+            "The passage states she \"finds it rewarding to help patients recover.\""),
+        ("When Carlos moved to a new country, he found it difficult to make friends at first because of the language barrier. However, he joined a local sports club, which helped him meet people who shared his interests. Within a year, he felt much more at home.",
+            "How did Carlos overcome his difficulty making friends?", CefrLevel.B1,
+            ["By joining a local sports club", "By avoiding social situations", "By learning to cook", "By moving back to his home country"], 0,
+            "The passage explains he \"joined a local sports club, which helped him meet people.\""),
+
+        // B2
+        ("Remote work has become increasingly common in recent years, offering employees greater flexibility and eliminating long commutes. However, critics argue that it can lead to feelings of isolation and make collaboration between team members more difficult. Companies are now experimenting with hybrid models that combine the benefits of both office and remote work.",
+            "According to the passage, what is one criticism of remote work?", CefrLevel.B2,
+            ["It can make employees feel isolated", "It eliminates all flexibility", "It increases commute times", "It makes collaboration easier"], 0,
+            "The passage lists isolation and difficulty in collaboration as criticisms raised by critics."),
+        ("Despite significant advances in renewable energy technology, many countries still rely heavily on fossil fuels to meet their energy needs. Experts suggest that this dependence is due to a combination of infrastructure costs, political interests, and the slow pace of policy change, rather than a lack of viable alternatives.",
+            "What do experts suggest is the main reason for continued reliance on fossil fuels?", CefrLevel.B2,
+            ["A combination of costs, politics, and slow policy change", "A lack of renewable energy technology", "Renewable energy is too expensive to develop", "Fossil fuels are more efficient than alternatives"], 0,
+            "The passage attributes it to \"infrastructure costs, political interests, and the slow pace of policy change\" - not a lack of alternatives."),
+        ("The novel's protagonist initially appears confident and self-assured, but as the story unfolds, the reader discovers a deep sense of insecurity beneath the surface. This contrast becomes central to understanding her later decisions, which often seem irrational unless viewed through the lens of her hidden fears.",
+            "Why is the contrast between the protagonist's confidence and insecurity important?", CefrLevel.B2,
+            ["It helps explain her later, seemingly irrational decisions", "It shows she never changes throughout the novel", "It proves she is not a reliable narrator", "It has no real significance to the plot"], 0,
+            "The passage says this contrast \"becomes central to understanding her later decisions.\""),
+        ("While social media has undeniably transformed how people communicate, its impact on mental health remains a subject of ongoing debate. Some studies link heavy usage to increased anxiety and lower self-esteem, while others argue that the platforms simply reflect pre-existing issues rather than causing them.",
+            "What is the ongoing debate mentioned in the passage about?", CefrLevel.B2,
+            ["Whether social media causes or merely reflects mental health issues", "Whether social media has changed communication", "Whether social media should be banned", "Whether studies about social media are reliable"], 0,
+            "The debate is whether heavy usage \"causes\" issues or the platforms \"simply reflect pre-existing issues.\""),
+
+        // C1
+        ("It would be an oversimplification to attribute the decline of traditional print journalism solely to the rise of digital media. While online platforms have undeniably disrupted established revenue models, the industry's struggles are equally rooted in a failure to adapt editorial practices to a rapidly evolving readership whose expectations of immediacy and interactivity print media was ill-equipped to satisfy.",
+            "According to the passage, what is a mistaken view about print journalism's decline?", CefrLevel.C1,
+            ["That digital media alone is responsible for it", "That readers no longer want immediacy", "That print journalism never had revenue problems", "That editorial practices were always well-adapted"], 0,
+            "The passage opens by calling it \"an oversimplification\" to blame the decline \"solely\" on digital media."),
+        ("Proponents of universal basic income argue that it would alleviate poverty and provide a safety net in an era of automation-driven job displacement. Detractors, meanwhile, contend that unconditional payments risk disincentivizing work and may prove fiscally unsustainable at scale, though empirical evidence from limited pilot programs remains inconclusive on both counts.",
+            "What does the passage say about the evidence from pilot programs?", CefrLevel.C1,
+            ["It is inconclusive regarding both the benefits and the risks", "It clearly proves UBI reduces poverty", "It clearly proves UBI discourages work", "No pilot programs have ever been conducted"], 0,
+            "The passage states the evidence \"remains inconclusive on both counts\" - referring to both the benefits and risks mentioned."),
+        ("Critics of the policy have been quick to characterize it as reactionary, yet such a label obscures the more nuanced motivations at play: a genuine, if perhaps misguided, attempt to address constituents' economic anxieties rather than a straightforward ideological retreat.",
+            "What is the author's view of the \"reactionary\" label critics use?", CefrLevel.C1,
+            ["It oversimplifies more complex motivations behind the policy", "It accurately describes the policy's ideology", "It was created by the policy's supporters", "It has no relation to constituents' concerns"], 0,
+            "The author says the label \"obscures the more nuanced motivations at play\", implying it's an oversimplification."),
+        ("The assumption that technological progress inevitably yields greater leisure time has been repeatedly contradicted by historical evidence; each wave of labor-saving innovation, from the industrial revolution onward, has tended to intensify productivity demands rather than diminish them, a paradox economists have struggled to satisfactorily explain.",
+            "What paradox does the passage describe?", CefrLevel.C1,
+            ["Technology increasing productivity demands instead of leisure time", "Economists agreeing on why technology increases leisure", "The industrial revolution reducing productivity", "Labor-saving innovation having no effect on work"], 0,
+            "The passage describes how technological progress, expected to increase leisure, instead \"intensif[ies] productivity demands\" - a paradox."),
     ];
 }

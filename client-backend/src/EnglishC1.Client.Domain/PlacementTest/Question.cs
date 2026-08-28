@@ -20,4 +20,9 @@ public class Question
     // it's clear which is which - not otherwise treated differently
     // (grading, sampling, everything else works identically either way).
     public bool IsAiGenerated { get; set; }
+
+    // A short paragraph shown above the question - only Reading
+    // questions use this (Grammar/Vocabulary stay one-liners). Null for
+    // every other skill.
+    public string? Passage { get; set; }
 }

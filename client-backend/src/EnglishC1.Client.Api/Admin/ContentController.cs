@@ -1,4 +1,5 @@
 using EnglishC1.Client.Application.Admin;
+using EnglishC1.Client.Domain.PlacementTest;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,6 +44,11 @@ public class ContentController(IContentService contentService) : ControllerBase
         if (request.CorrectOptionIndex < 0 || request.CorrectOptionIndex >= request.Options.Count)
         {
             error = "Correct option index is out of range.";
+            return false;
+        }
+        if (request.SkillArea == SkillArea.Reading && string.IsNullOrWhiteSpace(request.Passage))
+        {
+            error = "Reading questions need a passage.";
             return false;
         }
         error = string.Empty;

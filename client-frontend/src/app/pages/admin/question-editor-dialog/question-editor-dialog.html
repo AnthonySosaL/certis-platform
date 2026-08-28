@@ -36,6 +36,13 @@
       </mat-form-field>
     </div>
 
+    @if (isReading()) {
+      <mat-form-field appearance="outline">
+        <mat-label>Passage (shown above the question)</mat-label>
+        <textarea matInput formControlName="passage" rows="4"></textarea>
+      </mat-form-field>
+    }
+
     <fieldset class="editor-form__options" formArrayName="options">
       <legend>Options - pick the correct one</legend>
       <div class="options-radio-group" role="radiogroup">

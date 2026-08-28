@@ -3,7 +3,7 @@ using EnglishC1.Client.Domain.PlacementTest;
 namespace EnglishC1.Client.Application.PlacementTest;
 
 // Never carries CorrectOptionId to the client - grading happens server-side only.
-public record QuestionDto(Guid Id, string Text, SkillArea SkillArea, CefrLevel Level, List<QuestionOptionDto> Options);
+public record QuestionDto(Guid Id, string Text, SkillArea SkillArea, CefrLevel Level, List<QuestionOptionDto> Options, string? Passage);
 
 public record QuestionOptionDto(Guid Id, string Text);
 
