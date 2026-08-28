@@ -1,4 +1,15 @@
 <main class="dashboard">
+  @if (auth.tutorLabel()) {
+    <div class="dashboard__tutor">
+      <span class="dashboard__tutor-icon">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2 2 7l10 5 10-5-10-5Z" /><path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+        </svg>
+      </span>
+      Your tutor: <strong>{{ auth.tutorLabel() }}</strong>
+    </div>
+  }
+
   @if (loading()) {
     <div class="dashboard__loading">
       <mat-spinner diameter="32" />

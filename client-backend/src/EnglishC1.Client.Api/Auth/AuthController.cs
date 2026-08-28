@@ -39,8 +39,14 @@ public class AuthController(
 
     [Authorize]
     [HttpGet("me")]
-    public IActionResult Me() =>
-        Ok(new { email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email") });
+    public async Task<IActionResult> Me()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        var user = userId is null ? null : await userManager.FindByIdAsync(userId);
+        if (user is null) return Unauthorized();
+
+        return Ok(new { email = user.Email, tutorLabel = await ResolveTutorLabel(user) });
+    }
 
     private async Task<AuthResponse> BuildAuthResponse(ApplicationUser user)
     {
@@ -50,7 +56,15 @@ public class AuthController(
             Email: user.Email!,
             ExpiresAtUtc: DateTime.UtcNow.AddMinutes(jwtOptions.Value.ExpirationMinutes),
             IsAdmin: roles.Contains("Admin"),
-            IsTutor: roles.Contains("Tutor"));
+            IsTutor: roles.Contains("Tutor"),
+            TutorLabel: await ResolveTutorLabel(user));
+    }
+
+    private async Task<string?> ResolveTutorLabel(ApplicationUser user)
+    {
+        if (!user.TutorId.HasValue) return null;
+        var tutor = await userManager.FindByIdAsync(user.TutorId.Value.ToString());
+        return tutor?.DisplayName ?? tutor?.Email;
     }
 
     private static ModelStateDictionary BuildErrorModelState(IdentityResult result)

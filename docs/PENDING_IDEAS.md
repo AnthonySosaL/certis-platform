@@ -49,17 +49,6 @@ by this: **Reading and Listening**, explicitly named.
       installed on this machine as far as I can tell, so that path is
       blocked until an API key is provided or the claim is corrected.
       Groq TTS is the unblocked path to try first.
-- [ ] **Tutor-student assignment.** A real `Tutor` role already exists
-      (Access tab), but nothing links a specific tutor to a specific
-      student yet. Needs: a `TutorAssignment`-style relationship, a way
-      for a Tutor/Admin to assign students (probably a 4th Admin panel
-      tab, or folded into Access), and a "Your tutor: X" surfaced
-      somewhere a student sees it (Dashboard is the natural spot).
-      **Also explicitly requested**: assign the user's own account to an
-      "AI tutor" persona for now, not a real human - needs a seeded
-      non-login account representing that persona (display name, maybe
-      an avatar), not a real ApplicationUser someone signs in as.
-      Unblocked, no external dependency.
 - [ ] **Speaking/conversation practice, Cambridge-exam style.** The
       biggest, least-scoped item in the request - deliberately splitting
       it instead of guessing a single build:
@@ -150,6 +139,14 @@ what *was* built that session):
       but not this round's card/animation treatment.
 ## Done
 
+- [x] **Tutor-student assignment, with a seeded "AI Tutor" persona.**
+      `ApplicationUser.TutorId` (self-referencing, one tutor per student)
+      + a real seeded `ai-tutor@certis.local` account (Tutor role, no
+      one can sign into it) auto-assigned to the requesting account.
+      Admin Access tab can assign/clear any account's tutor; Dashboard
+      shows "Your tutor: X". Verified end-to-end including logging out
+      and back in to see the assignment take effect. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-28--tutor-student-assignment-with-a-seeded-ai-tutor-persona). — 2026-08-28
 - [x] **AI-generated reinforcement exercises (Groq).** A "Practice
       different questions (AI-generated)" button on the reinforcement
       page generates fresh questions for that (level, skill) via Groq

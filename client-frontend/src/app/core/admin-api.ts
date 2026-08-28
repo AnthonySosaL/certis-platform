@@ -50,11 +50,17 @@ export interface Account {
   email: string;
   isAdmin: boolean;
   isTutor: boolean;
+  tutorId: string | null;
+  tutorLabel: string | null;
 }
 
 export interface SetRolesRequest {
   isAdmin: boolean;
   isTutor: boolean;
+}
+
+export interface SetTutorRequest {
+  tutorUserId: string | null;
 }
 
 // Thin wrapper over /api/admin/* - mirrors TestApi's shape. Student and
@@ -90,5 +96,9 @@ export class AdminApi {
 
   setRoles(userId: string, request: SetRolesRequest): Promise<Account> {
     return firstValueFrom(this.http.put<Account>(`${API_BASE_URL}/api/admin/accounts/${userId}/roles`, request));
+  }
+
+  setTutor(userId: string, request: SetTutorRequest): Promise<Account> {
+    return firstValueFrom(this.http.put<Account>(`${API_BASE_URL}/api/admin/accounts/${userId}/tutor`, request));
   }
 }

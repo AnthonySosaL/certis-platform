@@ -4,6 +4,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { Auth } from '../../core/auth';
 import { AdminApi, Account, AdminQuestion, StudentSummary } from '../../core/admin-api';
@@ -16,7 +18,7 @@ type Tab = 'students' | 'content' | 'access';
 
 @Component({
   selector: 'app-admin',
-  imports: [MatProgressSpinnerModule, MatButtonModule, MatSlideToggleModule],
+  imports: [MatProgressSpinnerModule, MatButtonModule, MatSlideToggleModule, MatSelectModule, MatFormFieldModule],
   templateUrl: './admin.html',
   styleUrl: './admin.scss',
 })
@@ -55,6 +57,7 @@ export class AdminDashboard implements OnInit {
   protected readonly accountsError = signal<string | null>(null);
   protected readonly accountsActionError = signal<string | null>(null);
   protected readonly savingAccountId = signal<string | null>(null);
+  protected readonly eligibleTutors = computed(() => this.accounts().filter((a) => a.isTutor));
 
   protected readonly levelCssVar = levelCssVar;
   protected readonly levelCode = levelCode;
@@ -143,6 +146,24 @@ export class AdminDashboard implements OnInit {
         error instanceof HttpErrorResponse && error.error?.message
           ? error.error.message
           : "Could not update that account's access.";
+      this.accountsActionError.set(message);
+    } finally {
+      this.savingAccountId.set(null);
+    }
+  }
+
+  async setTutor(account: Account, tutorUserId: string | null): Promise<void> {
+    this.savingAccountId.set(account.userId);
+    this.accountsActionError.set(null);
+    try {
+      const updated = await this.adminApi.setTutor(account.userId, { tutorUserId });
+      this.accounts.set(this.accounts().map((a) => (a.userId === updated.userId ? updated : a)));
+      this.toast.success(tutorUserId ? `Tutor assigned for ${updated.email}` : `Tutor cleared for ${updated.email}`);
+    } catch (error) {
+      const message =
+        error instanceof HttpErrorResponse && error.error?.message
+          ? error.error.message
+          : "Could not update that account's tutor.";
       this.accountsActionError.set(message);
     } finally {
       this.savingAccountId.set(null);

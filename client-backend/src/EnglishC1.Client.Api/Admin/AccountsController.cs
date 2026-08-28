@@ -19,11 +19,14 @@ public class AccountsController(UserManager<ApplicationUser> userManager) : Cont
     public async Task<ActionResult<List<AccountDto>>> GetAccounts()
     {
         var users = userManager.Users.ToList();
+        var labelById = users.ToDictionary(u => u.Id, u => u.DisplayName ?? u.Email!);
+
         var result = new List<AccountDto>();
         foreach (var user in users)
         {
             var roles = await userManager.GetRolesAsync(user);
-            result.Add(new AccountDto(user.Id, user.Email!, roles.Contains("Admin"), roles.Contains("Tutor")));
+            var tutorLabel = user.TutorId.HasValue && labelById.TryGetValue(user.TutorId.Value, out var label) ? label : null;
+            result.Add(new AccountDto(user.Id, user.Email!, roles.Contains("Admin"), roles.Contains("Tutor"), user.TutorId, tutorLabel));
         }
         return Ok(result.OrderBy(a => a.Email).ToList());
     }
@@ -40,7 +43,33 @@ public class AccountsController(UserManager<ApplicationUser> userManager) : Cont
         await ReconcileRole(user, "Admin", request.IsAdmin);
         await ReconcileRole(user, "Tutor", request.IsTutor);
 
-        return Ok(new AccountDto(user.Id, user.Email!, request.IsAdmin, request.IsTutor));
+        return Ok(new AccountDto(user.Id, user.Email!, request.IsAdmin, request.IsTutor, user.TutorId, await ResolveTutorLabel(user)));
+    }
+
+    [HttpPut("{userId:guid}/tutor")]
+    public async Task<ActionResult<AccountDto>> SetTutor(Guid userId, SetTutorRequest request)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null) return NotFound();
+
+        if (request.TutorUserId == userId)
+            return BadRequest(new { message = "An account can't be its own tutor." });
+
+        string? tutorLabel = null;
+        if (request.TutorUserId.HasValue)
+        {
+            var tutor = await userManager.FindByIdAsync(request.TutorUserId.Value.ToString());
+            if (tutor is null) return BadRequest(new { message = "That tutor account doesn't exist." });
+            if (!await userManager.IsInRoleAsync(tutor, "Tutor"))
+                return BadRequest(new { message = "That account doesn't have the Tutor role." });
+            tutorLabel = tutor.DisplayName ?? tutor.Email;
+        }
+
+        user.TutorId = request.TutorUserId;
+        await userManager.UpdateAsync(user);
+
+        var roles = await userManager.GetRolesAsync(user);
+        return Ok(new AccountDto(user.Id, user.Email!, roles.Contains("Admin"), roles.Contains("Tutor"), user.TutorId, tutorLabel));
     }
 
     private async Task ReconcileRole(ApplicationUser user, string role, bool shouldHaveRole)
@@ -48,6 +77,13 @@ public class AccountsController(UserManager<ApplicationUser> userManager) : Cont
         var hasRole = await userManager.IsInRoleAsync(user, role);
         if (shouldHaveRole && !hasRole) await userManager.AddToRoleAsync(user, role);
         if (!shouldHaveRole && hasRole) await userManager.RemoveFromRoleAsync(user, role);
+    }
+
+    private async Task<string?> ResolveTutorLabel(ApplicationUser user)
+    {
+        if (!user.TutorId.HasValue) return null;
+        var tutor = await userManager.FindByIdAsync(user.TutorId.Value.ToString());
+        return tutor?.DisplayName ?? tutor?.Email;
     }
 
     private Guid CurrentUserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")!);

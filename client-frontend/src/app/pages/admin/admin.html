@@ -159,6 +159,21 @@
                   Admin
                 </label>
               </div>
+              <mat-form-field appearance="outline" class="account-row__tutor-field">
+                <mat-label>Tutor</mat-label>
+                <mat-select
+                  [value]="a.tutorId"
+                  [disabled]="savingAccountId() === a.userId"
+                  (selectionChange)="setTutor(a, $event.value)"
+                >
+                  <mat-option [value]="null">No tutor</mat-option>
+                  @for (t of eligibleTutors(); track t.userId) {
+                    @if (t.userId !== a.userId) {
+                      <mat-option [value]="t.userId">{{ t.email }}</mat-option>
+                    }
+                  }
+                </mat-select>
+              </mat-form-field>
             </div>
           }
         </div>

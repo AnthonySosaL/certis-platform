@@ -127,4 +127,50 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// Seeds a non-login "AI Tutor" persona account (2026-08-28,
+// tutor-student assignment) - explicitly requested as a real assignable
+// tutor without needing a human on the other end yet. It's a genuine
+// ApplicationUser (reuses every bit of existing Tutor-role plumbing
+// instead of special-casing "no tutor assigned" vs "AI tutor assigned")
+// but with a password nobody is ever given, so nothing can sign into it.
+// Idempotent - looked up by its fixed email every startup, created only
+// once. Also does the one-off assignment the user explicitly asked for:
+// their own account gets this persona as its tutor if it doesn't have
+// one yet.
+using (var scope = app.Services.CreateScope())
+{
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    const string aiTutorEmail = "ai-tutor@certis.local";
+
+    var aiTutor = await userManager.FindByEmailAsync(aiTutorEmail);
+    if (aiTutor is null)
+    {
+        aiTutor = new ApplicationUser
+        {
+            UserName = aiTutorEmail,
+            Email = aiTutorEmail,
+            EmailConfirmed = true,
+            DisplayName = "AI Tutor",
+        };
+        var created = await userManager.CreateAsync(aiTutor, Guid.NewGuid().ToString("N") + "Aa1!");
+        if (created.Succeeded)
+            await userManager.AddToRoleAsync(aiTutor, "Tutor");
+    }
+    else if (!await userManager.IsInRoleAsync(aiTutor, "Tutor"))
+    {
+        await userManager.AddToRoleAsync(aiTutor, "Tutor");
+    }
+
+    var requestedStudentEmail = builder.Configuration["Admin:Email"]; // same account that requested this feature
+    if (!string.IsNullOrWhiteSpace(requestedStudentEmail))
+    {
+        var student = await userManager.FindByEmailAsync(requestedStudentEmail);
+        if (student is not null && student.TutorId is null && student.Id != aiTutor.Id)
+        {
+            student.TutorId = aiTutor.Id;
+            await userManager.UpdateAsync(student);
+        }
+    }
+}
+
 app.Run();

@@ -5,6 +5,61 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-28 — Tutor-student assignment, with a seeded "AI Tutor" persona
+
+Third item from the 2026-08-28 request batch. A student can now have an
+assigned tutor, surfaced on their Dashboard.
+
+- `ApplicationUser` gained `DisplayName` (nullable, for a friendlier
+  label than a raw email) and a self-referencing optional `TutorId` -
+  one tutor per student at a time, not a many-to-many junction table.
+  Deliberately the simplest model that satisfies "Your tutor: X" - no
+  co-tutoring use case exists yet to justify more. Migration
+  `AddTutorAssignment`; the self-referencing FK uses
+  `DeleteBehavior.Restrict` (SQL Server flatly rejects a cascading
+  self-reference, and there's no delete-account feature yet for this to
+  matter in practice).
+- **Seeded "AI Tutor" persona** (`ai-tutor@certis.local`, `DisplayName =
+  "AI Tutor"`, Tutor role) - explicitly requested: a real, assignable
+  tutor without needing an actual human yet. It's a genuine
+  `ApplicationUser` (reuses every bit of existing Tutor-role plumbing
+  instead of special-casing "AI tutor" vs "real tutor" everywhere) but
+  seeded with a random password nobody is ever given, so nothing can
+  sign into it. Idempotent, looked up by its fixed email every startup.
+  Also does the one-off assignment that was explicitly asked for: the
+  requesting account (`Admin:Email`) gets this persona as its tutor if
+  it doesn't have one yet.
+- `AccountsController` gained `PUT /api/admin/accounts/{userId}/tutor`
+  (Admin-only, validates the target actually holds the Tutor role,
+  rejects self-assignment) and `GetAccounts`/`SetRoles` now resolve and
+  return `tutorId`/`tutorLabel` per account.
+- `/api/auth/login`, `/register`, and `/me` all now return `tutorLabel`
+  (display name, falling back to email) - same pattern already
+  established for `isAdmin`/`isTutor`, refreshed at login like those.
+- Frontend: Admin Access tab gets a per-account tutor `<mat-select>`
+  (options = accounts with the Tutor role, "No tutor" to clear).
+  Dashboard shows a "Your tutor: X" pill at the top when one's assigned.
+
+**A real bug caught and fixed before it shipped, not after**: initially
+had `AccountsController.SetRoles` hardcode `tutorLabel: null` in its
+response instead of resolving it - toggling Admin/Tutor for an account
+that already had a tutor assigned would have silently blanked the label
+in the UI on the next refresh. Pulled the resolution into a shared
+`ResolveTutorLabel` helper used by both `SetRoles` and `Me()` instead.
+
+**Another `dotnet ef` PATH gotcha** (same root cause as the previous
+entry, worth confirming the fix generalizes): `PATH="/c/Users/pc/.dotnet:$PATH"`
+prefixing worked again for both `migrations add` and `database update`.
+
+Verified end-to-end for real: confirmed via the API that the AI Tutor
+persona was seeded and `anthonysosa44@gmail.com` got auto-assigned to it
+on startup; assigned a tutor to a test account through the actual Access
+tab UI (`PUT .../tutor` → 200); logged out and back in and confirmed the
+login response carried `tutorLabel: "AI Tutor"`; confirmed the Dashboard
+rendered "Your tutor: AI Tutor" at the top. Migration applied to the
+real shared database. Backend build + 10/10 unit tests, frontend build,
+both clean.
+
 ## 2026-08-28 — AI-generated reinforcement practice (Groq)
 
 Second item from the 2026-08-28 request batch. Lets a student practice a

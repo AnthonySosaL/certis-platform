@@ -49,5 +49,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
                 .HasForeignKey(a => a.TestAttemptId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        modelBuilder.Entity<ApplicationUser>(entity =>
+        {
+            entity.Property(u => u.DisplayName).HasMaxLength(100);
+            // Restrict, not Cascade/SetNull: SQL Server rejects cascading
+            // self-referencing FKs outright, and there's no
+            // delete-account feature yet for this to matter in practice -
+            // Restrict is the safe default until there is one.
+            entity.HasOne(u => u.Tutor)
+                .WithMany()
+                .HasForeignKey(u => u.TutorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 }
