@@ -19,13 +19,84 @@ to sit here as open decisions:
 
 Still open, now that the first slice exists:
 
-- [ ] Beyond the placement test: which skills come next (reading,
-      writing, listening, speaking - only Grammar/Vocabulary exist so
-      far)?
 - [ ] Should a reinforcement attempt that's passed update anything about
       the original placement, or stay purely a practice log forever? No
       auto-update exists yet - retaking the full placement test is
       currently the only way to change your recorded level.
+
+## Requested 2026-08-28 — AI-generated practice, new skills, tutor assignment
+
+One long message, broken into concrete items here so the `/loop` can work
+them one at a time instead of trying to swallow all of it at once. Which
+skills come next (the open question right above, until now) is answered
+by this: **Reading and Listening**, explicitly named.
+
+- [ ] **AI-generated reinforcement exercises (Groq).** Instead of only
+      pulling from the fixed hand-written bank, let Groq generate a new
+      multiple-choice question on demand for a specific (level, skill)
+      the student is weak in - same shape as a real question (text, 4
+      options, correct index, explanation) so it can run through the
+      existing `Quiz` component unmodified. Unblocked: the Groq key and
+      the JSON-structured-prompt pattern are already proven (see the AI
+      insight feature). Needs a validation step before showing a
+      generated question to anyone - a malformed/off-topic generation
+      has to be caught and retried or discarded, not shown as-is.
+- [ ] **Early-warning threshold reworked to a 0-10 school-style grade,
+      below 7 = priority.** Explicit decision from the user ("como en
+      los colegios evalúan... si ya está menos de 7"), replacing the
+      current 60% pass threshold per (level, skill) cell
+      (`PlacementScorer.PassThreshold`). Raises the bar from 60% to 70%
+      and should show as a familiar /10 grade (not just a percentage)
+      wherever a score displays - test result, dashboard, admin Students
+      tab. Unblocked, no external dependency, but touches scoring logic
+      shared by placement/reinforcement/the admin early-warning flag, so
+      needs care + the unit tests updated.
+- [ ] **Reading comprehension as a real skill.** A new `SkillArea` value
+      needs a short passage + a question about it, not just a bare MCQ -
+      a bigger content shape than Grammar/Vocabulary's one-liners.
+      Unblocked (no external service needed - can be hand-written same
+      as the rest of the bank, or AI-generated per the item above once
+      that exists).
+- [ ] **Listening comprehension as a real skill.** Needs generated
+      audio. **Investigate Groq's own TTS model
+      (`canopylabs/orpheus-v1-english`, confirmed present in
+      `GET /openai/v1/models` - see the AI-insight changelog entry) as
+      the first thing to try**, since the Groq key is already
+      configured - would avoid a new external dependency entirely. The
+      user mentioned ElevenLabs tools being installed locally for this;
+      checked (CLI, Python package, npm global package, env vars, local
+      user-secrets, MCP tools) and found nothing - genuinely not
+      installed on this machine as far as I can tell, so that path is
+      blocked until an API key is provided or the claim is corrected.
+      Groq TTS is the unblocked path to try first.
+- [ ] **Tutor-student assignment.** A real `Tutor` role already exists
+      (Access tab), but nothing links a specific tutor to a specific
+      student yet. Needs: a `TutorAssignment`-style relationship, a way
+      for a Tutor/Admin to assign students (probably a 4th Admin panel
+      tab, or folded into Access), and a "Your tutor: X" surfaced
+      somewhere a student sees it (Dashboard is the natural spot).
+      **Also explicitly requested**: assign the user's own account to an
+      "AI tutor" persona for now, not a real human - needs a seeded
+      non-login account representing that persona (display name, maybe
+      an avatar), not a real ApplicationUser someone signs in as.
+      Unblocked, no external dependency.
+- [ ] **Speaking/conversation practice, Cambridge-exam style.** The
+      biggest, least-scoped item in the request - deliberately splitting
+      it instead of guessing a single build:
+      - A first buildable slice: **AI-only roleplay practice** - pick a
+        Cambridge-speaking-style scenario, have a text conversation with
+        Groq playing the examiner/partner role, in a new tab/section.
+        Unblocked (same Groq infrastructure as the AI insight feature).
+      - **Matching with another real user** ("con quién voy a
+        practicar", presumably meaning the user's partner) is a
+        materially bigger feature - presence, pairing, likely real-time
+        state - and needs its own design pass before being buildable in
+        a single loop iteration. Not attempting this without scoping it
+        properly first.
+      - "Le puedas preguntar a la IA" (ask the AI a question directly)
+        reads as the same underlying chat/conversation capability as the
+        roleplay slice above, not a separate feature - covered by
+        whatever chat UI the first slice builds.
 
 ## Scaffolded structurally, not implemented
 
