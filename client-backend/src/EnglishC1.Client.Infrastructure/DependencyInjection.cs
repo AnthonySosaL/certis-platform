@@ -6,11 +6,13 @@ using Microsoft.Extensions.Options;
 using EnglishC1.Client.Application.Admin;
 using EnglishC1.Client.Application.Ai;
 using EnglishC1.Client.Application.PlacementTest;
+using EnglishC1.Client.Application.Speaking;
 using EnglishC1.Client.Infrastructure.Admin;
 using EnglishC1.Client.Infrastructure.Ai;
 using EnglishC1.Client.Infrastructure.Identity;
 using EnglishC1.Client.Infrastructure.Persistence;
 using EnglishC1.Client.Infrastructure.PlacementTest;
+using EnglishC1.Client.Infrastructure.Speaking;
 
 namespace EnglishC1.Client.Infrastructure;
 
@@ -57,6 +59,7 @@ public static class DependencyInjection
         services.AddScoped<IContentService, ContentService>();
         services.AddHttpClient<IAiInsightService, GroqInsightService>(client => client.Timeout = TimeSpan.FromSeconds(20));
         services.AddHttpClient<IAiQuestionGeneratorService, GroqQuestionGeneratorService>(client => client.Timeout = TimeSpan.FromSeconds(20));
+        services.AddHttpClient<ISpeakingService, SpeakingService>(client => client.Timeout = TimeSpan.FromSeconds(20));
 
         return services;
     }

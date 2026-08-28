@@ -5,6 +5,70 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-28 — Speaking practice: AI-only roleplay, Cambridge-exam style
+
+Fifth item from the 2026-08-28 request batch, and the first slice of the
+biggest, least-scoped item in it ("situaciones para practicar con un
+compañero... la IA ahí también puede entrar y darle qué caso literal como
+si fuera a dar una prueba de Cambridge"). Deliberately split in two per
+`PENDING_IDEAS.md`: this slice is AI-only roleplay; matching with another
+real user is a separate, materially bigger feature (presence, pairing,
+likely real-time) that needs its own design pass before it's buildable.
+
+- New `Speaking` slice across all three backend layers, same shape as the
+  existing AI features: `ISpeakingService`/`SpeakingDtos.cs`
+  (Application), `SpeakingService`/`SpeakingScenario.cs` (Infrastructure),
+  `SpeakingController` (Api). Registered in `DependencyInjection.cs` via
+  `AddHttpClient<ISpeakingService, SpeakingService>`, matching
+  `IAiInsightService`/`IAiQuestionGeneratorService`.
+- Four fixed scenarios (`SpeakingScenarios.All`), loosely modeled on the
+  four parts of a real Cambridge speaking exam - interview (B1+), long
+  turn (B2+), collaborative task (B2+), abstract discussion (C1+). Each
+  has its own system prompt instructing Groq to play the
+  examiner/partner role and stay in character; the prompt never leaves
+  the backend (`SpeakingScenarioDto` only exposes id/title/level/
+  description).
+- **Deliberately stateless for this first slice**: the full conversation
+  history is sent by the client on every turn (`SpeakingReplyRequest.
+  History`) instead of being persisted server-side - no new table, no
+  attempt/session concept yet. `SpeakingService` caps what it forwards
+  to Groq at the last 12 turns so a long session doesn't grow the prompt
+  (and cost) without bound. Revisit persistence if this needs to survive
+  a reload or show up in a student's history later.
+- `GET /api/speaking/scenarios` and `POST /api/speaking/{scenarioId}/reply`,
+  both `[Authorize]`-protected. A missing/invalid scenario id returns
+  404; an unconfigured or failing Groq call returns 503 with a plain
+  message, same pattern as `GroqInsightService`/
+  `GroqQuestionGeneratorService` - never a generic 500 for "AI isn't
+  available right now."
+- Frontend: `core/speaking-api.ts` (thin wrapper, mirrors `test-api.ts`),
+  new `pages/speaking/` component - a scenario-card picker that swaps to
+  a chat view on pick. Picking a scenario sends a synthetic opening line
+  ("Hi, I'm ready to start.") to get the examiner talking first, but
+  that line is never shown as something the student typed - only the
+  reply appears. New `/speaking` route (`authGuard`), new "Speaking" navbar
+  link for authenticated users (between Dashboard and Admin).
+- **Product decision, made live in chat, not guessed**: Listening's
+  audio generation will use `edge-tts` (already installed locally,
+  Python 3.11) instead of either Groq's TTS (blocked on terms
+  acceptance) or ElevenLabs (not installed) - see the updated Listening
+  entry in `PENDING_IDEAS.md`. Not built yet; recorded here because it
+  changes that item from blocked to ready-to-build.
+
+Verified end-to-end in the Browser pane with the real dev servers and a
+real Groq call: picked the Interview scenario, got an opening question
+("Can you tell me where you were born...") without a synthetic user
+bubble showing, replied with a real answer, and got a natural,
+context-aware follow-up question back (not a canned response) - confirms
+history is actually being threaded through, not just the latest message.
+"Change scenario" correctly resets the chat and returns to the picker. No
+console errors. Backend: `dotnet build` 0 warnings/0 errors; domain unit
+tests still 10/10 green (this slice added no new domain logic - the
+scenario list and prompts are static data, nothing here needed a unit
+test beyond the build/integration verification above). Frontend:
+`ng build` clean (only the two pre-existing, already-accepted budget
+warnings).
+
 ## 2026-08-28 — Reading comprehension: the first new skill beyond Grammar/Vocabulary
 
 Fourth item from the 2026-08-28 request batch, and the first of the two

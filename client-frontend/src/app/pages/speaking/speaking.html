@@ -1,0 +1,61 @@
+<main class="speaking">
+  <h1>Speaking practice</h1>
+  <p class="speaking__intro">
+    Practice a Cambridge-style speaking task with an AI partner, in text - pick a scenario to start.
+  </p>
+
+  @if (errorMessage()) {
+    <p class="speaking__error">{{ errorMessage() }}</p>
+  }
+
+  @switch (stage()) {
+    @case ('loading') {
+      <div class="speaking__loading">
+        <mat-spinner diameter="32" />
+      </div>
+    }
+    @case ('picking') {
+      <div class="speaking__scenarios">
+        @for (scenario of scenarios(); track scenario.id) {
+          <button type="button" class="scenario-card" (click)="pick(scenario)">
+            <span class="scenario-card__level">{{ scenario.level }}</span>
+            <span class="scenario-card__title">{{ scenario.title }}</span>
+            <span class="scenario-card__description">{{ scenario.description }}</span>
+          </button>
+        }
+      </div>
+    }
+    @case ('chatting') {
+      @let scenario = activeScenario()!;
+      <div class="speaking__chat">
+        <div class="speaking__chat-header">
+          <button mat-button type="button" (click)="backToScenarios()">&larr; Change scenario</button>
+          <span class="speaking__chat-title">{{ scenario.title }} · {{ scenario.level }}</span>
+        </div>
+
+        <div class="speaking__messages">
+          @for (turn of messages(); track $index) {
+            <p class="chat-bubble" [class.chat-bubble--user]="turn.role === 'user'">
+              {{ turn.content }}
+            </p>
+          }
+          @if (sending()) {
+            <div class="speaking__typing">
+              <mat-spinner diameter="20" />
+            </div>
+          }
+        </div>
+
+        <form class="speaking__form" [formGroup]="messageForm" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline" class="speaking__field">
+            <mat-label>Your reply</mat-label>
+            <input matInput formControlName="message" autocomplete="off" />
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit" [disabled]="messageForm.invalid || sending()">
+            Send
+          </button>
+        </form>
+      </div>
+    }
+  }
+</main>

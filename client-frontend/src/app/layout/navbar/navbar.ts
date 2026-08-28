@@ -17,6 +17,7 @@ const BASE_NAV_ITEMS: NavItem[] = [
 ];
 
 const DASHBOARD_ITEM: NavItem = { path: '/dashboard', label: 'Dashboard' };
+const SPEAKING_ITEM: NavItem = { path: '/speaking', label: 'Speaking' };
 const ADMIN_ITEM: NavItem = { path: '/admin', label: 'Admin' };
 
 @Component({
@@ -34,8 +35,8 @@ export class Navbar {
   protected readonly navItems = computed<NavItem[]>(() => {
     if (!this.auth.isAuthenticated()) return BASE_NAV_ITEMS;
     return this.auth.canManage()
-      ? [...BASE_NAV_ITEMS, DASHBOARD_ITEM, ADMIN_ITEM]
-      : [...BASE_NAV_ITEMS, DASHBOARD_ITEM];
+      ? [...BASE_NAV_ITEMS, DASHBOARD_ITEM, SPEAKING_ITEM, ADMIN_ITEM]
+      : [...BASE_NAV_ITEMS, DASHBOARD_ITEM, SPEAKING_ITEM];
   });
 
   openSignIn(): void {

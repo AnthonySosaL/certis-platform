@@ -34,34 +34,34 @@ skills come next (the open question right above, until now) is answered
 by this: **Reading and Listening**, explicitly named.
 
 - [ ] **Listening comprehension as a real skill.** Needs generated
-      audio. **Investigate Groq's own TTS model
-      (`canopylabs/orpheus-v1-english`, confirmed present in
-      `GET /openai/v1/models` - see the AI-insight changelog entry) as
-      the first thing to try**, since the Groq key is already
-      configured - would avoid a new external dependency entirely. The
-      user mentioned ElevenLabs tools being installed locally for this;
-      checked (CLI, Python package, npm global package, env vars, local
-      user-secrets, MCP tools) and found nothing - genuinely not
-      installed on this machine as far as I can tell, so that path is
-      blocked until an API key is provided or the claim is corrected.
-      Groq TTS is the unblocked path to try first.
-- [ ] **Speaking/conversation practice, Cambridge-exam style.** The
-      biggest, least-scoped item in the request - deliberately splitting
-      it instead of guessing a single build:
-      - A first buildable slice: **AI-only roleplay practice** - pick a
-        Cambridge-speaking-style scenario, have a text conversation with
-        Groq playing the examiner/partner role, in a new tab/section.
-        Unblocked (same Groq infrastructure as the AI insight feature).
-      - **Matching with another real user** ("con quién voy a
-        practicar", presumably meaning the user's partner) is a
-        materially bigger feature - presence, pairing, likely real-time
-        state - and needs its own design pass before being buildable in
-        a single loop iteration. Not attempting this without scoping it
-        properly first.
-      - "Le puedas preguntar a la IA" (ask the AI a question directly)
-        reads as the same underlying chat/conversation capability as the
-        roleplay slice above, not a separate feature - covered by
-        whatever chat UI the first slice builds.
+      audio. Groq's TTS endpoint (`POST /v1/audio/speech`, model
+      `canopylabs/orpheus-v1-english`) was tried for real and returned
+      `400 model_terms_required` - a one-time manual click in the Groq
+      console only the account owner can do, not something to script
+      around. ElevenLabs was checked too (CLI, Python package, npm
+      global package, env vars, user-secrets, MCP tools) and genuinely
+      isn't installed. **Unblocked as of 2026-08-28** by a product
+      decision (user, in chat): generate audio locally instead of via
+      either cloud API, using `edge-tts` (Python 3.11, already
+      installed on this machine - confirmed via `pip list`) - free,
+      keyless, decent-quality Microsoft neural voices; the one caveat
+      is it still calls a Microsoft network endpoint under the hood, so
+      it isn't a fully-offline model (Piper was offered as the
+      fully-offline alternative but the user picked edge-tts for zero
+      extra install). Plan: pre-generate a fixed bank of listening
+      audio files with a local script (same seeded-bank pattern as
+      Reading's `ReadingBank` in `QuestionSeeder.cs`, not live
+      per-request generation), save them as static assets served by
+      the app, and add a `SkillArea.Listening` + audio-URL field to
+      `Question` following the same shape `Passage` was added for
+      Reading. Ready to build.
+- [ ] **Speaking/conversation practice, matching with a real user.** The
+      AI-only roleplay slice is done (see Done section below). What's
+      left is "con quién voy a practicar" (presumably meaning the user's
+      partner) - a materially bigger feature than the roleplay slice:
+      presence, pairing, likely real-time state. Needs its own design
+      pass before being buildable in a single loop iteration - not
+      attempting this without scoping it properly first.
 
 ## Scaffolded structurally, not implemented
 
@@ -135,6 +135,14 @@ what *was* built that session):
       but not this round's card/animation treatment.
 ## Done
 
+- [x] **Speaking practice: AI-only roleplay, Cambridge-exam style.** Four
+      fixed scenarios modeled on the four parts of a real Cambridge
+      speaking exam; a text chat where Groq plays the examiner/partner
+      role and stays in character. Stateless for this first slice - full
+      history sent by the client each turn, no persistence yet.
+      Matching with a real user is split out as its own not-yet-scoped
+      item above. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-28--speaking-practice-ai-only-roleplay-cambridge-exam-style). — 2026-08-28
 - [x] **Reading comprehension as a real skill.** New `SkillArea.Reading`
       + `Question.Passage`; 16 hand-written passage-based questions (4
       per level). Placement test grew from 32 to 48 questions as an
