@@ -2,6 +2,7 @@ import { Component, DestroyRef, OnInit, computed, inject, input, output, signal 
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
+import { API_BASE_URL } from '../../core/api-config';
 import { Question, SubmitAnswer } from '../../core/test-api';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -95,6 +96,13 @@ export class Quiz implements OnInit {
 
   letterFor(index: number): string {
     return OPTION_LETTERS[index] ?? String(index + 1);
+  }
+
+  // Question.audioUrl is a relative path ("/audio/listening/a2-1.mp3") -
+  // the backend serves the file, not the Angular dev server, so it needs
+  // the API origin prepended.
+  audioSrc(audioUrl: string): string {
+    return `${API_BASE_URL}${audioUrl}`;
   }
 
   select(questionId: string, optionId: string): void {

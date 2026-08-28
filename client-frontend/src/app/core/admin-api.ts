@@ -35,6 +35,7 @@ export interface AdminQuestion {
   correctOptionId: string;
   isAiGenerated: boolean;
   passage: string | null;
+  audioUrl: string | null;
 }
 
 export interface UpsertQuestionRequest {
@@ -45,6 +46,7 @@ export interface UpsertQuestionRequest {
   options: string[];
   correctOptionIndex: number;
   passage: string | null;
+  audioUrl: string | null;
 }
 
 export interface Account {

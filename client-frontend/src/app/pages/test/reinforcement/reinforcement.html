@@ -13,7 +13,7 @@
       </div>
     }
     @case ('taking') {
-      @if (skill !== 'Reading') {
+      @if (skill !== 'Reading' && skill !== 'Listening') {
         <div class="reinforce__ai-toggle">
           @if (usingAiQuestions()) {
             <span class="reinforce__ai-badge">AI-generated practice</span>

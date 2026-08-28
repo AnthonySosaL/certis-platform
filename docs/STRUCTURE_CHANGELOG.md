@@ -5,6 +5,67 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-28 — Listening comprehension: the second new skill, audio generated locally with edge-tts
+
+Sixth item from the 2026-08-28 request batch, and the second of the two
+explicitly-named new skills. Was blocked earlier this session (Groq's TTS
+returns `400 model_terms_required`, ElevenLabs isn't installed); unblocked
+by a live product decision in chat to generate audio locally with
+`edge-tts` instead (see the Speaking entry below for that decision).
+
+- `SkillArea` gained a fourth value, `Listening` - same no-migration-needed
+  reasoning as Reading (string-serialized enum, EF stores an appended
+  int).
+- `Question.AudioUrl` (nullable, new migration `AddQuestionAudioUrl`) - a
+  relative URL to a static mp3, used only by Listening. Threaded through
+  `QuestionDto`, `AdminQuestionDto`, and `UpsertQuestionRequest`, same
+  shape as `Passage`.
+- `Program.cs` now calls `app.UseStaticFiles()` - serves
+  `wwwroot/audio/listening/*.mp3` as plain public files (no auth on the
+  files themselves; the question referencing one is still behind the
+  normal `[Authorize]`-protected test endpoints).
+- **New `scripts/generate_listening_audio.py`**: a one-time/occasional
+  script (not run at app startup) that generates all 16 clips via
+  `edge-tts` (voice `en-US-AriaNeural`) and writes them straight into
+  `wwwroot/audio/listening/`. The spoken transcript for each clip lives
+  only in this script - `QuestionSeeder.cs`'s new `ListeningBank` stores
+  just the filename, question, options, and explanation, matched by
+  filename, to avoid the transcript existing in two places that could
+  drift apart. Ran it for real; confirmed all 16 files were written with
+  real, non-trivial sizes (54KB-110KB).
+- 16 new questions (`ListeningBank`, `QuestionSeeder.cs`) - 4 per CEFR
+  level, one comprehension question per clip. Register grows with level
+  the same way Reading's passages do: simple scripted announcements at
+  A2, up to a nuanced multi-clause opinion at C1.
+- Frontend: `Quiz` renders an `<audio controls>` element when
+  `question.audioUrl` is set (prefixed with `API_BASE_URL` client-side,
+  since the backend serves the file, not the Angular dev server), same
+  slot as the Reading passage. Admin's question editor dialog shows an
+  Audio URL text field that appears/disappears reactively as the Skill
+  dropdown changes, validated required (frontend and backend) when the
+  skill is Listening. New headphones skill icon. AI-generated
+  reinforcement's "Practice different questions" button is hidden for
+  Listening too, same as Reading, since the generator doesn't produce
+  audio.
+- **The placement test grew from 48 to 64 questions**, the same direct,
+  intended consequence as when Reading was added - copy on the
+  placement intro updated (64 questions, ~25 minutes) and the About page's
+  "Scope, honestly" section now lists Listening as assessed.
+
+Verified end-to-end with the real dev servers: confirmed
+`GET /audio/listening/a2-1.mp3` returns `200 OK` with `Content-Type:
+audio/mpeg` and `Accept-Ranges: bytes`; retook the placement test in the
+Browser pane and confirmed via JS that exactly 16 `<audio>` elements
+render with correct `src` URLs pointing at the backend, and that one
+loads with a real duration (11.3s) and `readyState: 4` (fully loaded,
+not just metadata) - not just present in the DOM but actually playable.
+Admin Content tab shows "100 questions in the bank" (84 + 16) with an
+"A2 LISTENING" group; opening one for edit shows the Audio URL field
+correctly pre-filled with `/audio/listening/a2-1.mp3`. No console
+errors. Backend: `dotnet build` 0 warnings/0 errors, domain unit tests
+10/10 green. Frontend: `ng build` clean (only the two pre-existing,
+already-accepted budget warnings).
+
 ## 2026-08-28 — Speaking practice: AI-only roleplay, Cambridge-exam style
 
 Fifth item from the 2026-08-28 request batch, and the first slice of the

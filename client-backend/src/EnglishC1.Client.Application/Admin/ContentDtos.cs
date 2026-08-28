@@ -14,7 +14,8 @@ public record AdminQuestionDto(
     List<AdminQuestionOptionDto> Options,
     Guid CorrectOptionId,
     bool IsAiGenerated,
-    string? Passage);
+    string? Passage,
+    string? AudioUrl);
 
 public record AdminQuestionOptionDto(Guid Id, string Text);
 
@@ -25,4 +26,5 @@ public record UpsertQuestionRequest(
     string? Explanation,
     List<string> Options,
     int CorrectOptionIndex,
-    string? Passage);
+    string? Passage,
+    string? AudioUrl);

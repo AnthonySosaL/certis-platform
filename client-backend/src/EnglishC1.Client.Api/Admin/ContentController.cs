@@ -51,6 +51,11 @@ public class ContentController(IContentService contentService) : ControllerBase
             error = "Reading questions need a passage.";
             return false;
         }
+        if (request.SkillArea == SkillArea.Listening && string.IsNullOrWhiteSpace(request.AudioUrl))
+        {
+            error = "Listening questions need an audio URL.";
+            return false;
+        }
         error = string.Empty;
         return true;
     }

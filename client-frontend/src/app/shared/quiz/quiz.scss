@@ -59,6 +59,13 @@
   opacity: 0.9;
 }
 
+.quiz-question__audio {
+  display: block;
+  width: 100%;
+  max-width: 24rem;
+  margin: 0 0 1.25rem;
+}
+
 .quiz-question__text {
   margin: 0 0 1.25rem;
   font-size: 1.15rem;

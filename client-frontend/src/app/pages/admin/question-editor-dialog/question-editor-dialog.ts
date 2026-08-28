@@ -16,7 +16,7 @@ export interface QuestionEditorData {
 }
 
 const LEVELS: CefrLevel[] = ['A2', 'B1', 'B2', 'C1'];
-const SKILLS: SkillArea[] = ['Grammar', 'Vocabulary', 'Reading'];
+const SKILLS: SkillArea[] = ['Grammar', 'Vocabulary', 'Reading', 'Listening'];
 
 @Component({
   selector: 'app-question-editor-dialog',
@@ -50,6 +50,7 @@ export class QuestionEditorDialog {
     skillArea: [this.data.question?.skillArea ?? 'Grammar', Validators.required],
     explanation: [this.data.question?.explanation ?? ''],
     passage: [this.data.question?.passage ?? ''],
+    audioUrl: [this.data.question?.audioUrl ?? ''],
     options: this.fb.array(
       (this.data.question?.options ?? [{ text: '' }, { text: '' }]).map((o) =>
         this.fb.nonNullable.control(o.text, Validators.required),
@@ -59,9 +60,13 @@ export class QuestionEditorDialog {
   });
 
   protected readonly isReading = signal(this.form.controls.skillArea.value === 'Reading');
+  protected readonly isListening = signal(this.form.controls.skillArea.value === 'Listening');
 
   constructor() {
-    this.form.controls.skillArea.valueChanges.subscribe((skill) => this.isReading.set(skill === 'Reading'));
+    this.form.controls.skillArea.valueChanges.subscribe((skill) => {
+      this.isReading.set(skill === 'Reading');
+      this.isListening.set(skill === 'Listening');
+    });
   }
 
   private initialCorrectIndex(): number {
@@ -101,6 +106,10 @@ export class QuestionEditorDialog {
       this.errorMessage.set('Reading questions need a passage.');
       return;
     }
+    if (value.skillArea === 'Listening' && value.audioUrl.trim() === '') {
+      this.errorMessage.set('Listening questions need an audio URL.');
+      return;
+    }
 
     const request: UpsertQuestionRequest = {
       text: value.text,
@@ -108,6 +117,7 @@ export class QuestionEditorDialog {
       skillArea: value.skillArea,
       explanation: value.explanation.trim() === '' ? null : value.explanation,
       passage: value.passage.trim() === '' ? null : value.passage,
+      audioUrl: value.audioUrl.trim() === '' ? null : value.audioUrl,
       options: value.options,
       correctOptionIndex: value.correctOptionIndex,
     };

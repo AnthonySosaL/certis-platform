@@ -25,4 +25,10 @@ public class Question
     // questions use this (Grammar/Vocabulary stay one-liners). Null for
     // every other skill.
     public string? Passage { get; set; }
+
+    // A URL to a short spoken audio clip, played instead of showing a
+    // passage - only Listening questions use this. Null for every other
+    // skill. Served as a static file (wwwroot/audio) - see
+    // Program.cs's UseStaticFiles and QuestionSeeder's ListeningBank.
+    public string? AudioUrl { get; set; }
 }

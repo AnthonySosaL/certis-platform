@@ -17,6 +17,9 @@
       @if (question.passage) {
         <p class="quiz-question__passage">{{ question.passage }}</p>
       }
+      @if (question.audioUrl) {
+        <audio class="quiz-question__audio" controls [src]="audioSrc(question.audioUrl)"></audio>
+      }
       <p class="quiz-question__text">{{ question.text }}</p>
       <div class="quiz-question__options" role="radiogroup">
         @for (option of question.options; track option.id; let i = $index) {

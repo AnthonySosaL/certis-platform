@@ -28,6 +28,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             entity.Property(q => q.Text).HasMaxLength(500).IsRequired();
             entity.Property(q => q.Explanation).HasMaxLength(500);
             entity.Property(q => q.Passage).HasMaxLength(1000);
+            entity.Property(q => q.AudioUrl).HasMaxLength(300);
             // Explicit default so adding this column to the already-populated
             // Questions table (64 rows, shared dev+prod DB) doesn't need a
             // separate backfill step - every existing row becomes false.

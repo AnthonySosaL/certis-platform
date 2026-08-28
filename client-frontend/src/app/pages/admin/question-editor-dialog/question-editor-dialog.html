@@ -43,6 +43,13 @@
       </mat-form-field>
     }
 
+    @if (isListening()) {
+      <mat-form-field appearance="outline">
+        <mat-label>Audio URL (e.g. /audio/listening/a2-1.mp3)</mat-label>
+        <input matInput formControlName="audioUrl" />
+      </mat-form-field>
+    }
+
     <fieldset class="editor-form__options" formArrayName="options">
       <legend>Options - pick the correct one</legend>
       <div class="options-radio-group" role="radiogroup">

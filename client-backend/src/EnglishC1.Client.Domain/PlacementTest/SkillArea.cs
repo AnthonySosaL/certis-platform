@@ -9,4 +9,9 @@ public enum SkillArea
     // Question.Passage (a short paragraph) that Grammar/Vocabulary
     // questions don't use - see Question.cs.
     Reading,
+
+    // 2026-08-28: second new skill from the same request. Carries a
+    // Question.AudioUrl (a short spoken clip) instead of a Passage - see
+    // Question.cs.
+    Listening,
 }

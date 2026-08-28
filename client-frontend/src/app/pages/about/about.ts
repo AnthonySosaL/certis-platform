@@ -27,7 +27,7 @@ const SECTIONS: Section[] = [
   },
   {
     title: 'Scope, honestly',
-    text: 'This version covers Grammar, Vocabulary, and Reading - Listening, Writing, and Speaking are not assessed yet. The question bank is mostly hand-written, with AI-generated questions available for extra reinforcement practice, and is small enough that results should be read as a solid estimate, not a certified exam score.',
+    text: 'This version covers Grammar, Vocabulary, Reading, and Listening - Writing and Speaking aren\'t part of the scored placement test yet, though Speaking now has its own AI roleplay practice section. The question bank is mostly hand-written, with AI-generated questions available for extra reinforcement practice, and is small enough that results should be read as a solid estimate, not a certified exam score.',
     // Eye
     iconPath: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
   },

@@ -229,7 +229,8 @@ public class TestService(AppDbContext db, IAiQuestionGeneratorService aiQuestion
             question.SkillArea,
             question.Level,
             shuffled.Select(o => new QuestionOptionDto(o.Id, o.Text)).ToList(),
-            question.Passage);
+            question.Passage,
+            question.AudioUrl);
     }
 
     private static TestResultDto ToResultDto(TestAttempt attempt, List<SkillBreakdown> breakdown, Dictionary<Guid, Question> questionsById) => new(
