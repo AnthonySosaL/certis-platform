@@ -1,3 +1,4 @@
+using EnglishC1.Client.Application.Ai;
 using EnglishC1.Client.Application.PlacementTest;
 using EnglishC1.Client.Domain.PlacementTest;
 using EnglishC1.Client.Infrastructure.Persistence;
@@ -11,7 +12,7 @@ namespace EnglishC1.Client.Infrastructure.PlacementTest;
 // algorithm lives in EnglishC1.Client.Domain.PlacementTest.PlacementScorer
 // (pure, unit tested) - this class is just the EF Core plumbing around
 // it: load questions, grade answers, persist the attempt, map to DTOs.
-public class TestService(AppDbContext db) : ITestService
+public class TestService(AppDbContext db, IAiQuestionGeneratorService aiQuestionGenerator) : ITestService
 {
     // The bank now holds more than 4 questions per cell (see
     // QuestionSeeder) so repeat placement attempts don't always show the
@@ -36,6 +37,49 @@ public class TestService(AppDbContext db) : ITestService
             .Where(q => q.Level == level && q.SkillArea == skill)
             .ToListAsync();
         return questions.Select(ToDto).ToList();
+    }
+
+    public async Task<List<QuestionDto>> GenerateReinforcementQuestionsAsync(CefrLevel level, SkillArea skill, int count)
+    {
+        var existingTexts = await db.Questions
+            .Where(q => q.Level == level && q.SkillArea == skill)
+            .Select(q => q.Text)
+            .ToListAsync();
+
+        var generated = new List<Question>();
+        for (var i = 0; i < count; i++)
+        {
+            // Include this batch's own texts too, not just the existing
+            // bank - otherwise back-to-back generations in one call could
+            // land on near-duplicates of each other.
+            var avoid = existingTexts.Concat(generated.Select(q => q.Text)).ToList();
+            var candidate = await aiQuestionGenerator.GenerateQuestionAsync(level, skill, avoid);
+            if (candidate is null) continue;
+
+            var question = new Question
+            {
+                Id = Guid.NewGuid(),
+                Text = candidate.Text,
+                Level = level,
+                SkillArea = skill,
+                Explanation = candidate.Explanation,
+                IsAiGenerated = true,
+            };
+            question.Options = candidate.Options
+                .Select(optionText => new QuestionOption { Id = Guid.NewGuid(), QuestionId = question.Id, Text = optionText })
+                .ToList();
+            question.CorrectOptionId = question.Options[candidate.CorrectIndex].Id;
+
+            generated.Add(question);
+        }
+
+        if (generated.Count > 0)
+        {
+            db.Questions.AddRange(generated);
+            await db.SaveChangesAsync();
+        }
+
+        return generated.Select(ToDto).ToList();
     }
 
     public async Task<TestResultDto> SubmitPlacementTestAsync(Guid userId, List<SubmitAnswerDto> answers)

@@ -33,6 +33,7 @@ export interface AdminQuestion {
   explanation: string | null;
   options: AdminQuestionOption[];
   correctOptionId: string;
+  isAiGenerated: boolean;
 }
 
 export interface UpsertQuestionRequest {

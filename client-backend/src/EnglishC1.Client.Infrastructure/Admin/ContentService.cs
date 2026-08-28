@@ -95,5 +95,6 @@ public class ContentService(AppDbContext db) : IContentService
         q.SkillArea,
         q.Explanation,
         q.Options.Select(o => new AdminQuestionOptionDto(o.Id, o.Text)).ToList(),
-        q.CorrectOptionId);
+        q.CorrectOptionId,
+        q.IsAiGenerated);
 }

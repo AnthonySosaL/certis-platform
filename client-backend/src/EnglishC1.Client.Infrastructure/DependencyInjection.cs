@@ -56,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IContentService, ContentService>();
         services.AddHttpClient<IAiInsightService, GroqInsightService>(client => client.Timeout = TimeSpan.FromSeconds(20));
+        services.AddHttpClient<IAiQuestionGeneratorService, GroqQuestionGeneratorService>(client => client.Timeout = TimeSpan.FromSeconds(20));
 
         return services;
     }

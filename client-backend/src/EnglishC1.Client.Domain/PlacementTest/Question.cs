@@ -13,4 +13,11 @@ public class Question
     // test itself) - a short reason so a failed reinforcement attempt
     // teaches something instead of just reporting a score.
     public string? Explanation { get; set; }
+
+    // True for a question Groq generated on demand for reinforcement
+    // practice (see IAiQuestionGeneratorService), false for the
+    // hand-written seeded bank. Surfaced in the admin Content tab so
+    // it's clear which is which - not otherwise treated differently
+    // (grading, sampling, everything else works identically either way).
+    public bool IsAiGenerated { get; set; }
 }

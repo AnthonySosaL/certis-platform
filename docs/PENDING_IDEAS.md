@@ -31,16 +31,6 @@ them one at a time instead of trying to swallow all of it at once. Which
 skills come next (the open question right above, until now) is answered
 by this: **Reading and Listening**, explicitly named.
 
-- [ ] **AI-generated reinforcement exercises (Groq).** Instead of only
-      pulling from the fixed hand-written bank, let Groq generate a new
-      multiple-choice question on demand for a specific (level, skill)
-      the student is weak in - same shape as a real question (text, 4
-      options, correct index, explanation) so it can run through the
-      existing `Quiz` component unmodified. Unblocked: the Groq key and
-      the JSON-structured-prompt pattern are already proven (see the AI
-      insight feature). Needs a validation step before showing a
-      generated question to anyone - a malformed/off-topic generation
-      has to be caught and retried or discarded, not shown as-is.
 - [ ] **Reading comprehension as a real skill.** A new `SkillArea` value
       needs a short passage + a question about it, not just a bare MCQ -
       a bigger content shape than Grammar/Vocabulary's one-liners.
@@ -160,6 +150,16 @@ what *was* built that session):
       but not this round's card/animation treatment.
 ## Done
 
+- [x] **AI-generated reinforcement exercises (Groq).** A "Practice
+      different questions (AI-generated)" button on the reinforcement
+      page generates fresh questions for that (level, skill) via Groq
+      (structured JSON output, validated, one retry on a bad
+      generation), persisted as real `Question` rows
+      (`IsAiGenerated = true`) so grading/sampling/pooling all work
+      through the exact same path as the hand-written bank - no
+      special-casing needed anywhere else. Admin Content tab shows an
+      "AI" badge per generated question. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-28--ai-generated-reinforcement-practice-groq). — 2026-08-28
 - [x] **Early-warning threshold reworked to a 0-10 school-style grade,
       below 7 = priority.** Explicit decision from the user. Raised the
       pass bar from 60% to 70% (`PlacementScorer.PassThreshold`), added

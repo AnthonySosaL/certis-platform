@@ -218,6 +218,19 @@
   overflow-wrap: anywhere;
 }
 
+.question-row__ai-badge {
+  display: inline-flex;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mat-sys-tertiary) 16%, transparent);
+  color: var(--mat-sys-tertiary);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+}
+
 .question-row__actions {
   flex: 0 0 auto;
   display: flex;

@@ -12,7 +12,8 @@ public record AdminQuestionDto(
     SkillArea SkillArea,
     string? Explanation,
     List<AdminQuestionOptionDto> Options,
-    Guid CorrectOptionId);
+    Guid CorrectOptionId,
+    bool IsAiGenerated);
 
 public record AdminQuestionOptionDto(Guid Id, string Text);
 

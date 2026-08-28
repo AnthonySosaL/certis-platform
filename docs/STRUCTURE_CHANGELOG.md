@@ -5,6 +5,63 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-28 — AI-generated reinforcement practice (Groq)
+
+Second item from the 2026-08-28 request batch. Lets a student practice a
+weak (level, skill) area with freshly-generated questions instead of only
+the fixed hand-written bank.
+
+- `Question.IsAiGenerated` (new column, migration
+  `AddQuestionIsAiGenerated`, `HasDefaultValue(false)` so the existing 64
+  rows didn't need a separate backfill) marks which questions came from
+  Groq vs the seeded bank. Everything else about an AI-generated question
+  - grading, sampling, reinforcement pooling - works identically, since
+  it's persisted as a real `Question` with a real `CorrectOptionId`, not
+  a special-cased shape.
+- `IAiQuestionGeneratorService` / `GroqQuestionGeneratorService`: calls
+  Groq with `response_format: {"type": "json_object"}` - structured JSON
+  output, confirmed against a real request before writing any C# (see
+  the raw curl test in this session) - far more reliable than asking a
+  reasoning model to "reply with JSON" in free text and hoping it isn't
+  wrapped in markdown fences or padded with commentary. Validates the
+  parsed result (exactly 4 options, index in range, non-empty fields)
+  and retries once before giving up. The prompt is given the existing
+  bank's question texts for that cell (plus this batch's own so-far
+  generations) so it steers away from near-duplicates.
+- New endpoint `POST /api/test/reinforcement/{level}/{skill}/generate`
+  (count capped 1-6, defaults to 4 - each one is a real Groq call, not
+  free). Returns 503 if literally zero generations came through; a
+  partial batch (e.g. 3 of 4) still returns what succeeded rather than
+  failing the whole request over one bad roll.
+- Frontend: a "Practice different questions (AI-generated)" button on
+  the reinforcement page swaps the fixed bank for a freshly-generated
+  set on the same (level, skill), running through the exact same `Quiz`
+  component unmodified. An "AI-generated practice" badge replaces the
+  button once active. Admin Content tab shows a small "AI" badge per
+  question so it's clear which are Groq-generated vs hand-written.
+
+**A real PATH gotcha hit again, different symptom this time**: `dotnet
+ef migrations add` failed with "No .NET SDKs were found" / "the
+application 'msbuild' does not exist" even when invoked via the full
+path to the per-user SDK's `dotnet.exe` - because `dotnet-ef` itself
+shells out to a *child* `dotnet` process, and that child resolves
+through PATH, which still has the machine-wide runtime-only install
+first (see the earlier dotnet-SDK-path memory/feedback). Fixed by
+prefixing PATH for just that command:
+`PATH="/c/Users/pc/.dotnet:$PATH" dotnet ef migrations add ...` - calling
+the full path alone wasn't enough this time since the *tool*, not my own
+command, is what re-resolves `dotnet` internally.
+
+Verified end-to-end for real, not just that it compiles: generated 4 new
+A2 Grammar questions live via the actual UI button (all genuinely new,
+distinct from the 8 already in that cell), confirmed the question bank
+grew from 64 to 68 in the admin Content tab with the "AI" badge showing
+on exactly those 4, and submitted a real answer set against them -
+graded correctly (`score: 1, total: 4, grade: 2.5`) through the same
+path as any other reinforcement attempt. Migration applied to the real
+shared database (not just described). Backend build + 10/10 unit tests,
+frontend build, both clean.
+
 ## 2026-08-28 — School-style 0-10 grading; pass threshold raised to 7/10
 
 Fourth `/loop` batch, first item from the 2026-08-28 request (AI

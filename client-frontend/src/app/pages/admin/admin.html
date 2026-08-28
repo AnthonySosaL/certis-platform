@@ -104,7 +104,12 @@
             <div class="question-list">
               @for (q of group[1]; track q.id) {
                 <div class="question-row">
-                  <span class="question-row__text">{{ q.text }}</span>
+                  <span class="question-row__text">
+                    {{ q.text }}
+                    @if (q.isAiGenerated) {
+                      <span class="question-row__ai-badge">AI</span>
+                    }
+                  </span>
                   <div class="question-row__actions">
                     <button mat-button type="button" (click)="openQuestionEditor(q)">Edit</button>
                     <button mat-button type="button" class="question-row__delete" (click)="deleteQuestion(q)">Delete</button>

@@ -56,5 +56,19 @@ public class TestController(ITestService testService, IAiInsightService aiInsigh
     public async Task<ActionResult<TestResultDto>> SubmitReinforcement(CefrLevel level, SkillArea skill, List<SubmitAnswerDto> answers) =>
         Ok(await testService.SubmitReinforcementAsync(UserId, level, skill, answers));
 
+    // On-demand practice beyond the fixed bank - generates via Groq, not
+    // automatic. Count is capped (not just clamped to something huge by
+    // accident) since each one is a real Groq call.
+    [HttpPost("reinforcement/{level}/{skill}/generate")]
+    public async Task<ActionResult<List<QuestionDto>>> GenerateReinforcementQuestions(CefrLevel level, SkillArea skill, [FromQuery] int count = 4)
+    {
+        var clamped = Math.Clamp(count, 1, 6);
+        var questions = await testService.GenerateReinforcementQuestionsAsync(level, skill, clamped);
+        if (questions.Count == 0)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "AI-generated practice isn't available right now." });
+
+        return Ok(questions);
+    }
+
     private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")!);
 }

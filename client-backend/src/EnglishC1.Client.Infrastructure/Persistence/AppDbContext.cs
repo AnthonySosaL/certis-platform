@@ -27,6 +27,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         {
             entity.Property(q => q.Text).HasMaxLength(500).IsRequired();
             entity.Property(q => q.Explanation).HasMaxLength(500);
+            // Explicit default so adding this column to the already-populated
+            // Questions table (64 rows, shared dev+prod DB) doesn't need a
+            // separate backfill step - every existing row becomes false.
+            entity.Property(q => q.IsAiGenerated).HasDefaultValue(false);
             entity.HasMany(q => q.Options)
                 .WithOne()
                 .HasForeignKey(o => o.QuestionId)

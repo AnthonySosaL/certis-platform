@@ -7,7 +7,7 @@ import { CefrLevel, Question, SkillArea, SubmitAnswer, TestApi, TestResult } fro
 import { passed as isPassed } from '../../../core/grading';
 import { Quiz } from '../../../shared/quiz/quiz';
 
-type Stage = 'loading' | 'taking' | 'submitting' | 'result';
+type Stage = 'loading' | 'taking' | 'submitting' | 'result' | 'generating';
 
 @Component({
   selector: 'app-reinforcement',
@@ -27,6 +27,7 @@ export class Reinforcement implements OnInit {
   protected readonly questions = signal<Question[]>([]);
   protected readonly result = signal<TestResult | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly usingAiQuestions = signal(false);
 
   async ngOnInit(): Promise<void> {
     try {
@@ -56,7 +57,26 @@ export class Reinforcement implements OnInit {
 
   async retry(): Promise<void> {
     this.result.set(null);
+    this.usingAiQuestions.set(false);
     this.stage.set('loading');
     await this.ngOnInit();
+  }
+
+  // Swaps the fixed bank for freshly Groq-generated questions on the
+  // exact same (level, skill) - a different way to practice the same
+  // weak area instead of seeing the identical few questions every time.
+  async practiceWithAi(): Promise<void> {
+    this.stage.set('generating');
+    this.errorMessage.set(null);
+    localStorage.removeItem(this.storageKey);
+    try {
+      const generated = await this.testApi.generateReinforcementQuestions(this.level, this.skill);
+      this.questions.set(generated);
+      this.usingAiQuestions.set(true);
+      this.stage.set('taking');
+    } catch {
+      this.errorMessage.set("AI-generated practice isn't available right now.");
+      this.stage.set('taking');
+    }
   }
 }

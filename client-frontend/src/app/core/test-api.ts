@@ -108,4 +108,17 @@ export class TestApi {
       this.http.post<TestResult>(`${API_BASE_URL}/api/test/reinforcement/${level}/${skill}/submit`, answers),
     );
   }
+
+  // On-demand AI-generated practice, beyond the fixed bank - a real Groq
+  // call per question, never automatic. Can come back with fewer than
+  // `count` questions (still 200) if some generations failed validation,
+  // or 503 if none came through at all.
+  generateReinforcementQuestions(level: CefrLevel, skill: SkillArea, count = 4): Promise<Question[]> {
+    return firstValueFrom(
+      this.http.post<Question[]>(
+        `${API_BASE_URL}/api/test/reinforcement/${level}/${skill}/generate?count=${count}`,
+        {},
+      ),
+    );
+  }
 }
