@@ -5,6 +5,44 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-28 — "Ver cursos": a free-practice hub, no placement test required
+
+Resolves the "Ver cursos" item that had sat as an open product question
+("is this a list of future skill modules... or an actual multi-course
+structure?"). The user resolved it directly in chat: build the sections
+for practicing, organized around what a Cambridge exam covers.
+
+- **Key discovery that made this cheap to build**: `GetReinforcementQuestionsAsync`
+  / `TestController.GetReinforcementQuestions` never actually required a
+  prior placement attempt - `/api/test/reinforcement/{level}/{skill}/questions`
+  was always callable directly for any (level, skill) pair. The only thing
+  missing was a front door into it that didn't require first failing an
+  area on the placement test.
+- New `/courses` page (`pages/courses/`), guarded by `authGuard` like the
+  other practice routes. Five cards mirroring a Cambridge exam's
+  structure: Grammar and Vocabulary (labeled "Use of English", matching
+  Cambridge's own naming, while staying two separate cards since they're
+  two separate `SkillArea` values in this app's data model), Reading,
+  Listening, and Speaking. The four skill-area cards show one link per
+  CEFR level straight into the existing `/test/reinforce/:level/:skill`
+  route; the Speaking card links to `/speaking`.
+- New navbar link ("Courses", between Dashboard and Speaking, same
+  authenticated-only visibility as those two). New microphone icon
+  added to `skill-icons.ts` for Speaking - not a real `SkillArea` value,
+  but reuses the same icon map/component pattern already used everywhere
+  else in the app.
+
+Verified end-to-end in the Browser pane: registered a fresh test account
+(`courses-verify-test@certis.local`), loaded `/courses`, confirmed all 5
+cards render with correct icons and Cambridge-part labels (screenshots),
+confirmed the generated `routerLink`s point at the right URLs (e.g.
+`/test/reinforce/A2/Grammar`), and navigated directly into
+`/test/reinforce/B2/Grammar` - a real 8-question quiz loaded with zero
+prior placement-test activity on that account, confirming the "no
+placement test required" claim in the page's own copy is actually true,
+not just written. No console errors. `ng build` clean (same
+already-accepted budget warnings).
+
 ## 2026-08-28 — First real photo on the landing page (Pexels)
 
 Addresses the long-standing "Real imagery/illustrations" item from the

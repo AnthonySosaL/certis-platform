@@ -1,0 +1,105 @@
+.courses {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.courses h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.courses__intro {
+  margin: 0 0 2rem;
+  opacity: 0.75;
+  max-width: 40rem;
+}
+
+.courses__grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.course-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  background: var(--mat-sys-surface-container);
+}
+
+.course-card--speaking {
+  background: color-mix(in srgb, var(--mat-sys-tertiary) 10%, var(--mat-sys-surface-container));
+}
+
+.course-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.course-card__icon {
+  flex: 0 0 auto;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+  color: var(--mat-sys-primary);
+}
+
+.course-card h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.course-card__part {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.course-card__description {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.course-card__levels {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.course-card__level {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: var(--mat-sys-surface-container-high);
+  color: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.course-card__level:hover {
+  background: color-mix(in srgb, var(--mat-sys-primary) 18%, var(--mat-sys-surface-container-high));
+}
+
+.course-card__cta {
+  align-self: flex-start;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}

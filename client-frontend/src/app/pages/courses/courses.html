@@ -1,0 +1,46 @@
+<main class="courses">
+  <h1>Practice by course</h1>
+  <p class="courses__intro">
+    Jump straight into practice for any skill and level - organized the way a Cambridge exam is,
+    no need to take the placement test first.
+  </p>
+
+  <div class="courses__grid">
+    @for (course of skillCourses; track course.skill) {
+      <div class="course-card">
+        <div class="course-card__header">
+          <svg class="course-card__icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path [attr.d]="skillIconPath(course.skill)" />
+          </svg>
+          <div>
+            <h2>{{ course.title }}</h2>
+            <span class="course-card__part">Cambridge: {{ course.cambridgePart }}</span>
+          </div>
+        </div>
+        <p class="course-card__description">{{ course.description }}</p>
+        <div class="course-card__levels">
+          @for (level of levels; track level) {
+            <a class="course-card__level" [routerLink]="['/test/reinforce', level, course.skill]">{{ level }}</a>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="course-card course-card--speaking">
+      <div class="course-card__header">
+        <svg class="course-card__icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path [attr.d]="skillIconPath('Speaking')" />
+        </svg>
+        <div>
+          <h2>Speaking</h2>
+          <span class="course-card__part">Cambridge: Speaking</span>
+        </div>
+      </div>
+      <p class="course-card__description">
+        A text roleplay with an AI examiner, across the four parts of a Cambridge speaking exam - interview,
+        long turn, collaborative task, and abstract discussion.
+      </p>
+      <a class="course-card__cta" routerLink="/speaking">Start practicing</a>
+    </div>
+  </div>
+</main>

@@ -100,16 +100,20 @@ Raised 2026-08-27 alongside the quiz redesign - real, but too open-ended
 to build without picking a direction first (see the changelog entry for
 what *was* built that session):
 
-- [ ] **"Ver cursos" - a course catalog.** Named once, no scope attached
-      yet: is this a list of future skill modules (reading, listening...)
-      shown as "coming soon," or an actual multi-course structure the
-      placement test would feed into? Needs a real decision, not a guess.
 - [ ] **Broader visual pass beyond the test module** - the redesign this
       session focused on the quiz/results/navbar specifically. Home and
       About got a content pass earlier (2026-08-27, design system entry)
       but not this round's card/animation treatment.
 ## Done
 
+- [x] **"Ver cursos": a free-practice hub, no placement test required.**
+      Resolved by the user directly: sections organized the way a
+      Cambridge exam is - Grammar, Vocabulary (both "Use of English"),
+      Reading, Listening, Speaking. New `/courses` page with a card per
+      skill, each linking straight into the existing per-level
+      reinforcement quizzes (which never actually required a prior
+      placement attempt) or into Speaking. New navbar link. See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-28--ver-cursos-a-free-practice-hub-no-placement-test-required). — 2026-08-28
 - [x] **Real imagery: first photo on the landing page (Pexels).** Source
       resolved by the user directly - a Pexels API key already used in
       a sibling project of his, reused with his explicit authorization

@@ -7,6 +7,7 @@ import { PlacementTest } from './pages/test/placement-test/placement-test';
 import { TestResultPage } from './pages/test/test-result/test-result';
 import { Reinforcement } from './pages/test/reinforcement/reinforcement';
 import { Speaking } from './pages/speaking/speaking';
+import { Courses } from './pages/courses/courses';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { AdminDashboard } from './pages/admin/admin';
 import { authGuard } from './core/auth.guard';
@@ -22,4 +23,5 @@ export const routes: Routes = [
   { path: 'test/results', component: TestResultPage, canActivate: [authGuard] },
   { path: 'test/reinforce/:level/:skill', component: Reinforcement, canActivate: [authGuard] },
   { path: 'speaking', component: Speaking, canActivate: [authGuard] },
+  { path: 'courses', component: Courses, canActivate: [authGuard] },
 ];
