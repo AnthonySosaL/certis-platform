@@ -5,6 +5,47 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-28 — First real photo on the landing page (Pexels)
+
+Addresses the long-standing "Real imagery/illustrations" item from the
+"Flagged for a future design pass" list - the site had none, blocked on
+having both a source and a place for it to earn its spot.
+
+- **Source**: Pexels, via a key the user pointed to directly in chat -
+  it already exists in a sibling project (`D:\videos\proyecto\
+  test_pexels_search.py`, a video-bot project of the user's), which he
+  explicitly authorized reusing. That file was only *read*, never
+  modified, per his explicit caution that it's shared with another
+  project - the key was copied out, not moved, and nothing in that
+  other project was touched.
+- Searched Pexels' photo API for a few on-topic queries ("student
+  studying language laptop", "friends conversation practice speaking")
+  and picked photo #6671683 ("Young woman teaches English grammar
+  online, holding a 'Present Simple' note and pencil" by Tima
+  Miroshnichenko) - about as on-the-nose as a stock photo gets for an
+  English grammar platform. Downloaded once at 1600px wide
+  (`client-frontend/public/images/home-practice.jpg`, ~110KB) as a
+  static asset - no live Pexels API call at runtime, no API key ever
+  shipped to the frontend or backend, consistent with this project's
+  "hand-picked, not live-integrated" content philosophy (same reasoning
+  as the seeded question banks).
+- New `.home__photo` section on the Home page, right after "How it
+  works" - the image with a small, non-intrusive photographer credit
+  line underneath (Pexels doesn't require attribution, but it's
+  respectful to include it).
+- **Also fixed a stale line found while in this file**: `home.ts`'s
+  first "How it works" step still said "32 short questions covering
+  grammar and vocabulary... About 15 minutes" - never updated after
+  Reading and Listening grew the test to 64 questions / ~25 minutes
+  earlier today. Now matches `placement-test.html`'s copy.
+
+Verified in the Browser pane with the real dev server: confirmed via JS
+that the image element has `complete: true` and its natural dimensions
+(1600x1067) match the downloaded file - not a broken image - and took a
+screenshot showing it rendered correctly with rounded corners matching
+the app's existing visual language. No console errors. `ng build` clean
+(same two pre-existing, already-accepted budget warnings as always).
+
 ## 2026-08-28 — Listening comprehension: the second new skill, audio generated locally with edge-tts
 
 Sixth item from the 2026-08-28 request batch, and the second of the two

@@ -146,3 +146,23 @@
   line-height: 1.5;
 }
 
+.home__photo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.home__photo-img {
+  width: 100%;
+  max-height: 26rem;
+  object-fit: cover;
+  border-radius: 1.5rem;
+}
+
+.home__photo-credit {
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.55;
+  text-align: right;
+}
+

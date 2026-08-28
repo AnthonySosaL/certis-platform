@@ -104,16 +104,20 @@ what *was* built that session):
       yet: is this a list of future skill modules (reading, listening...)
       shown as "coming soon," or an actual multi-course structure the
       placement test would feed into? Needs a real decision, not a guess.
-- [ ] **Real imagery/illustrations**, not just inline SVG icons - the
-      site currently has none. Needs a source (stock, commissioned,
-      generated) and a place they'd actually earn their spot (the
-      landing hero is the obvious first candidate).
 - [ ] **Broader visual pass beyond the test module** - the redesign this
       session focused on the quiz/results/navbar specifically. Home and
       About got a content pass earlier (2026-08-27, design system entry)
       but not this round's card/animation treatment.
 ## Done
 
+- [x] **Real imagery: first photo on the landing page (Pexels).** Source
+      resolved by the user directly - a Pexels API key already used in
+      a sibling project of his, reused with his explicit authorization
+      (that project's file was only read, never modified). Downloaded
+      one on-topic photo once as a static asset (no live API calls, no
+      key shipped anywhere) - a new photo section on the Home page,
+      right after "How it works". See
+      [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md#2026-08-28--first-real-photo-on-the-landing-page-pexels). — 2026-08-28
 - [x] **Listening comprehension as a real skill.** Was blocked on Groq's
       TTS (terms not accepted) and ElevenLabs (not installed); unblocked
       by a live product decision to generate audio locally with

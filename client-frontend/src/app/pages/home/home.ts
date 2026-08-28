@@ -8,7 +8,7 @@ import { AuthDialogService } from '../../core/auth-dialog.service';
 const STEPS = [
   {
     title: 'Take the placement test',
-    text: '32 short questions covering grammar and vocabulary, from A2 to C1. About 15 minutes, no prep needed.',
+    text: '64 short questions covering grammar, vocabulary, reading, and listening, from A2 to C1. About 25 minutes, no prep needed.',
   },
   {
     title: 'See exactly where you stand',
