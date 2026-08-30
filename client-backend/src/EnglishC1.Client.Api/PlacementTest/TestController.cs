@@ -10,7 +10,8 @@ namespace EnglishC1.Client.Api.PlacementTest;
 [ApiController]
 [Route("api/test")]
 [Authorize]
-public class TestController(ITestService testService, IAiInsightService aiInsightService) : ControllerBase
+public class TestController(ITestService testService, IAiInsightService aiInsightService, IAiLessonService aiLessonService)
+    : ControllerBase
 {
     [HttpGet("placement/questions")]
     public async Task<ActionResult<List<QuestionDto>>> GetPlacementQuestions() =>
@@ -63,6 +64,21 @@ public class TestController(ITestService testService, IAiInsightService aiInsigh
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "AI feedback isn't available right now." });
 
         return Ok(new TestInsightDto(insight));
+    }
+
+    // Optional "take a quick lesson first" step (2026-08-29) - shown as
+    // a choice before the quiz starts, never forced. A real Groq call
+    // per (level, skill), not cached - short and cheap enough that
+    // regenerating on request is simpler than adding a persistence
+    // layer for content this ephemeral.
+    [HttpPost("reinforcement/{level}/{skill}/lesson")]
+    public async Task<ActionResult<LessonDto>> GetLesson(CefrLevel level, SkillArea skill)
+    {
+        var lesson = await aiLessonService.GenerateLessonAsync(level, skill);
+        if (lesson is null)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "The lesson isn't available right now." });
+
+        return Ok(new LessonDto(lesson));
     }
 
     [HttpGet("reinforcement/{level}/{skill}/questions")]

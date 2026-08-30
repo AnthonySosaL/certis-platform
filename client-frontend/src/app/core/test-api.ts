@@ -53,6 +53,10 @@ export interface TestInsight {
   insight: string;
 }
 
+export interface Lesson {
+  content: string;
+}
+
 export interface TestResult {
   attemptId: string;
   kind: AttemptKind;
@@ -108,6 +112,15 @@ export class TestApi {
   // (nothing to analyze); 503 means Groq isn't configured/available.
   getOverallInsight(): Promise<TestInsight> {
     return firstValueFrom(this.http.post<TestInsight>(`${API_BASE_URL}/api/test/insight/overall`, {}));
+  }
+
+  // Optional pre-quiz mini-lesson - a real Groq call, generated fresh
+  // per (level, skill), never automatic. 503 means it isn't
+  // configured/available right now.
+  getLesson(level: CefrLevel, skill: SkillArea): Promise<Lesson> {
+    return firstValueFrom(
+      this.http.post<Lesson>(`${API_BASE_URL}/api/test/reinforcement/${level}/${skill}/lesson`, {}),
+    );
   }
 
   getReinforcementQuestions(level: CefrLevel, skill: SkillArea): Promise<Question[]> {

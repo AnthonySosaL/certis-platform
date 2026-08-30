@@ -43,6 +43,38 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-29 — Optional AI-generated mini-lesson before a reinforcement quiz
+
+Direct feedback: practicing via Courses/reinforcement was "just more
+tests" - nowhere to actually learn the material before being quizzed on
+it. Asked the user to pick a content format (hand-written vs
+AI-generated) rather than guess; picked AI-generated per (level,
+skill), same Groq infrastructure as the rest of the app's AI features.
+
+- New `IAiLessonService`/`GroqLessonService` (Application/Infrastructure) -
+  same shape as `IAiInsightService`, a system prompt asking for a short
+  (150-220 word), plain-prose mini-lesson explaining the key rules/focus
+  points for one specific (level, skill) combination, with an example
+  woven in. New `POST /api/test/reinforcement/{level}/{skill}/lesson`,
+  same 503-on-unavailable pattern as every other AI endpoint.
+- `Reinforcement` (the quiz page) gained a new first stage: instead of
+  loading questions immediately, it now asks "take a quick lesson first,
+  or skip to quiz" - genuinely optional, never forced. Picking the
+  lesson shows the generated text with a "Start the quiz" button;
+  skipping (or a failed lesson generation) goes straight to the quiz
+  either way, so a Groq hiccup never blocks practice. A reload
+  mid-quiz still resumes straight into the quiz via the existing
+  `readPersistedQuiz` check - the lesson-or-skip choice only shows once,
+  at the true start of a fresh attempt, not on every reload.
+
+Verified end-to-end with real Groq calls in the Browser pane: a B2
+Vocabulary lesson came back genuinely on-topic (collocations, synonym
+nuance, idioms, with worked examples) and clicking through into the
+quiz worked; separately confirmed "Skip to quiz" on A2 Reading goes
+straight to the quiz with no lesson step. No console errors beyond
+stale entries from earlier manual API testing in this same session.
+Backend: `dotnet build` 0 warnings/errors. Frontend: `ng build` clean.
+
 ## 2026-08-29 — Dashboard "Coach" (full-history AI insight), navigation fixes, dark-mode contrast bug
 
 A long batch of direct feedback after the user tried the app end to end

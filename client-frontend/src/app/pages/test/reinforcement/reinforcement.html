@@ -7,6 +7,31 @@
   }
 
   @switch (stage()) {
+    @case ('intro') {
+      <div class="reinforce__intro">
+        <p class="reinforce__intro-text">
+          Want a quick refresher before you start, or jump straight into the quiz?
+        </p>
+        <div class="reinforce__intro-actions">
+          <button mat-flat-button color="primary" type="button" (click)="takeLesson()">
+            Take a quick lesson first
+          </button>
+          <button mat-stroked-button type="button" (click)="startQuiz()">Skip to quiz</button>
+        </div>
+      </div>
+    }
+    @case ('lesson-loading') {
+      <div class="reinforce__loading">
+        <mat-spinner diameter="32" />
+        <p>Writing your lesson…</p>
+      </div>
+    }
+    @case ('lesson') {
+      <div class="reinforce__lesson">
+        <p class="reinforce__lesson-text">{{ lessonText() }}</p>
+        <button mat-flat-button color="primary" type="button" (click)="startQuiz()">Start the quiz</button>
+      </div>
+    }
     @case ('loading') {
       <div class="reinforce__loading">
         <mat-spinner diameter="32" />
