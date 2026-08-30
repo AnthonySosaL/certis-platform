@@ -43,6 +43,26 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-29 — Fixed navbar wrongly highlighting "Take the test" on course quizzes
+
+Real bug behind a repeated complaint ("why does finishing a course send
+me to take the test?"): `navbar.html`'s `routerLinkActive` only used
+exact matching for `/` - every other link, including "Take the test"
+(`/test`), used prefix matching. Since course-driven reinforcement
+quizzes live at `/test/reinforce/:level/:skill` (textually nested under
+`/test`), the navbar highlighted "Take the test" as active the entire
+time a student was doing a Courses-driven quiz, even though that quiz
+has nothing to do with the placement test - exactly the confusion
+described.
+
+Added `/test` to the exact-match list alongside `/`, so "Take the
+test" is now active only on the literal placement-test intro page, not
+its `/test/reinforce/...` or `/test/results` sub-routes.
+
+Verified in the Browser pane: confirmed via the link's own class list
+that "Take the test" is inactive on `/test/reinforce/A2/Grammar` and
+active on `/test` itself. No console errors. `ng build` clean.
+
 ## 2026-08-29 — Placement/Courses cross-links removed; "already taken" badge iterated to match test-result's ring
 
 Two more rounds of direct feedback on the same screen, right after the

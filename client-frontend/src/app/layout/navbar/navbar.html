@@ -13,7 +13,7 @@
       <a
         [routerLink]="item.path"
         routerLinkActive="navbar__link--active"
-        [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+        [routerLinkActiveOptions]="{ exact: item.path === '/' || item.path === '/test' }"
         class="navbar__link"
       >
         {{ item.label }}
