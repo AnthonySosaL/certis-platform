@@ -10,8 +10,11 @@ namespace EnglishC1.Client.Api.PlacementTest;
 [ApiController]
 [Route("api/test")]
 [Authorize]
-public class TestController(ITestService testService, IAiInsightService aiInsightService, IAiLessonService aiLessonService)
-    : ControllerBase
+public class TestController(
+    ITestService testService,
+    IAiInsightService aiInsightService,
+    IAiLessonService aiLessonService,
+    IAiCourseService aiCourseService) : ControllerBase
 {
     [HttpGet("placement/questions")]
     public async Task<ActionResult<List<QuestionDto>>> GetPlacementQuestions() =>
@@ -79,6 +82,21 @@ public class TestController(ITestService testService, IAiInsightService aiInsigh
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "The lesson isn't available right now." });
 
         return Ok(new LessonDto(lesson));
+    }
+
+    // The real course (2026-08-29) - a distinct multi-slide course per
+    // (level, skill), reached from the Courses hub before practicing.
+    // Separate from the shorter pre-quiz "lesson" above: this is the
+    // actual class, the lesson is a quick refresher for someone who
+    // just wants to practice.
+    [HttpPost("reinforcement/{level}/{skill}/course")]
+    public async Task<ActionResult<CourseDto>> GetCourse(CefrLevel level, SkillArea skill)
+    {
+        var slides = await aiCourseService.GenerateCourseAsync(level, skill);
+        if (slides is null)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "The course isn't available right now." });
+
+        return Ok(new CourseDto(slides));
     }
 
     [HttpGet("reinforcement/{level}/{skill}/questions")]

@@ -8,6 +8,7 @@ import { TestResultPage } from './pages/test/test-result/test-result';
 import { Reinforcement } from './pages/test/reinforcement/reinforcement';
 import { Speaking } from './pages/speaking/speaking';
 import { Courses } from './pages/courses/courses';
+import { Course } from './pages/course/course';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { AdminDashboard } from './pages/admin/admin';
 import { authGuard } from './core/auth.guard';
@@ -24,4 +25,5 @@ export const routes: Routes = [
   { path: 'test/reinforce/:level/:skill', component: Reinforcement, canActivate: [authGuard] },
   { path: 'speaking', component: Speaking, canActivate: [authGuard] },
   { path: 'courses', component: Courses, canActivate: [authGuard] },
+  { path: 'courses/:level/:skill', component: Course, canActivate: [authGuard] },
 ];

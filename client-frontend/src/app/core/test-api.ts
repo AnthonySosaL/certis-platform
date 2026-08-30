@@ -57,6 +57,11 @@ export interface Lesson {
   content: string;
 }
 
+export interface CourseSlide {
+  title: string;
+  body: string;
+}
+
 export interface TestResult {
   attemptId: string;
   kind: AttemptKind;
@@ -120,6 +125,18 @@ export class TestApi {
   getLesson(level: CefrLevel, skill: SkillArea): Promise<Lesson> {
     return firstValueFrom(
       this.http.post<Lesson>(`${API_BASE_URL}/api/test/reinforcement/${level}/${skill}/lesson`, {}),
+    );
+  }
+
+  // The real multi-slide course (distinct from the shorter pre-quiz
+  // lesson above) - a real Groq call, generated fresh per (level,
+  // skill). 503 means it isn't configured/available right now.
+  getCourse(level: CefrLevel, skill: SkillArea): Promise<{ slides: CourseSlide[] }> {
+    return firstValueFrom(
+      this.http.post<{ slides: CourseSlide[] }>(
+        `${API_BASE_URL}/api/test/reinforcement/${level}/${skill}/course`,
+        {},
+      ),
     );
   }
 

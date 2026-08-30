@@ -1,0 +1,43 @@
+<main class="course">
+  <a routerLink="/courses" class="course__back">&larr; Back to courses</a>
+
+  @switch (stage()) {
+    @case ('loading') {
+      <div class="course__loading">
+        <mat-spinner diameter="32" />
+        <p>Building your course…</p>
+      </div>
+    }
+    @case ('unavailable') {
+      <div class="course__unavailable">
+        <h1>{{ level }} {{ skill }}</h1>
+        <p>The course isn't available right now, but you can still practice directly.</p>
+        <a mat-flat-button color="primary" [routerLink]="['/test/reinforce', level, skill]">Skip to practice</a>
+      </div>
+    }
+    @case ('ready') {
+      <img class="course__banner" [src]="headerImage.src" alt="" loading="lazy" />
+      <p class="course__banner-credit">{{ headerImage.credit }}</p>
+
+      <div class="course__header">
+        <h1>{{ level }} {{ skill }}</h1>
+        <span class="course__progress">Slide {{ index() + 1 }} / {{ slides().length }}</span>
+      </div>
+
+      @let slide = currentSlide()!;
+      <div class="course__slide">
+        <h2>{{ slide.title }}</h2>
+        <p>{{ slide.body }}</p>
+      </div>
+
+      <div class="course__nav">
+        <button mat-stroked-button type="button" [disabled]="isFirst()" (click)="previous()">&larr; Previous</button>
+        @if (isLast()) {
+          <a mat-flat-button color="primary" [routerLink]="['/test/reinforce', level, skill]">Start practicing</a>
+        } @else {
+          <button mat-flat-button color="primary" type="button" (click)="next()">Next &rarr;</button>
+        }
+      </div>
+    }
+  }
+</main>

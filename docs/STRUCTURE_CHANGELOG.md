@@ -43,6 +43,47 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-29 — The real course: multi-slide, per (level, skill), reached from Courses
+
+Explicit follow-up after the pre-quiz "lesson" landed: that one-paragraph
+refresher was fine for someone who "already knows it" and just wants to
+practice, but Courses itself gave "no clases ni nada para aprender" -
+nowhere with actual text, images, and ideas to learn from first. Asked
+the user to scope it (one course per skill, or a distinct course per
+level+skill) rather than guess; picked a distinct course per (level,
+skill) - ~16 separate courses (4 skills × 4 levels), each generated on
+demand.
+
+- New `IAiCourseService`/`GroqCourseService`, same structured-JSON-output
+  pattern as `GroqQuestionGeneratorService` (`response_format:
+  json_object`, one retry on a validation failure) - Groq writes 4-6
+  slides (title + 2-4 sentence body with a worked example) building up
+  the key concepts for that specific level and skill. New
+  `POST /api/test/reinforcement/{level}/{skill}/course`.
+- New `/courses/:level/:skill` page (`pages/course/`) - a slide viewer
+  (Previous/Next, "Slide N / total") topped with a skill-themed header
+  photo. Reuses three already-downloaded Pexels photos by skill
+  (Grammar → the "Present Simple" photo from Home, Vocabulary → the
+  notebook photo from About, Listening → the headphones photo from
+  Home's CTA banner) and one new one for Reading (a woman reading in a
+  library, cottonbro studio). The last slide's "Next" becomes "Start
+  practicing", routing into the existing `/test/reinforce/:level/:skill`
+  flow (which still offers its own quick lesson-or-skip choice,
+  independent of whether the student came through the full course).
+- Courses' level pills now link here instead of straight to the quiz -
+  `/courses` is the browse-and-learn entry point, the quiz itself is
+  still reachable on its own (directly, or via "Practice this" from
+  placement results) without forcing the course first.
+
+Verified with a real Groq call in the Browser pane: requested B2
+Grammar, got back a real 5-slide course (Simple Past vs. Past
+Continuous → ... → Common Mistakes to Avoid), clicked through every
+slide via Next, confirmed the last slide correctly swapped to "Start
+practicing," and confirmed clicking it lands on the reinforcement
+page's existing lesson-or-skip intro. No new console errors. Backend:
+`dotnet build` 0 warnings/errors, 10/10 unit tests green. Frontend:
+`ng build` clean.
+
 ## 2026-08-29 — Cross-linked "Your results by area" and Courses (were confusingly duplicated)
 
 Direct feedback: the placement results page's breakdown grid ("Practice

@@ -60,6 +60,7 @@ public static class DependencyInjection
         services.AddHttpClient<IAiInsightService, GroqInsightService>(client => client.Timeout = TimeSpan.FromSeconds(20));
         services.AddHttpClient<IAiQuestionGeneratorService, GroqQuestionGeneratorService>(client => client.Timeout = TimeSpan.FromSeconds(20));
         services.AddHttpClient<IAiLessonService, GroqLessonService>(client => client.Timeout = TimeSpan.FromSeconds(20));
+        services.AddHttpClient<IAiCourseService, GroqCourseService>(client => client.Timeout = TimeSpan.FromSeconds(25));
         services.AddHttpClient<ISpeakingService, SpeakingService>(client => client.Timeout = TimeSpan.FromSeconds(20));
 
         return services;

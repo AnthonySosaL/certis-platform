@@ -21,7 +21,7 @@
         <p class="course-card__description">{{ course.description }}</p>
         <div class="course-card__levels">
           @for (level of levels; track level) {
-            <a class="course-card__level" [routerLink]="['/test/reinforce', level, course.skill]">{{ level }}</a>
+            <a class="course-card__level" [routerLink]="['/courses', level, course.skill]">{{ level }}</a>
           }
         </div>
       </div>
