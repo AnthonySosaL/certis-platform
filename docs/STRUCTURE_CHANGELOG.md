@@ -43,6 +43,26 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-29 — Cross-linked "Your results by area" and Courses (were confusingly duplicated)
+
+Direct feedback: the placement results page's breakdown grid ("Practice
+areas") and the new Courses hub both let you jump into the same
+reinforcement quizzes, but with no connection between them and near-
+identical framing - felt like the same feature under two different
+names, and Courses felt "isolated from the main test."
+
+- Renamed the results-page section to "Your results by area" and added
+  a one-line note clarifying it's specifically about *this test's*
+  results, with a link to "Browse all courses" for anyone who wants a
+  different skill/level.
+- Added the reverse link on the Courses page: "Prefer a guided starting
+  point instead? Take the placement test..." - the two pages now point
+  at each other instead of existing as separate, disconnected paths to
+  the same underlying reinforcement routes.
+
+Small, low-risk copy/link change - verified both pages render the new
+text and links correctly with no console errors. `ng build` clean.
+
 ## 2026-08-29 — Optional AI-generated mini-lesson before a reinforcement quiz
 
 Direct feedback: practicing via Courses/reinforcement was "just more
