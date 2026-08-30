@@ -43,6 +43,60 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-30 — Course entry redesigned into three real choices, courses expanded with ungraded practice exercises
+
+Two rounds of direct feedback, building on the multi-slide course from
+2026-08-29:
+
+- **"The tests from a course are different from the general test - why
+  does finishing a course send me to 'take the test'?"** - partly the
+  navbar bug fixed in the entry above, and partly that the course page
+  forced straight into the slide deck with no other path. Redesigned
+  `Course` to open on a real choice between three paths: **take the
+  full course** (unchanged slide deck), a **quick check** (a real,
+  graded 3-question AI-generated mini-quiz through the exact same
+  `generateReinforcementQuestions`/`submitReinforcement` pipeline as
+  "Practice different questions" - just shorter), or **skip straight
+  to the full quiz**. Finishing the quick check branches again: passed
+  → offered the full quiz directly; not passed → offered the course.
+  The pre-quiz "lesson" feature from 2026-08-29 (a single AI-generated
+  paragraph) is removed entirely (`IAiLessonService`, `GroqLessonService`,
+  `LessonDto`, the `/lesson` endpoint, and the reinforcement page's own
+  intro step) - it's functionally superseded by "take the course," and
+  keeping both would have reintroduced the same redundant-feature
+  confusion this whole feedback thread has been about. `Reinforcement`
+  (the quiz page itself) goes back to loading straight into the quiz,
+  since the Course page is now the one place this choice is made.
+- **"Make the courses longer, and add ungraded self-check exercises in
+  the middle - drag-and-drop for lower levels, typed answers for more
+  advanced ones, several of them, not just one."** `GroqCourseService`'s
+  prompt grew from "4-6 slides, plain content" to "8-11 slides, 3-4
+  interleaved practice exercises" - `CourseSlideDto` gained a `Type`
+  discriminator (`content`/`drag`/`write`) plus `Prompt`/`Options`/
+  `Answer` fields. The model picks `drag` for A2/B1 (a sentence with a
+  blank and 3-4 draggable options) or `write` for B2/C1 (type the
+  missing word/phrase) per its own instructions. These are genuinely
+  ungraded - nothing is submitted or persisted, so it's safe to send
+  `Answer` to the client for instant local feedback, unlike the real
+  quiz where the correct option is deliberately withheld until
+  submission. The frontend renders drag chips with native HTML5
+  drag-and-drop (`dragstart`/`dragover`/`drop`) plus a tap-to-place
+  click fallback for touch devices, and a text input with instant
+  case-insensitive comparison for `write` slides.
+
+Verified with real Groq calls in the Browser pane: a B1 Grammar course
+came back as 9 slides (5 content, 4 drag) - dragged/tapped a correct
+answer into a blank and confirmed the green "Correct!" state (and its
+CSS colors) render correctly; a C1 Vocabulary course came back
+correctly using `write` exercises instead of `drag`, and typing the
+right answer produced the same correct feedback. Took a real C1
+Grammar quick check (3 AI questions, answered 2/3), confirmed the
+not-passed branch offered "Take the course" rather than the full quiz.
+Confirmed "Start practicing" at the end of a course lands directly on
+the real quiz with no leftover lesson step. No new console errors.
+Backend: `dotnet build` 0 warnings/errors, 10/10 unit tests green.
+Frontend: `ng build` clean.
+
 ## 2026-08-29 — Fixed navbar wrongly highlighting "Take the test" on course quizzes
 
 Real bug behind a repeated complaint ("why does finishing a course send

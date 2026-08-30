@@ -53,13 +53,18 @@ export interface TestInsight {
   insight: string;
 }
 
-export interface Lesson {
-  content: string;
-}
-
+// "content" slides carry title/body; "drag" slides carry prompt/options/
+// answer (student drags the correct option into the blank); "write"
+// slides carry prompt/answer (student types the answer). drag/write are
+// ungraded self-checks, safe to include the answer client-side since
+// nothing here is persisted or scored server-side.
 export interface CourseSlide {
-  title: string;
-  body: string;
+  type: 'content' | 'drag' | 'write';
+  title: string | null;
+  body: string | null;
+  prompt: string | null;
+  options: string[] | null;
+  answer: string | null;
 }
 
 export interface TestResult {
@@ -119,18 +124,8 @@ export class TestApi {
     return firstValueFrom(this.http.post<TestInsight>(`${API_BASE_URL}/api/test/insight/overall`, {}));
   }
 
-  // Optional pre-quiz mini-lesson - a real Groq call, generated fresh
-  // per (level, skill), never automatic. 503 means it isn't
-  // configured/available right now.
-  getLesson(level: CefrLevel, skill: SkillArea): Promise<Lesson> {
-    return firstValueFrom(
-      this.http.post<Lesson>(`${API_BASE_URL}/api/test/reinforcement/${level}/${skill}/lesson`, {}),
-    );
-  }
-
-  // The real multi-slide course (distinct from the shorter pre-quiz
-  // lesson above) - a real Groq call, generated fresh per (level,
-  // skill). 503 means it isn't configured/available right now.
+  // The real multi-slide course - a real Groq call, generated fresh per
+  // (level, skill). 503 means it isn't configured/available right now.
   getCourse(level: CefrLevel, skill: SkillArea): Promise<{ slides: CourseSlide[] }> {
     return firstValueFrom(
       this.http.post<{ slides: CourseSlide[] }>(

@@ -13,7 +13,10 @@ namespace EnglishC1.Client.Infrastructure.Ai;
 // structured JSON output - same reliability reasoning as
 // GroqQuestionGeneratorService (asking a reasoning model to "reply with
 // JSON" in free text is much less reliable than response_format:
-// json_object).
+// json_object). 2026-08-30: expanded from plain content slides to
+// interleave ungraded self-check exercises (drag-and-drop for A2/B1,
+// type-the-answer for B2/C1), explicitly requested after the first
+// version felt too short for what a "course" implies.
 public class GroqCourseService(HttpClient http, IOptions<GroqOptions> options, ILogger<GroqCourseService> logger)
     : IAiCourseService
 {
@@ -26,17 +29,26 @@ public class GroqCourseService(HttpClient http, IOptions<GroqOptions> options, I
     private const string Model = "openai/gpt-oss-20b";
 
     private const string SystemPrompt =
-        "You are an English teacher writing a short course for Certis, an English placement and " +
-        "practice platform. Given a CEFR level and a skill area, write a course of 4 to 6 slides that " +
-        "teaches the key concepts a student needs for that level and skill, building up from simpler to " +
-        "more advanced points, with at least one worked example per slide. Respond with ONLY a JSON " +
-        "object matching this exact shape: {\"slides\": array of objects, each " +
-        "{\"title\": string (short, a few words), \"body\": string (2-4 sentences, plain text, no " +
-        "markdown)}}. No extra text outside the JSON object.";
+        "You are an English teacher writing a real course for Certis, an English placement and practice " +
+        "platform. Given a CEFR level and a skill area, write a course of 8 to 11 slides that teaches the " +
+        "key concepts a student needs for that level and skill, building up from simpler to more advanced " +
+        "points, with at least one worked example per content slide. Weave in 3 to 4 short practice " +
+        "exercises among the content slides so the student can self-check understanding as they go - " +
+        "these are never graded, just a comprehension check. For level A2 or B1, practice exercises must " +
+        "be \"drag\" type: a short sentence with a blank (write the blank as ___) and 3 to 4 short " +
+        "draggable word/phrase options where exactly one is correct. For level B2 or C1, practice " +
+        "exercises must be \"write\" type: a short sentence with a blank (___) where the student types " +
+        "the missing word or short phrase (1-3 words). Respond with ONLY a JSON object matching this " +
+        "exact shape: {\"slides\": array of objects}. Each slide object has \"type\": one of \"content\", " +
+        "\"drag\", \"write\". A \"content\" slide also has \"title\" (short, a few words) and \"body\" " +
+        "(2-4 sentences, plain text, no markdown). A \"drag\" slide also has \"prompt\" (the sentence with " +
+        "___), \"options\" (array of 3-4 short strings), and \"answer\" (must exactly match one of " +
+        "options). A \"write\" slide also has \"prompt\" (the sentence with ___) and \"answer\" (the " +
+        "expected short answer). No extra text outside the JSON object.";
 
     // One retry, same reasoning as the question generator - a reasoning
     // model occasionally returns something that parses as JSON but fails
-    // validation (too few slides, an empty title).
+    // validation (unknown slide type, missing field for that type).
     public async Task<List<CourseSlideDto>?> GenerateCourseAsync(CefrLevel level, SkillArea skill, CancellationToken ct = default)
     {
         var apiKey = options.Value.ApiKey;
@@ -65,7 +77,7 @@ public class GroqCourseService(HttpClient http, IOptions<GroqOptions> options, I
                         new GroqChatMessage("user", $"Level: {level}. Skill: {skill}. Write the course now."),
                     ],
                     Temperature: 0.7,
-                    MaxTokens: 900,
+                    MaxTokens: 1600,
                     ReasoningEffort: "low",
                     ResponseFormat: new GroqResponseFormat("json_object")),
                 options: JsonOptions);
@@ -93,10 +105,32 @@ public class GroqCourseService(HttpClient http, IOptions<GroqOptions> options, I
 
     private static List<CourseSlideDto>? Validate(GeneratedCourseJson? candidate)
     {
-        if (candidate?.Slides is not { Count: >= 2 } slides) return null;
-        if (slides.Any(s => string.IsNullOrWhiteSpace(s.Title) || string.IsNullOrWhiteSpace(s.Body))) return null;
+        if (candidate?.Slides is not { Count: >= 5 } slides) return null;
 
-        return slides.Select(s => new CourseSlideDto(s.Title!.Trim(), s.Body!.Trim())).ToList();
+        var result = new List<CourseSlideDto>();
+        foreach (var slide in slides)
+        {
+            switch (slide.Type?.Trim().ToLowerInvariant())
+            {
+                case "content":
+                    if (string.IsNullOrWhiteSpace(slide.Title) || string.IsNullOrWhiteSpace(slide.Body)) return null;
+                    result.Add(new CourseSlideDto("content", slide.Title.Trim(), slide.Body.Trim(), null, null, null));
+                    break;
+                case "drag":
+                    if (string.IsNullOrWhiteSpace(slide.Prompt) || string.IsNullOrWhiteSpace(slide.Answer)) return null;
+                    if (slide.Options is not { Count: >= 2 } || slide.Options.Any(string.IsNullOrWhiteSpace)) return null;
+                    result.Add(new CourseSlideDto("drag", null, null, slide.Prompt.Trim(), slide.Options, slide.Answer.Trim()));
+                    break;
+                case "write":
+                    if (string.IsNullOrWhiteSpace(slide.Prompt) || string.IsNullOrWhiteSpace(slide.Answer)) return null;
+                    result.Add(new CourseSlideDto("write", null, null, slide.Prompt.Trim(), null, slide.Answer.Trim()));
+                    break;
+                default:
+                    return null;
+            }
+        }
+
+        return result;
     }
 
     private record GroqChatRequest(
@@ -119,5 +153,5 @@ public class GroqCourseService(HttpClient http, IOptions<GroqOptions> options, I
 
     private record GeneratedCourseJson(List<GeneratedSlideJson>? Slides);
 
-    private record GeneratedSlideJson(string? Title, string? Body);
+    private record GeneratedSlideJson(string? Type, string? Title, string? Body, string? Prompt, List<string>? Options, string? Answer);
 }

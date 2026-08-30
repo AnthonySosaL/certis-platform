@@ -1,21 +1,45 @@
 <main class="course">
   <a routerLink="/courses" class="course__back">&larr; Back to courses</a>
 
+  @if (errorMessage()) {
+    <p class="course__error">{{ errorMessage() }}</p>
+  }
+
   @switch (stage()) {
-    @case ('loading') {
+    @case ('choice') {
+      <h1>{{ level }} {{ skill }}</h1>
+      <p class="course__choice-intro">How do you want to start?</p>
+      <div class="course__choice-grid">
+        <button type="button" class="choice-card" (click)="takeCourse()">
+          <span class="choice-card__title">Take the course</span>
+          <span class="choice-card__text">A full lesson with explanations, examples, and practice exercises.</span>
+        </button>
+        <button type="button" class="choice-card" (click)="takeMiniQuiz()">
+          <span class="choice-card__title">Quick check</span>
+          <span class="choice-card__text">A short 3-question quiz to see if you already know this.</span>
+        </button>
+        <a class="choice-card" [routerLink]="['/test/reinforce', level, skill]">
+          <span class="choice-card__title">Skip to the full quiz</span>
+          <span class="choice-card__text">Already confident? Go straight to the real, graded quiz.</span>
+        </a>
+      </div>
+    }
+
+    @case ('course-loading') {
       <div class="course__loading">
         <mat-spinner diameter="32" />
         <p>Building your course…</p>
       </div>
     }
-    @case ('unavailable') {
+    @case ('course-unavailable') {
       <div class="course__unavailable">
         <h1>{{ level }} {{ skill }}</h1>
         <p>The course isn't available right now, but you can still practice directly.</p>
         <a mat-flat-button color="primary" [routerLink]="['/test/reinforce', level, skill]">Skip to practice</a>
+        <button mat-button type="button" (click)="backToChoice()">&larr; Back</button>
       </div>
     }
-    @case ('ready') {
+    @case ('course-ready') {
       <img class="course__banner" [src]="headerImage.src" alt="" loading="lazy" />
       <p class="course__banner-credit">{{ headerImage.credit }}</p>
 
@@ -25,10 +49,71 @@
       </div>
 
       @let slide = currentSlide()!;
-      <div class="course__slide">
-        <h2>{{ slide.title }}</h2>
-        <p>{{ slide.body }}</p>
-      </div>
+      @switch (slide.type) {
+        @case ('content') {
+          <div class="course__slide">
+            <h2>{{ slide.title }}</h2>
+            <p>{{ slide.body }}</p>
+          </div>
+        }
+        @case ('drag') {
+          <div class="course__slide course__slide--exercise">
+            <span class="course__exercise-label">Quick check - drag the correct answer</span>
+            <p class="course__exercise-prompt">{{ slide.prompt }}</p>
+            <div
+              class="course__drop-zone"
+              [class.course__drop-zone--correct]="exerciseResult() === 'correct'"
+              [class.course__drop-zone--incorrect]="exerciseResult() === 'incorrect'"
+              (dragover)="onDragOver($event)"
+              (drop)="onDrop($event)"
+            >
+              {{ droppedAnswer() ?? 'Drop here' }}
+            </div>
+            <div class="course__options">
+              @for (option of slide.options; track option) {
+                <button
+                  type="button"
+                  class="course__chip"
+                  draggable="true"
+                  (dragstart)="onDragStart($event, option)"
+                  (click)="pickOption(option)"
+                >
+                  {{ option }}
+                </button>
+              }
+            </div>
+            @if (exerciseResult() === 'correct') {
+              <p class="course__exercise-feedback course__exercise-feedback--correct">Correct!</p>
+            } @else if (exerciseResult() === 'incorrect') {
+              <p class="course__exercise-feedback course__exercise-feedback--incorrect">
+                Not quite - the answer was "{{ slide.answer }}".
+              </p>
+            }
+          </div>
+        }
+        @case ('write') {
+          <div class="course__slide course__slide--exercise">
+            <span class="course__exercise-label">Quick check - type the answer</span>
+            <p class="course__exercise-prompt">{{ slide.prompt }}</p>
+            <input
+              class="course__write-input"
+              type="text"
+              [value]="writeInput()"
+              (input)="setWriteInput($any($event.target).value)"
+              (keydown.enter)="checkWrite()"
+              placeholder="Type your answer…"
+            />
+            <button mat-stroked-button type="button" (click)="checkWrite()">Check</button>
+            @if (exerciseResult() === 'correct') {
+              <p class="course__exercise-feedback course__exercise-feedback--correct">Correct!</p>
+            } @else if (exerciseResult() === 'incorrect') {
+              <p class="course__exercise-feedback course__exercise-feedback--incorrect">
+                Not quite - the answer was "{{ slide.answer }}".
+              </p>
+            }
+          </div>
+        }
+      }
 
       <div class="course__nav">
         <button mat-stroked-button type="button" [disabled]="isFirst()" (click)="previous()">&larr; Previous</button>
@@ -37,6 +122,40 @@
         } @else {
           <button mat-flat-button color="primary" type="button" (click)="next()">Next &rarr;</button>
         }
+      </div>
+    }
+
+    @case ('mini-loading') {
+      <div class="course__loading">
+        <mat-spinner diameter="32" />
+        <p>Writing a quick check…</p>
+      </div>
+    }
+    @case ('mini-taking') {
+      <h1>{{ level }} {{ skill }} - Quick check</h1>
+      <app-quiz [questions]="miniQuestions()" submitLabel="Check" (submitted)="onMiniSubmit($event)" />
+    }
+    @case ('mini-submitting') {
+      <div class="course__loading">
+        <mat-spinner diameter="32" />
+        <p>Grading…</p>
+      </div>
+    }
+    @case ('mini-result') {
+      @let r = miniResult()!;
+      <div class="course__mini-result" [class.course__mini-result--pass]="miniPassed()">
+        <p class="course__mini-result-score">{{ r.score }} / {{ r.totalQuestions }}</p>
+        <p class="course__mini-result-label">
+          {{ miniPassed() ? "Nice - looks like you've got this." : "Might be worth a closer look." }}
+        </p>
+        <div class="course__mini-result-actions">
+          @if (miniPassed()) {
+            <a mat-flat-button color="primary" [routerLink]="['/test/reinforce', level, skill]">Take the full quiz</a>
+          } @else {
+            <button mat-flat-button color="primary" type="button" (click)="takeCourse()">Take the course</button>
+          }
+          <a mat-button [routerLink]="['/test/reinforce', level, skill]">Or go straight to the full quiz</a>
+        </div>
       </div>
     }
   }

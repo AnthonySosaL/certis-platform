@@ -7,8 +7,16 @@ import { CefrLevel, Question, SkillArea, SubmitAnswer, TestApi, TestResult } fro
 import { passed as isPassed } from '../../../core/grading';
 import { Quiz, readPersistedQuiz } from '../../../shared/quiz/quiz';
 
-type Stage = 'intro' | 'lesson-loading' | 'lesson' | 'loading' | 'taking' | 'submitting' | 'result' | 'generating';
+type Stage = 'loading' | 'taking' | 'submitting' | 'result' | 'generating';
 
+// This page IS the quiz - the "which prep option do you want" choice
+// (take the course, a quick mini-quiz, or come straight here) lives on
+// the Courses/Course page (2026-08-29) instead of a separate intro step
+// here, since that's now the single place that choice is made. This
+// page used to also offer its own "take a quick lesson first" step,
+// which became redundant once the full multi-slide course existed as
+// one of those three choices - removed rather than kept as a second,
+// competing way to get a pre-quiz refresher.
 @Component({
   selector: 'app-reinforcement',
   imports: [RouterLink, MatButtonModule, MatProgressSpinnerModule, Quiz],
@@ -23,41 +31,20 @@ export class Reinforcement implements OnInit {
   protected readonly skill = this.route.snapshot.paramMap.get('skill') as SkillArea;
   protected readonly storageKey = `reinforcement-in-progress-${this.level}-${this.skill}`;
 
-  protected readonly stage = signal<Stage>('intro');
+  protected readonly stage = signal<Stage>('loading');
   protected readonly questions = signal<Question[]>([]);
   protected readonly result = signal<TestResult | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly usingAiQuestions = signal(false);
-  protected readonly lessonText = signal<string | null>(null);
 
-  // A reload mid-quiz should resume straight into it, not re-show the
-  // lesson-or-skip choice - that choice only makes sense once, at the
-  // very start of a fresh attempt.
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const persisted = readPersistedQuiz(this.storageKey);
     if (persisted && persisted.hasAnswers) {
       this.questions.set(persisted.questions);
       this.stage.set('taking');
       return;
     }
-    this.stage.set('intro');
-  }
-
-  // Optional pre-quiz mini-lesson (2026-08-29) - explicitly requested:
-  // practicing here was "just more tests" with nowhere to actually
-  // learn the material first. A real Groq call, generated fresh per
-  // (level, skill) - never blocks the quiz itself if it fails.
-  async takeLesson(): Promise<void> {
-    this.stage.set('lesson-loading');
-    this.errorMessage.set(null);
-    try {
-      const { content } = await this.testApi.getLesson(this.level, this.skill);
-      this.lessonText.set(content);
-      this.stage.set('lesson');
-    } catch {
-      this.errorMessage.set("The lesson isn't available right now.");
-      this.stage.set('intro');
-    }
+    await this.startQuiz();
   }
 
   async startQuiz(): Promise<void> {
@@ -68,7 +55,6 @@ export class Reinforcement implements OnInit {
       this.stage.set('taking');
     } catch {
       this.errorMessage.set('Could not load this quiz. Please try again.');
-      this.stage.set('intro');
     }
   }
 
@@ -89,9 +75,6 @@ export class Reinforcement implements OnInit {
     return isPassed(result.score, result.totalQuestions);
   }
 
-  // Re-practicing right after seeing a result skips straight back into
-  // a quiz - the lesson-or-skip choice already happened once for this
-  // attempt.
   async retry(): Promise<void> {
     this.result.set(null);
     this.usingAiQuestions.set(false);

@@ -13,7 +13,6 @@ namespace EnglishC1.Client.Api.PlacementTest;
 public class TestController(
     ITestService testService,
     IAiInsightService aiInsightService,
-    IAiLessonService aiLessonService,
     IAiCourseService aiCourseService) : ControllerBase
 {
     [HttpGet("placement/questions")]
@@ -69,26 +68,10 @@ public class TestController(
         return Ok(new TestInsightDto(insight));
     }
 
-    // Optional "take a quick lesson first" step (2026-08-29) - shown as
-    // a choice before the quiz starts, never forced. A real Groq call
-    // per (level, skill), not cached - short and cheap enough that
-    // regenerating on request is simpler than adding a persistence
-    // layer for content this ephemeral.
-    [HttpPost("reinforcement/{level}/{skill}/lesson")]
-    public async Task<ActionResult<LessonDto>> GetLesson(CefrLevel level, SkillArea skill)
-    {
-        var lesson = await aiLessonService.GenerateLessonAsync(level, skill);
-        if (lesson is null)
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "The lesson isn't available right now." });
-
-        return Ok(new LessonDto(lesson));
-    }
-
     // The real course (2026-08-29) - a distinct multi-slide course per
     // (level, skill), reached from the Courses hub before practicing.
-    // Separate from the shorter pre-quiz "lesson" above: this is the
-    // actual class, the lesson is a quick refresher for someone who
-    // just wants to practice.
+    // Supersedes an earlier, shorter "pre-quiz lesson" endpoint (removed)
+    // once this covered the same need better.
     [HttpPost("reinforcement/{level}/{skill}/course")]
     public async Task<ActionResult<CourseDto>> GetCourse(CefrLevel level, SkillArea skill)
     {
