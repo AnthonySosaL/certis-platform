@@ -19,33 +19,113 @@
   margin: 0 0 1.25rem;
 }
 
-// One unified card instead of a nested "already taken" box stacked on
-// top of a separate "retake" section (the previous layout took two
-// visually distinct boxes to reach the same action - caught via direct
-// feedback with a screenshot).
-.placement__intro--card {
-  padding: 2rem 2rem 2.5rem;
-  border-radius: 1.25rem;
-  background: var(--mat-sys-tertiary-container);
-  color: var(--mat-sys-on-tertiary-container);
+// Same circular ring badge as test-result.scss's .result__badge* -
+// explicitly requested over both the earlier boxed-card version and a
+// plain-text version. Class names are prefixed differently
+// (placement__badge*) but otherwise identical; duplicated rather than
+// shared since this component and TestResultPage don't share a base
+// class or common stylesheet to hang a mixin off of.
+.placement__badge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem 0.5rem;
 }
 
-.placement__previous-label {
-  margin: 0;
-  font-size: 0.85rem;
-  opacity: 0.85;
+.placement__badge-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
 }
 
-.placement__previous-level {
-  margin: 0.15rem 0 0.4rem;
-  font-size: 2rem;
+.placement__badge {
+  position: relative;
+  width: 13.5rem;
+  height: 13.5rem;
+  animation: placement-badge-pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+.placement__badge-glow {
+  position: absolute;
+  inset: -0.85rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--level-color) 18%, transparent), transparent 70%);
+}
+
+.placement__badge-ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.placement__badge-ring-track {
+  fill: none;
+  stroke: color-mix(in srgb, var(--level-color) 18%, transparent);
+  stroke-width: 10;
+}
+
+.placement__badge-ring-fill {
+  fill: none;
+  stroke: var(--level-color);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.3, 0.8, 0.2, 1);
+}
+
+.placement__badge-inner {
+  position: absolute;
+  inset: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+}
+
+.placement__badge-level {
+  font-size: 2.5rem;
   font-weight: 800;
+  color: var(--level-color);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.placement__badge-name {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.placement__badge-score {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+@keyframes placement-badge-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .placement__previous-link {
-  display: inline-block;
+  display: block;
+  text-align: center;
   margin-bottom: 1.75rem;
-  color: inherit;
+  color: var(--mat-sys-primary);
   font-weight: 600;
   font-size: 0.9rem;
 }

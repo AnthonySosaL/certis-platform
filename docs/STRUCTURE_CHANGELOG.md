@@ -43,6 +43,41 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-29 — Placement/Courses cross-links removed; "already taken" badge iterated to match test-result's ring
+
+Two more rounds of direct feedback on the same screen, right after the
+"unified card" entry below landed:
+
+- **"I don't want that, you keep putting that orange box"**: the
+  "unified card" was still a colored tertiary-container box, just one
+  box instead of two - not what was asked for. Removed the box/card
+  entirely; the already-taken note is now plain text directly on the
+  page, same as the first-time "Ready to start?" flow already was.
+- **"Actually I did want the one with the circle, that one's better"**:
+  plain text wasn't it either - the user wanted the same circular ring
+  badge `test-result.html` already uses for the CEFR level, not a
+  colored box and not plain text. `placement-test.ts` gained the same
+  `levelCssVar`/`ringOffset` helpers as `TestResultPage`, and
+  `placement-test.html`/`.scss` now render an identical ring badge
+  (duplicated markup/CSS under a `placement__badge*` prefix - the two
+  pages don't share a base class to hang this on).
+- **"Courses are courses, that's separate from the general test"**:
+  reading back through the thread, the "isolated from the main test"
+  complaint that prompted the cross-links two entries ago was actually
+  about Courses-driven practice not feeding into your recorded
+  placement level (a data/architecture point), not a request for
+  hyperlinks between the two pages - and clicking through the added
+  "Take the placement test" link from Courses is exactly what landed
+  on this messy screen in the first place. Removed both cross-links
+  (Courses' "Prefer a guided starting point" sentence, results'
+  "Browse all courses" note) - the two pages go back to being fully
+  independent, as the user now describes wanting.
+
+Verified in the Browser pane in both light and dark mode: the ring
+badge renders identically to `test-result.html`'s (same pop-in
+animation, same score-proportional arc), no leftover cross-links on
+either page, no console errors. `ng build` clean.
+
 ## 2026-08-29 — Unified the placement test's "already taken" intro into one card
 
 Direct feedback with a screenshot: the `/test` intro screen, when a

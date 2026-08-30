@@ -6,10 +6,30 @@
       </div>
     }
     @case ('intro') {
-      <div class="placement__intro" [class.placement__intro--card]="previousResult()">
+      <div class="placement__intro">
         @if (previousResult(); as result) {
-          <p class="placement__previous-label">You've already taken this test</p>
-          <p class="placement__previous-level">{{ result.placementResult ?? 'Below A2' }}</p>
+          <div class="placement__badge-wrap">
+            <span class="placement__badge-label">You've already taken this test</span>
+            <div class="placement__badge" [style.--level-color]="result.placementResult ? levelCssVar(result.placementResult) : '#94a3b8'">
+              <div class="placement__badge-glow"></div>
+              <svg viewBox="0 0 190 190" class="placement__badge-ring">
+                <circle cx="95" cy="95" r="82" class="placement__badge-ring-track" />
+                <circle
+                  cx="95"
+                  cy="95"
+                  r="82"
+                  class="placement__badge-ring-fill"
+                  stroke-dasharray="515.2"
+                  [attr.stroke-dashoffset]="ringOffset(result.score, result.totalQuestions)"
+                />
+              </svg>
+              <div class="placement__badge-inner">
+                <span class="placement__badge-level">{{ levelCode(result.placementResult) }}</span>
+                <span class="placement__badge-name">{{ levelName(result.placementResult) }}</span>
+                <span class="placement__badge-score">{{ result.score }} / {{ result.totalQuestions }} correct</span>
+              </div>
+            </div>
+          </div>
           <a routerLink="/test/results" class="placement__previous-link">View my results</a>
         }
 

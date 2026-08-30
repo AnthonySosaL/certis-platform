@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { Question, SubmitAnswer, TestApi, TestResult } from '../../../core/test-api';
+import { levelCode, levelCssVar, levelName } from '../../../core/cefr';
 import { Quiz, readPersistedQuiz } from '../../../shared/quiz/quiz';
 
 type Stage = 'loading' | 'intro' | 'taking' | 'submitting';
@@ -30,6 +31,10 @@ export class PlacementTest implements OnInit {
   protected readonly previousResult = signal<TestResult | null>(null);
   protected readonly questions = signal<Question[]>([]);
   protected readonly errorMessage = signal<string | null>(null);
+
+  protected readonly levelCssVar = levelCssVar;
+  protected readonly levelCode = levelCode;
+  protected readonly levelName = levelName;
 
   async ngOnInit(): Promise<void> {
     try {
@@ -75,5 +80,12 @@ export class PlacementTest implements OnInit {
       this.errorMessage.set('Could not submit your answers. Please try again.');
       this.stage.set('taking');
     }
+  }
+
+  // Same ring math as test-result.ts: circumference of r=82 is ~515.2.
+  ringOffset(score: number, total: number): number {
+    const circumference = 515.2;
+    const share = total > 0 ? score / total : 0;
+    return circumference * (1 - share);
   }
 }

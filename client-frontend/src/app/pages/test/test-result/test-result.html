@@ -36,10 +36,6 @@
 
     <section class="result__breakdown">
       <h2>Your results by area</h2>
-      <p class="result__breakdown-note">
-        From this test - anything under 7/10 is flagged below. Want to practice a different skill or
-        level? <a routerLink="/courses">Browse all courses</a>.
-      </p>
       <div class="breakdown-grid">
         @for (cell of r.breakdown; track cell.level + cell.skillArea) {
           <div class="breakdown-cell" [class.breakdown-cell--weak]="cell.needsReinforcement" [style.--level-color]="levelCssVar(cell.level)">
