@@ -1,0 +1,12 @@
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__track">
+    @for (tip of tips; track $index + '-a') {
+      <span class="ticker__item">{{ tip }}</span>
+      <span class="ticker__dot">•</span>
+    }
+    @for (tip of tips; track $index + '-b') {
+      <span class="ticker__item">{{ tip }}</span>
+      <span class="ticker__dot">•</span>
+    }
+  </div>
+</div>

@@ -43,6 +43,48 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-29 — Ticker color, image crop fix, two more Pexels sections
+
+Direct feedback from the user after seeing the tips ticker and the first
+Pexels photo live:
+
+- **Ticker color**: was `--mat-sys-tertiary-container` (the theme's
+  orange accent) - user wanted a soft green instead, not the page's
+  usual red/blue/orange. Switched to `--cefr-a2`/`--cefr-a2-bg`, the
+  same soft green already used everywhere else in the app for a
+  positive/reassuring tone (a passed CEFR cell, the success toast) -
+  reused an existing semantic token instead of inventing a new color.
+- **Home photo cropping bug, confirmed by the user with a screenshot**:
+  `home-practice.jpg` (1.5:1) inside a much wider banner (`object-fit:
+  cover`, default center position) was cropping off the top of the
+  subject's head on wide screens. Fixed with `object-position: center
+  20%` to bias the crop toward the top, where the face actually is.
+- **Two more Pexels photos, in marketing sections only - explicitly not
+  in the quiz-taking screens** (the user's own scoping): `about-hero.jpg`
+  (Polina Tankilevitch - a top-down desk shot of handwritten notes and
+  an open textbook, deliberately faceless so wide-banner cropping can't
+  repeat the same mistake) added as a new `.about__photo` section on the
+  About page, mirroring Home's existing photo-with-credit pattern
+  exactly. `home-cta.jpg` (Anna Shvets - a woman laughing with
+  headphones and a laptop) added as a new closing CTA banner on Home
+  ("Ready to put it into practice?" → links to `/courses`) - text sits
+  in a fixed-contrast dark card over the photo rather than relying on
+  theme tokens, so it stays legible in both light and dark mode without
+  fighting the image's own colors.
+- **Also fixed another stale line found in the process**: `about.ts`'s
+  "Format" section still said "32 multiple-choice questions... Grammar,
+  Vocabulary" from before Reading/Listening - now says 64 and lists all
+  four skills.
+
+Verified in the Browser pane: ticker renders green; the home photo's
+face is now fully in frame; both new images load with correct natural
+dimensions and no console errors (confirmed via JS after a full page
+reload - an SPA in-place route navigation transiently returned
+`complete:false` before the image had a chance to load, not a real bug,
+resolved by a fresh page load); the "Browse courses" link correctly
+points at `/courses`. `ng build` clean (same two pre-existing budget
+warnings).
+
 ## 2026-08-28 — First real photo on the landing page (Pexels)
 
 Addresses the long-standing "Real imagery/illustrations" item from the

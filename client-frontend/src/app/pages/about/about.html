@@ -9,6 +9,16 @@
     </p>
   </section>
 
+  <section class="about__photo" #revealItem>
+    <img
+      class="about__photo-img"
+      src="/images/about-hero.jpg"
+      alt="Close-up of handwritten study notes and an open textbook on a desk"
+      loading="lazy"
+    />
+    <p class="about__photo-credit">Photo by Polina Tankilevitch / Pexels</p>
+  </section>
+
   <div class="about__sections">
     @for (section of sections; track section.title) {
       <section class="about-block" #revealItem>

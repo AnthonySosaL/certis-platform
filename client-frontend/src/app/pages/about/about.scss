@@ -43,6 +43,32 @@
   max-width: 36rem;
 }
 
+.about__photo {
+  margin-bottom: 3rem;
+  opacity: 0;
+  transform: translateY(0.75rem);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.about__photo.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.about__photo-img {
+  width: 100%;
+  max-height: 20rem;
+  object-fit: cover;
+  border-radius: 1.5rem;
+}
+
+.about__photo-credit {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  opacity: 0.55;
+  text-align: right;
+}
+
 .about__sections {
   display: flex;
   flex-direction: column;
@@ -112,6 +138,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .about__hero,
+  .about__photo,
   .about-block {
     opacity: 1;
     transform: none;

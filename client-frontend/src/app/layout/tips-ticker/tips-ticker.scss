@@ -1,0 +1,46 @@
+.ticker {
+  overflow: hidden;
+  // Same soft green already used everywhere else in the app for a
+  // positive/reassuring tone (a passed CEFR breakdown, the success
+  // toast) - picked deliberately over the tertiary-container orange so
+  // this doesn't read as an alert/warning strip.
+  background: var(--cefr-a2-bg);
+  color: var(--cefr-a2);
+  padding: 0.45rem 0;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.ticker__track {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: ticker-scroll 45s linear infinite;
+  will-change: transform;
+}
+
+.ticker__item {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.ticker__dot {
+  opacity: 0.5;
+}
+
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    // Exactly half the track's width, since the tip list is rendered
+    // twice back to back - stopping here loops with no visible seam.
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker__track {
+    animation: none;
+  }
+}

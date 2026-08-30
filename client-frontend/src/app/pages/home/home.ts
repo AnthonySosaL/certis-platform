@@ -1,5 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 
 import { Auth } from '../../core/auth';
@@ -35,7 +35,7 @@ const LEVELS: { level: string; cssVar: string; label: string }[] = [
 const HERO_MODEL = { src: '/models/open-book.glb', alt: 'A low-poly open book' };
 
 @Component({
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, RouterLink],
   selector: 'app-home',
   styleUrl: './home.scss',
   templateUrl: './home.html',

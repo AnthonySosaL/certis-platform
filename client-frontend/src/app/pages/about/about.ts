@@ -9,7 +9,7 @@ interface Section {
 const SECTIONS: Section[] = [
   {
     title: 'Format',
-    text: "The placement test is a fixed set of 32 multiple-choice questions answered in one sitting - 4 questions for each combination of level (A2, B1, B2, C1) and skill (Grammar, Vocabulary). It isn't adaptive: everyone sees the same questions, which keeps grading transparent and repeatable.",
+    text: "The placement test is a fixed set of 64 multiple-choice questions answered in one sitting - a mix of questions for each combination of level (A2, B1, B2, C1) and skill (Grammar, Vocabulary, Reading, Listening). It isn't adaptive: everyone sees the same questions, which keeps grading transparent and repeatable.",
     // Document/checklist
     iconPath: 'M9 12h6M9 16h6M9 8h2M6 4h9l3 3v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z',
   },
