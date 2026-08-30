@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using EnglishC1.Client.Application.Ai;
 using EnglishC1.Client.Application.PlacementTest;
+using EnglishC1.Client.Domain.PlacementTest;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -84,6 +85,97 @@ public class GroqInsightService(HttpClient http, IOptions<GroqOptions> options, 
             logger.LogWarning(ex, "Groq insight request threw");
             return null;
         }
+    }
+
+    private const string OverallSystemPrompt =
+        "You are an encouraging English C1 exam coach for Certis, an English placement and practice " +
+        "platform. Given a student's FULL history across every placement and reinforcement attempt " +
+        "they've taken - performance aggregated per (level, skill) combination across all of it, not one " +
+        "single attempt - write a short overall progress diagnostic. Identify the 2-3 skill areas most " +
+        "worth focusing on next, note any real improvement visible if the same cell was attempted more " +
+        "than once, and end with one concrete suggestion for what to practice this week. Plain prose, no " +
+        "markdown, no bullet points, no headers. 90-130 words. Address the student as \"you\".";
+
+    // Aggregates history rather than sending every attempt verbatim -
+    // bounds the prompt size to roughly one line per (level, skill)
+    // combination (at most ~20) regardless of how many attempts a
+    // student has racked up, instead of growing unbounded with history.
+    public async Task<string?> GenerateOverallInsightAsync(List<TestResultDto> history, CancellationToken ct = default)
+    {
+        var apiKey = options.Value.ApiKey;
+        if (string.IsNullOrWhiteSpace(apiKey) || history.Count == 0) return null;
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            request.Content = JsonContent.Create(
+                new GroqChatRequest(
+                    Model,
+                    [
+                        new GroqChatMessage("system", OverallSystemPrompt),
+                        new GroqChatMessage("user", BuildOverallPrompt(history)),
+                    ],
+                    Temperature: 0.6,
+                    MaxTokens: 400,
+                    ReasoningEffort: "low"),
+                options: JsonOptions);
+
+            using var response = await http.SendAsync(request, ct);
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Groq overall insight request failed with status {StatusCode}", response.StatusCode);
+                return null;
+            }
+
+            var payload = await response.Content.ReadFromJsonAsync<GroqChatResponse>(JsonOptions, ct);
+            var text = payload?.Choices?.FirstOrDefault()?.Message?.Content?.Trim();
+            return string.IsNullOrWhiteSpace(text) ? null : text;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            logger.LogWarning(ex, "Groq overall insight request threw");
+            return null;
+        }
+    }
+
+    private static string BuildOverallPrompt(List<TestResultDto> history)
+    {
+        var sb = new StringBuilder();
+        var placementCount = history.Count(h => h.Kind == AttemptKind.Placement);
+        var reinforcementCount = history.Count(h => h.Kind == AttemptKind.Reinforcement);
+        sb.AppendLine($"Total attempts: {history.Count} ({placementCount} placement, {reinforcementCount} reinforcement).");
+
+        var latestPlacement = history
+            .Where(h => h.Kind == AttemptKind.Placement)
+            .OrderByDescending(h => h.CompletedAtUtc)
+            .FirstOrDefault();
+        if (latestPlacement is not null)
+            sb.AppendLine($"Current placement level: {(latestPlacement.PlacementResult?.ToString() ?? "below A2")}.");
+
+        sb.AppendLine();
+        sb.AppendLine("Aggregate performance per (level, skill) across every attempt:");
+        var aggregated = history
+            .SelectMany(h => h.Breakdown)
+            .GroupBy(b => (b.Level, b.SkillArea))
+            .Select(g => new
+            {
+                g.Key.Level,
+                g.Key.SkillArea,
+                Correct = g.Sum(b => b.Correct),
+                Total = g.Sum(b => b.Total),
+                Attempts = g.Count(),
+            })
+            .OrderBy(x => x.Level)
+            .ThenBy(x => x.SkillArea);
+
+        foreach (var cell in aggregated)
+        {
+            var grade = cell.Total > 0 ? Math.Round((double)cell.Correct / cell.Total * 10, 1) : 0;
+            sb.AppendLine($"- {cell.Level} {cell.SkillArea}: {cell.Correct}/{cell.Total} correct across {cell.Attempts} attempt(s), grade {grade}/10.");
+        }
+
+        return sb.ToString();
     }
 
     private static string BuildPrompt(TestResultDto result)

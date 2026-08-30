@@ -8,4 +8,10 @@ namespace EnglishC1.Client.Application.Ai;
 public interface IAiInsightService
 {
     Task<string?> GenerateInsightAsync(TestResultDto result, CancellationToken ct = default);
+
+    // Same idea, but across a student's FULL history (every placement +
+    // reinforcement attempt) instead of one - a "what should I focus on
+    // overall" panel rather than a per-attempt diagnostic. See
+    // Dashboard's "Coach" panel, 2026-08-29.
+    Task<string?> GenerateOverallInsightAsync(List<TestResultDto> history, CancellationToken ct = default);
 }

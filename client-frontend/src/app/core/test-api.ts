@@ -103,6 +103,13 @@ export class TestApi {
     );
   }
 
+  // Coach panel (Dashboard) - a real Groq call across the student's
+  // full history, never automatic. 404 means no history exists yet
+  // (nothing to analyze); 503 means Groq isn't configured/available.
+  getOverallInsight(): Promise<TestInsight> {
+    return firstValueFrom(this.http.post<TestInsight>(`${API_BASE_URL}/api/test/insight/overall`, {}));
+  }
+
   getReinforcementQuestions(level: CefrLevel, skill: SkillArea): Promise<Question[]> {
     return firstValueFrom(
       this.http.get<Question[]>(`${API_BASE_URL}/api/test/reinforcement/${level}/${skill}/questions`),

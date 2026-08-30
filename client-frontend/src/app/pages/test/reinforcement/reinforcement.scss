@@ -53,10 +53,25 @@
   padding: 3rem 1.5rem;
   border-radius: 1.5rem;
   background: var(--mat-sys-error-container);
+  // Explicit, not inherited from the page - error-container is
+  // theme-aware and already pairs correctly with on-error-container,
+  // but leaving this to the ambient page text color broke badly for
+  // the pass state below (see --pass), so both are set explicitly here
+  // for the same reason.
+  color: var(--mat-sys-on-error-container);
 }
 
 .reinforce__result--pass {
+  // --cefr-a2/-bg are deliberately fixed (not theme-aware - same green
+  // in light or dark mode, see styles.scss). The score/label text used
+  // to inherit the page's ambient on-surface color, which flips to a
+  // light color in dark mode - unreadable against this always-light
+  // green background (caught via a real screenshot in dark mode).
+  // Pairing with --cefr-a2 (the fixed dark green) keeps it readable in
+  // both themes, matching the same pairing already used for the
+  // "correct answer" tag below.
   background: var(--cefr-a2-bg);
+  color: var(--cefr-a2);
 }
 
 .reinforce__result-score {

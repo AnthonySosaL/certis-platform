@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 interface Section {
   title: string;
@@ -34,7 +35,7 @@ const SECTIONS: Section[] = [
 ];
 
 @Component({
-  imports: [],
+  imports: [RouterLink],
   selector: 'app-about',
   styleUrl: './about.scss',
   templateUrl: './about.html',

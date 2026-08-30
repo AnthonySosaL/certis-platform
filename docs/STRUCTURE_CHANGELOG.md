@@ -43,6 +43,70 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-29 — Dashboard "Coach" (full-history AI insight), navigation fixes, dark-mode contrast bug
+
+A long batch of direct feedback after the user tried the app end to end
+in dark mode.
+
+- **Real bug, caught with a screenshot: the reinforcement pass card was
+  unreadable in dark mode.** `.reinforce__result--pass` used
+  `--cefr-a2-bg` (a fixed light green, same in every theme) but the
+  score/label text had no explicit color, so it inherited the page's
+  ambient `on-surface` color - light in dark mode, unreadable against
+  an always-light-green card. Fixed by pairing the card with its
+  matching fixed-dark-green text color (`--cefr-a2`), the same pairing
+  already used for the "correct answer" tag lower on the same page.
+  Also made the fail-state card's color explicit for the same reason,
+  even though it happened to look fine by coincidence (error-container
+  is theme-aware, unlike cefr-a2-bg).
+- **Navigation bug**: finishing a reinforcement quiz reached via Courses
+  (which never requires a placement attempt) sent "Back to results" to
+  `/test/results` - a page scoped specifically to placement results,
+  which showed an empty "take the test" prompt for anyone who reached
+  reinforcement without ever taking the placement test. Changed both
+  "back" links in `reinforcement.html` to `/dashboard` instead, which
+  shows full history (placement AND reinforcement) regardless of which
+  path a student took.
+- **Navbar reorder**: "About" moved to the end of the list (after
+  Dashboard/Courses/Speaking/Admin) instead of sitting in the middle of
+  them, per direct request - the practice-related links now group
+  together first.
+- **AI insight relocated and rescoped**: the old "Get AI feedback on
+  this attempt" button on the placement results page was per-attempt
+  and, per the user, not useful where it lived. Replaced with a new
+  "Coach" panel at the top of the Dashboard - `IAiInsightService`
+  gained `GenerateOverallInsightAsync`, which aggregates a student's
+  ENTIRE history (every placement + reinforcement attempt) per (level,
+  skill) cell before a single Groq call, bounding the prompt to roughly
+  one line per cell regardless of how many attempts exist. New
+  `POST /api/test/insight/overall`. The results page now just points to
+  the Dashboard instead of duplicating a lesser version of the same
+  feature. Verified with a real Groq call against a real 2-attempt
+  history - the response correctly noted the second attempt scored
+  better than the first, confirming it's actually reading historical
+  trends, not just restating one attempt's numbers.
+- **Ticker**: user asked for green first, then - after actually seeing
+  it (still on the old, undeployed orange version at the time) - asked
+  for blue instead, and slower. Switched to `--mat-sys-primary-container`
+  (the app's own azure brand color) and slowed the scroll from 45s to 75s.
+- **Two more Pexels sections**: an About page closing CTA banner
+  ("Ready to see where you stand?" → `/test`, Andrea Piacquadio photo),
+  matching the same fixed-contrast dark-card pattern as Home's CTA
+  banner, since About is now the last nav item and benefits from a
+  strong closing note.
+
+Verified end-to-end in the Browser pane, including forcing dark mode to
+specifically re-check the contrast bug: fail-card and pass-card (the
+latter via a real submitted attempt, DOM-toggled to preview the pass
+class since randomly guessing 12 correct answers isn't practical to
+script) both read clearly against a dark page background. Confirmed via
+`read_page` that the authenticated navbar order is now Home → Take the
+test → Dashboard → Courses → Speaking → Admin → About. Confirmed the
+Coach panel button, loading state, and a real Groq response all render
+correctly, and that the placement results page no longer shows the old
+per-attempt button. Backend: `dotnet build` 0 warnings/errors, 10/10
+unit tests green. Frontend: `ng build` clean.
+
 ## 2026-08-29 — Ticker color, image crop fix, two more Pexels sections
 
 Direct feedback from the user after seeing the tips ticker and the first

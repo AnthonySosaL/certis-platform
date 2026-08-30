@@ -10,11 +10,15 @@ import { AuthDialogService } from '../../core/auth-dialog.service';
 
 type NavItem = { path: string; label: string };
 
+// "About" stays last regardless of auth state - explicitly requested
+// (2026-08-29) so the practice-related links (Take the test, Dashboard,
+// Courses, Speaking) group together first, with About as the closing
+// "learn more" item rather than sitting in the middle of them.
 const BASE_NAV_ITEMS: NavItem[] = [
   { path: '/', label: 'Home' },
   { path: '/test', label: 'Take the test' },
-  { path: '/about', label: 'About' },
 ];
+const ABOUT_ITEM: NavItem = { path: '/about', label: 'About' };
 
 const DASHBOARD_ITEM: NavItem = { path: '/dashboard', label: 'Dashboard' };
 const COURSES_ITEM: NavItem = { path: '/courses', label: 'Courses' };
@@ -34,10 +38,10 @@ export class Navbar {
   private readonly authDialog = inject(AuthDialogService);
 
   protected readonly navItems = computed<NavItem[]>(() => {
-    if (!this.auth.isAuthenticated()) return BASE_NAV_ITEMS;
+    if (!this.auth.isAuthenticated()) return [...BASE_NAV_ITEMS, ABOUT_ITEM];
     return this.auth.canManage()
-      ? [...BASE_NAV_ITEMS, DASHBOARD_ITEM, COURSES_ITEM, SPEAKING_ITEM, ADMIN_ITEM]
-      : [...BASE_NAV_ITEMS, DASHBOARD_ITEM, COURSES_ITEM, SPEAKING_ITEM];
+      ? [...BASE_NAV_ITEMS, DASHBOARD_ITEM, COURSES_ITEM, SPEAKING_ITEM, ADMIN_ITEM, ABOUT_ITEM]
+      : [...BASE_NAV_ITEMS, DASHBOARD_ITEM, COURSES_ITEM, SPEAKING_ITEM, ABOUT_ITEM];
   });
 
   openSignIn(): void {

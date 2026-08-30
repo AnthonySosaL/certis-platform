@@ -1,11 +1,10 @@
 .ticker {
   overflow: hidden;
-  // Same soft green already used everywhere else in the app for a
-  // positive/reassuring tone (a passed CEFR breakdown, the success
-  // toast) - picked deliberately over the tertiary-container orange so
-  // this doesn't read as an alert/warning strip.
-  background: var(--cefr-a2-bg);
-  color: var(--cefr-a2);
+  // Blue, matching the app's own primary (azure) brand color - tried
+  // green first, but the user preferred blue on a second look
+  // (2026-08-29).
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
   padding: 0.45rem 0;
   white-space: nowrap;
   border-bottom: 1px solid var(--mat-sys-outline-variant);
@@ -15,7 +14,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  animation: ticker-scroll 45s linear infinite;
+  // Slowed down from an initial 45s per the user's feedback that it
+  // moved too fast to comfortably read.
+  animation: ticker-scroll 75s linear infinite;
   will-change: transform;
 }
 

@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -8,6 +9,8 @@ import { Auth } from '../../core/auth';
 import { levelCode, levelCssVar, levelName } from '../../core/cefr';
 import { skillIconPath } from '../../core/skill-icons';
 import { passed as isPassed } from '../../core/grading';
+
+type InsightState = 'idle' | 'loading' | 'ready' | 'unavailable' | 'error';
 
 @Component({
   selector: 'app-dashboard',
@@ -35,6 +38,14 @@ export class Dashboard implements OnInit {
   protected readonly levelName = levelName;
   protected readonly skillIconPath = skillIconPath;
 
+  // "Coach" panel - a real Groq call across the student's FULL history
+  // (2026-08-29), not tied to any single attempt. Was previously buried
+  // as a per-attempt button on the placement results page, which the
+  // user pointed out was barely useful there - moved here, more
+  // visible, and scoped to overall progress instead of one attempt.
+  protected readonly insightState = signal<InsightState>('idle');
+  protected readonly insightText = signal<string | null>(null);
+
   async ngOnInit(): Promise<void> {
     this.history.set(await this.testApi.getHistory());
     this.loading.set(false);
@@ -42,6 +53,18 @@ export class Dashboard implements OnInit {
 
   passed(result: TestResult): boolean {
     return isPassed(result.score, result.totalQuestions);
+  }
+
+  async getOverallInsight(): Promise<void> {
+    this.insightState.set('loading');
+    try {
+      const { insight } = await this.testApi.getOverallInsight();
+      this.insightText.set(insight);
+      this.insightState.set('ready');
+    } catch (error) {
+      const status = error instanceof HttpErrorResponse ? error.status : null;
+      this.insightState.set(status === 503 ? 'unavailable' : 'error');
+    }
   }
 
   formatDate(iso: string): string {

@@ -1,5 +1,5 @@
 <main class="reinforce">
-  <a routerLink="/test/results" class="reinforce__back">&larr; Back to results</a>
+  <a routerLink="/dashboard" class="reinforce__back">&larr; Back to dashboard</a>
   <h1>Reinforcement: {{ level }} {{ skill }}</h1>
 
   @if (errorMessage()) {
@@ -50,7 +50,7 @@
         <p class="reinforce__result-label">{{ passed(r) ? "Nice - you've got this." : 'Still shaky - here\'s what to fix.' }}</p>
         <div class="reinforce__result-actions">
           <button mat-flat-button color="primary" type="button" (click)="retry()">Try again</button>
-          <a mat-button routerLink="/test/results">Back to results</a>
+          <a mat-button routerLink="/dashboard">Back to dashboard</a>
         </div>
       </div>
 

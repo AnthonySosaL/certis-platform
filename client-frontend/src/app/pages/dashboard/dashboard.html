@@ -34,6 +34,34 @@
       }
     </header>
 
+    <section class="insight">
+      <h2>Your coach</h2>
+      @switch (insightState()) {
+        @case ('idle') {
+          <button mat-stroked-button color="primary" class="insight__cta" type="button" (click)="getOverallInsight()">
+            Get personalized feedback based on all my attempts
+          </button>
+        }
+        @case ('loading') {
+          <div class="insight__loading">
+            <mat-spinner diameter="24" />
+            <span>Looking over your history...</span>
+          </div>
+        }
+        @case ('ready') {
+          <p class="insight__text">{{ insightText() }}</p>
+        }
+        @case ('unavailable') {
+          <p class="insight__muted">AI feedback isn't set up yet - check back later.</p>
+        }
+        @case ('error') {
+          <p class="insight__muted">Couldn't get feedback right now.
+            <button type="button" class="insight__retry" (click)="getOverallInsight()">Try again</button>
+          </p>
+        }
+      }
+    </section>
+
     <section class="dashboard__section">
       <h2>Placement history</h2>
       <div class="history-list">

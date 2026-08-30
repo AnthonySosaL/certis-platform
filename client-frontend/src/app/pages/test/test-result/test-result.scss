@@ -230,57 +230,15 @@
   border-radius: 999px;
 }
 
-.insight {
-  padding: 1.5rem;
-  border-radius: 1rem;
-  background: var(--mat-sys-surface-container-low);
-  border: 1.5px dashed var(--mat-sys-outline-variant);
-}
-
-.insight h2 {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 0 0 0.85rem;
-}
-
-.insight__cta {
-  border-radius: 999px;
-}
-
-.insight__loading {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.9rem;
-  opacity: 0.75;
-}
-
-.insight__text {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.6;
-}
-
-.insight__muted {
-  margin: 0;
-  font-size: 0.88rem;
-  opacity: 0.65;
-}
-
-.insight__retry {
-  border: none;
-  background: none;
-  padding: 0;
-  margin-left: 0.35rem;
-  color: var(--mat-sys-primary);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 .result__retake {
   align-self: center;
   padding: 0 1.75rem;
   height: 2.75rem;
   border-radius: 999px;
+}
+
+.result__coach-link {
+  align-self: center;
+  font-size: 0.85rem;
+  opacity: 0.75;
 }

@@ -69,34 +69,9 @@
       </div>
     </section>
 
-    <section class="insight">
-      <h2>Personalized feedback</h2>
-      @switch (insightState()) {
-        @case ('idle') {
-          <button mat-stroked-button color="primary" class="insight__cta" type="button" (click)="getInsight()">
-            Get AI feedback on this attempt
-          </button>
-        }
-        @case ('loading') {
-          <div class="insight__loading">
-            <mat-spinner diameter="24" />
-            <span>Thinking it through...</span>
-          </div>
-        }
-        @case ('ready') {
-          <p class="insight__text">{{ insightText() }}</p>
-        }
-        @case ('unavailable') {
-          <p class="insight__muted">AI feedback isn't set up yet - check back later.</p>
-        }
-        @case ('error') {
-          <p class="insight__muted">Couldn't get feedback right now.
-            <button type="button" class="insight__retry" (click)="getInsight()">Try again</button>
-          </p>
-        }
-      }
-    </section>
-
     <a mat-flat-button color="primary" class="result__retake" routerLink="/test">Retake the full test</a>
+    <a mat-button class="result__coach-link" routerLink="/dashboard">
+      Want feedback based on your whole history? Check your Coach panel on the Dashboard →
+    </a>
   }
 </main>

@@ -48,6 +48,23 @@ public class TestController(ITestService testService, IAiInsightService aiInsigh
         return Ok(new TestInsightDto(insight));
     }
 
+    // Coach panel (2026-08-29) - "what should I improve overall", based
+    // on every attempt on record, not one. Distinct from GetInsight
+    // above (per-attempt) rather than replacing it - this one needs the
+    // full history to exist first, so 404s if there's none yet.
+    [HttpPost("insight/overall")]
+    public async Task<ActionResult<TestInsightDto>> GetOverallInsight()
+    {
+        var history = await testService.GetHistoryAsync(UserId);
+        if (history.Count == 0) return NotFound();
+
+        var insight = await aiInsightService.GenerateOverallInsightAsync(history);
+        if (insight is null)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "AI feedback isn't available right now." });
+
+        return Ok(new TestInsightDto(insight));
+    }
+
     [HttpGet("reinforcement/{level}/{skill}/questions")]
     public async Task<ActionResult<List<QuestionDto>>> GetReinforcementQuestions(CefrLevel level, SkillArea skill) =>
         Ok(await testService.GetReinforcementQuestionsAsync(level, skill));
