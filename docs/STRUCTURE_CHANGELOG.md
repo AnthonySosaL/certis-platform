@@ -43,6 +43,28 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-29 — Unified the placement test's "already taken" intro into one card
+
+Direct feedback with a screenshot: the `/test` intro screen, when a
+placement attempt already exists, stacked two visually separate boxes
+(an "already taken" banner with its own background, then a whole
+separate "Retake the placement test" section below it) - described as
+looking messy, like two clicks to reach the same thing. The user hit
+this specifically via the "Take the placement test" cross-link added
+to the Courses page in an earlier entry today.
+
+- `placement-test.html`: the "already taken" label/level/"View my
+  results" link now live directly inside the same card as the
+  h1/facts/button, instead of a separate nested `.placement__previous`
+  box. One `[class.placement__intro--card]` toggles the card styling
+  only when a previous result exists - the plain first-time "Ready to
+  start?" flow (never part of this complaint) is unchanged.
+
+Verified in the Browser pane in both light and dark mode (dark
+specifically, given the recent contrast bug in this same area of the
+app) - one cohesive card in both, no separate stacked boxes, no
+console errors. `ng build` clean.
+
 ## 2026-08-29 — The real course: multi-slide, per (level, skill), reached from Courses
 
 Explicit follow-up after the pre-quiz "lesson" landed: that one-paragraph

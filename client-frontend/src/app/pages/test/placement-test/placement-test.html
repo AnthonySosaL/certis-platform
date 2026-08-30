@@ -6,13 +6,11 @@
       </div>
     }
     @case ('intro') {
-      <div class="placement__intro">
+      <div class="placement__intro" [class.placement__intro--card]="previousResult()">
         @if (previousResult(); as result) {
-          <div class="placement__previous">
-            <p class="placement__previous-label">You've already taken this test</p>
-            <p class="placement__previous-level">{{ result.placementResult ?? 'Below A2' }}</p>
-            <a routerLink="/test/results" class="placement__previous-link">View my results</a>
-          </div>
+          <p class="placement__previous-label">You've already taken this test</p>
+          <p class="placement__previous-level">{{ result.placementResult ?? 'Below A2' }}</p>
+          <a routerLink="/test/results" class="placement__previous-link">View my results</a>
         }
 
         <h1>{{ previousResult() ? 'Retake the placement test' : 'Ready to start?' }}</h1>
