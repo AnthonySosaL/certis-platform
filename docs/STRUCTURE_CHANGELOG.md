@@ -43,6 +43,44 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-31 — A real 3D Certis seal, replacing the hero's open book
+
+Certis is becoming a real company, so the flat SVG seal that replaces
+the "C" in the navbar wordmark earned a proper 3D object study before
+going on the homepage.
+
+- Built a standalone showcase (published as a Claude Artifact, not part
+  of this repo) rendering the exact same silhouette (a beveled disc
+  seal, an embossed checkmark, two ribbon tails) in four finishes -
+  Classic Gold, Navy & Gold, Crystal (transmissive glass), and Onyx &
+  Gold - using `three` (already present in `node_modules` as a
+  transitive dependency of `@google/model-viewer`) via
+  `MeshPhysicalMaterial` for real PBR metal/glass/lacquer looks, not a
+  flat render. The three.js ESM build ships split across two files with
+  an internal relative import, which breaks when inlined into a
+  self-contained artifact (blob-URL module resolution can't follow a
+  relative specifier) - bundled it into one dependency-free IIFE with
+  `esbuild` (also already in `node_modules`) instead.
+- Picked "Navy & Gold" - it ties directly to the site's own azure
+  primary color, unlike a plain gold medal that doesn't reference the
+  palette at all.
+- Exported that exact geometry/material as a real `.glb`
+  (`public/models/certis-seal.glb`) via Three's `GLTFExporter`, run
+  once from a throwaway Node script (deleted after use, not part of the
+  app). `GLTFExporter`'s binary path calls a browser-only `FileReader`
+  even with zero image textures in the scene - polyfilled the one
+  method it actually calls (`readAsArrayBuffer`, resolved via Node's
+  native `Blob`) rather than pulling in a full DOM environment for a
+  one-off export.
+- `home.ts`'s `HERO_MODEL` now points at `certis-seal.glb` instead of
+  `open-book.glb` - same `<model-viewer>` element, same auto-rotate
+  setup, no other changes needed. `open-book.glb`, `grad-cap.glb`, and
+  `globe.glb` stay in `public/models/`, still reserved for elsewhere.
+
+Verified in the Browser pane with the real dev server: the seal renders
+on the homepage exactly as in the showcase - navy disc, gold checkmark
+and ribbon, auto-rotating - with no console errors. `ng build` clean.
+
 ## 2026-08-31 — Creator credit in the footer; ARCHITECTURE.md brought current
 
 - Footer now reads "Created by Anthony Sosa" under the copyright line -

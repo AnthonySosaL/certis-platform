@@ -27,12 +27,15 @@ const LEVELS: { level: string; cssVar: string; label: string }[] = [
   { level: 'C1', cssVar: '--cefr-c1', label: 'Advanced' },
 ];
 
-// Picked from three CC0 candidates previewed live on this page - see
-// docs/STRUCTURE_CHANGELOG.md (2026-08-27) for how they were sourced.
-// The other two (grad-cap.glb, globe.glb) are kept in public/models/
-// on purpose, reserved for another spot or a loading screen later -
-// not dead files.
-const HERO_MODEL = { src: '/models/open-book.glb', alt: 'A low-poly open book' };
+// The Certis seal (2026-08-31) - a real 3D render of the brand mark
+// (the seal/checkmark/ribbon that replaces the "C" in the navbar
+// wordmark), "Navy & Gold" finish, exported as a .glb from Three.js -
+// see docs/STRUCTURE_CHANGELOG.md for how it was built and the other
+// three finishes it was picked from. Replaces the open-book model that
+// held this spot since 2026-08-27; open-book.glb, grad-cap.glb, and
+// globe.glb stay in public/models/ on purpose, reserved for another
+// spot later - not dead files.
+const HERO_MODEL = { src: '/models/certis-seal.glb', alt: 'The Certis seal, rendered in navy and gold' };
 
 @Component({
   imports: [MatButtonModule, RouterLink],
