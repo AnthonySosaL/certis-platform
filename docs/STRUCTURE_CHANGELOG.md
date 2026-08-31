@@ -81,6 +81,42 @@ Verified in the Browser pane with the real dev server: the seal renders
 on the homepage exactly as in the showcase - navy disc, gold checkmark
 and ribbon, auto-rotating - with no console errors. `ng build` clean.
 
+## 2026-08-31 — Certis seal: checkmark on both faces, ribbon tails fixed
+
+Two follow-up geometry bugs found once the seal was actually spinning
+and viewed up close on the live homepage, not just in the showcase's
+fixed camera angles:
+
+- **Checkmark was single-sided.** It was one mesh at `z = +0.27` (the
+  front face only), so the back half of every auto-rotation cycle
+  showed a blank navy disc. Added a second mesh at `z = -0.27` with
+  `rotation.y = Math.PI` (same geometry, same material) so the mark
+  reads correctly from every angle, not just the one the original
+  showcase screenshots happened to freeze on.
+- **Ribbon tails read as four prongs curling inward, not two clean
+  tails.** The original SVG's swallowtail look (`navbar.html`'s
+  `.navbar__brand-ribbon` path) comes from the *gap* between two tails,
+  not from each tail having its own notch - but the 3D version gave
+  each individual tail mesh its own internal V-cut (`moveTo`/`lineTo`
+  tracing a second inner point), so pairing two of them nested one
+  notch inside another. On top of that, `rotation.z = sign * -0.16`
+  had the sign backwards, tipping each tail's bottom edge *toward*
+  center instead of away from it. Replaced each tail's `Shape` with a
+  simple single-point pennant (one point per tail, no inner notch) and
+  fixed the rotation sign so both tails now splay outward, matching
+  the flat logo.
+- Re-exported `public/models/certis-seal.glb` via the same throwaway
+  Node script (`GLTFExporter` + the `FileReader` polyfill) used for
+  the original export; no changes to the export pipeline itself, only
+  to the geometry it builds.
+
+Verified in the Browser pane against the real dev server: drove
+`<model-viewer>`'s `cameraOrbit` directly (`mv.jumpCameraToGoal()`)
+to check the back face head-on - checkmark clearly visible, not
+blank - and to get a close, non-rotating view of the ribbon - two
+single-pointed tails splaying apart, no nested double-point look. No
+console errors.
+
 ## 2026-08-31 — Creator credit in the footer; ARCHITECTURE.md brought current
 
 - Footer now reads "Created by Anthony Sosa" under the copyright line -
