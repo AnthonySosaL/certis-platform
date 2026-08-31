@@ -5,6 +5,46 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-31 — Boot splash: curtain texture and swing-open physics
+
+Second follow-up to the boot splash below. Feedback: the reveal should
+look like fabric - the two panels sliding open should read as a
+curtain, not two flat colored rectangles.
+
+- **Fold texture, not fabric imagery.** Layered a subtle
+  `repeating-linear-gradient` (soft light/shadow bands, rounded via
+  gradient stops rather than hard-edged stripes) on top of the
+  existing navy radial gradient as a second `background-image` layer,
+  sized as a percentage of each panel's own box. The two panels' folds
+  don't line up with each other at the center seam by design - real
+  two-panel curtains don't either, so this isn't a bug to fix.
+- **Swing-and-settle instead of a linear slide.** Replaced the
+  `transition: transform` approach with a `@keyframes` animation per
+  panel: it swings past its resting position (`-104%`/`104%`), rocks
+  back the other way (`-98%`/`98%`), then settles at `-100%`/`100%`,
+  with a couple of degrees of `rotate()` layered on top and
+  `transform-origin: top center` so it reads as hanging from a rod
+  rather than sliding on rails. Bumped the JS cleanup timeout from
+  950ms to 1150ms to match the longer 1.1s animation.
+- `prefers-reduced-motion: reduce` now jumps the panels straight to
+  their fully-open resting position instead of running the swing.
+
+Verified in the Browser pane against the real dev server. The
+sub-second swing is too fast to reliably catch with a screenshot
+round-trip in this tool (confirmed by watching several attempts land
+after the animation had already finished), so verified the physics
+numerically instead: triggered the opening class, then sampled
+`getComputedStyle(...).transform` on the left panel via
+`requestAnimationFrame` at fixed offsets within one script (avoids the
+round-trip race entirely). Confirmed the overshoot-and-settle: `x`
+reached -448px at ~550ms (past the -430px resting value), rocked back
+to -423px at ~720ms, then eased to -430px by 1150ms - exactly the
+swing-past-then-settle shape the keyframes were written for, not a
+straight line. Also confirmed the fold texture renders and the panel
+still lands fully off-screen at rest (no visible seam or leftover
+strip), and that the splash still fully removes itself from the DOM
+after a real (non-lengthened) run. No console errors.
+
 ## 2026-08-31 — Boot splash: staged fake progress, seal-opening reveal
 
 Follow-up to the boot splash below. Feedback on the first version: it

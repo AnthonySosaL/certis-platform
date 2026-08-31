@@ -37,9 +37,26 @@
         top: 0;
         bottom: 0;
         width: 50%;
-        background: radial-gradient(circle at 50% 38%, #223969 0%, #101c3a 55%, #070c1a 100%);
-        background-size: 200% 100%;
-        transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+        transform-origin: 50% 0%;
+        /* Two layers: a repeating fold gradient on top (curtain pleats -
+           soft light/shadow bands, not hard stripes, so they read as
+           rounded cloth rather than a barcode) and the same brand navy
+           radial underneath. Sized as a percentage of each panel's own
+           box, not the viewport - the two panels' folds don't need to
+           line up at the center seam, real curtain panels don't either. */
+        background-image:
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.08) 0%,
+            rgba(255, 255, 255, 0.02) 3%,
+            rgba(0, 0, 0, 0.16) 8%,
+            rgba(0, 0, 0, 0.03) 13%,
+            rgba(255, 255, 255, 0.08) 17%
+          ),
+          radial-gradient(circle at 50% 38%, #223969 0%, #101c3a 55%, #070c1a 100%);
+        background-size:
+          16% 100%,
+          200% 100%;
       }
       .app-splash__panel--left {
         left: 0;
@@ -47,17 +64,52 @@
            so sub-pixel rounding of the 50% split never leaves a hairline
            gap showing the page behind it. */
         width: calc(50% + 2px);
-        background-position: 0% 0%;
+        background-position:
+          0 0,
+          0% 0%;
       }
       .app-splash__panel--right {
         right: 0;
-        background-position: 100% 0%;
+        background-position:
+          0 0,
+          100% 0%;
+      }
+      /* A curtain has weight - it doesn't slide off in a straight line,
+         it swings out past its resting point and settles back, like it's
+         hung from a rod at the top (transform-origin above). */
+      @keyframes app-splash-curtain-left {
+        0% {
+          transform: translateX(0) rotate(0deg);
+        }
+        50% {
+          transform: translateX(-104%) rotate(-1.6deg);
+        }
+        72% {
+          transform: translateX(-98%) rotate(0.8deg);
+        }
+        100% {
+          transform: translateX(-100%) rotate(0deg);
+        }
+      }
+      @keyframes app-splash-curtain-right {
+        0% {
+          transform: translateX(0) rotate(0deg);
+        }
+        50% {
+          transform: translateX(104%) rotate(1.6deg);
+        }
+        72% {
+          transform: translateX(98%) rotate(-0.8deg);
+        }
+        100% {
+          transform: translateX(100%) rotate(0deg);
+        }
       }
       #app-splash.app-splash--opening .app-splash__panel--left {
-        transform: translateX(-100%);
+        animation: app-splash-curtain-left 1.1s cubic-bezier(0.3, 0, 0.2, 1) forwards;
       }
       #app-splash.app-splash--opening .app-splash__panel--right {
-        transform: translateX(100%);
+        animation: app-splash-curtain-right 1.1s cubic-bezier(0.3, 0, 0.2, 1) forwards;
       }
       .app-splash__center {
         position: absolute;
@@ -190,6 +242,14 @@
           animation: none;
           opacity: 1;
         }
+        #app-splash.app-splash--opening .app-splash__panel--left,
+        #app-splash.app-splash--opening .app-splash__panel--right {
+          animation: none;
+          transform: translateX(-100%);
+        }
+        #app-splash.app-splash--opening .app-splash__panel--right {
+          transform: translateX(100%);
+        }
         .app-splash__panel,
         .app-splash__center {
           transition: none;
@@ -289,7 +349,7 @@
             splash.classList.add('app-splash--opening');
             setTimeout(function () {
               splash.remove();
-            }, 950);
+            }, 1150);
           }, 420);
         }
 
