@@ -12,8 +12,206 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
+    <!--
+      Boot splash: plain CSS/JS, inlined here (not in styles.scss) so it
+      paints before the Angular bundle even finishes downloading - no
+      flash of a blank page while the app boots. Colors match the "Navy &
+      Gold" 3D seal used elsewhere (see docs/STRUCTURE_CHANGELOG.md), not
+      the navbar's azure brand color - this is a deliberate one-off dark
+      brand moment, not tied to the user's light/dark theme preference.
+    -->
+    <style>
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        background: radial-gradient(circle at 50% 38%, #223969 0%, #101c3a 55%, #070c1a 100%);
+        transition: opacity 0.5s ease;
+      }
+      #app-splash.app-splash--done {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .app-splash__stage {
+        position: relative;
+        width: 96px;
+        height: 116px;
+        perspective: 560px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .app-splash__glow {
+        position: absolute;
+        inset: -30%;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(212, 175, 55, 0.45) 0%, rgba(212, 175, 55, 0) 70%);
+        filter: blur(6px);
+        animation: app-splash-glow 2.4s ease-in-out infinite;
+      }
+      .app-splash__coin {
+        position: relative;
+        transform-style: preserve-3d;
+        animation: app-splash-spin 2.4s ease-in-out infinite;
+        filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
+      }
+      .app-splash__ribbon {
+        fill: #c9a24b;
+      }
+      .app-splash__disc {
+        fill: #17233f;
+        stroke: #d4af37;
+        stroke-width: 0.6;
+      }
+      .app-splash__check {
+        fill: none;
+        stroke: #d4af37;
+        stroke-width: 2.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      @keyframes app-splash-spin {
+        0%,
+        100% {
+          transform: rotateY(0deg);
+        }
+        50% {
+          transform: rotateY(180deg);
+        }
+      }
+      @keyframes app-splash-glow {
+        0%,
+        100% {
+          opacity: 0.5;
+          transform: scale(0.92);
+        }
+        50% {
+          opacity: 0.9;
+          transform: scale(1.08);
+        }
+      }
+      .app-splash__word {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 500;
+        font-size: 0.95rem;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.88);
+        opacity: 0;
+        animation: app-splash-word-in 0.6s ease both;
+        animation-delay: 0.15s;
+      }
+      @keyframes app-splash-word-in {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .app-splash__track {
+        width: 148px;
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        overflow: hidden;
+      }
+      .app-splash__fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #b5872f, #ecd28a);
+        transition: width 0.4s ease;
+      }
+      app-root:empty {
+        display: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .app-splash__coin,
+        .app-splash__glow,
+        .app-splash__word {
+          animation: none;
+          opacity: 1;
+        }
+      }
+    </style>
   </head>
   <body>
     <app-root></app-root>
+
+    <div id="app-splash" role="status" aria-label="Loading Certis">
+      <div class="app-splash__stage">
+        <div class="app-splash__glow"></div>
+        <svg class="app-splash__coin" viewBox="0 0 28 34" width="72" height="87" aria-hidden="true">
+          <path class="app-splash__ribbon" d="M9 16 L7 32 L14 27 L21 32 L19 16Z" />
+          <circle class="app-splash__disc" cx="14" cy="13" r="12" />
+          <path class="app-splash__check" d="M8.5 13.5 12 17 19.5 9" />
+        </svg>
+      </div>
+      <div class="app-splash__word">Certis</div>
+      <div class="app-splash__track"><div class="app-splash__fill" id="app-splash-fill"></div></div>
+    </div>
+
+    <script>
+      (function () {
+        var splash = document.getElementById('app-splash');
+        var fill = document.getElementById('app-splash-fill');
+        var appRoot = document.querySelector('app-root');
+        if (!splash || !fill || !appRoot) return;
+
+        var start = Date.now();
+        var minVisibleMs = 700;
+        var finished = false;
+
+        function setProgress(pct) {
+          fill.style.width = pct + '%';
+        }
+
+        // Not a fake timed bar: 20% on first paint, 65% once every initial
+        // resource (the JS bundle, fonts, etc.) has actually finished
+        // downloading, 100% only once Angular has really rendered the
+        // shell - the observer below is the real signal, everything else
+        // is just texture so the bar isn't sitting still in between.
+        requestAnimationFrame(function () {
+          setProgress(20);
+        });
+        window.addEventListener('load', function () {
+          setProgress(65);
+        });
+
+        function finish() {
+          if (finished) return;
+          finished = true;
+          setProgress(100);
+          var elapsed = Date.now() - start;
+          var wait = Math.max(250, minVisibleMs - elapsed);
+          setTimeout(function () {
+            splash.classList.add('app-splash--done');
+            setTimeout(function () {
+              splash.remove();
+            }, 550);
+          }, wait);
+        }
+
+        var observer = new MutationObserver(function () {
+          if (appRoot.childNodes.length > 0) {
+            observer.disconnect();
+            finish();
+          }
+        });
+        observer.observe(appRoot, { childList: true });
+
+        // Safety net: never mask the app for more than ~6s even if the
+        // observer above somehow never fires.
+        setTimeout(finish, 6000);
+      })();
+    </script>
   </body>
 </html>

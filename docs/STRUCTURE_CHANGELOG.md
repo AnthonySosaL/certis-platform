@@ -5,6 +5,50 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-31 — A branded boot splash, tied to real load state
+
+Requested as a "professional loading screen" using the 3D seal's own
+colors. Built directly in `index.html` (plain CSS/inline JS, not an
+Angular component) so it paints before the JS bundle even finishes
+downloading - an Angular component can't render anything until the
+framework has already booted, which is exactly the gap this needs to
+cover.
+
+- A flat SVG of the same seal glyph used in the navbar (`.navbar__brand-*`
+  in `navbar.html`), recolored to the "Navy & Gold" palette from the 3D
+  model (`#17233f` disc, `#d4af37` gold) instead of the navbar's azure
+  primary - a deliberate one-off dark brand moment, not tied to the
+  user's light/dark theme preference (`Theme` in `core/theme.ts` doesn't
+  run until Angular boots, after this is already on screen).
+- The "3D" look is CSS only: a `perspective` container plus a `rotateY`
+  keyframe animation on the flat SVG, which naturally thins it out
+  edge-on partway through the spin exactly like a real coin - no
+  Three.js/`model-viewer` involved, so it stays cheap enough to sit in
+  the critical path of every page load. A soft blurred gold glow behind
+  it pulses in sync.
+- The progress bar reflects real state, not a fixed-duration fake
+  animation: 20% on first paint, 65% once the browser's `load` event
+  fires (every initial resource actually fetched), 100% only once a
+  `MutationObserver` on `<app-root>` sees Angular has rendered real
+  children into it - the one point that's a true "the app is usable now"
+  signal. A 700ms minimum-visible floor (measured from first paint, not
+  added on top of the real load time) stops it from looking like an
+  accidental flash on fast/cached loads; a 6s timeout forces it to finish
+  regardless in case the observer never fires. Fades out via opacity
+  transition, then removes itself from the DOM.
+- `app-root:empty { display: none }` added so the (briefly childless)
+  host element never affects layout while the splash covers it.
+
+Verified in the Browser pane against the real dev server: temporarily
+raised the minimum-visible floor to 4s to inspect the animation without
+racing it (reverted after), confirmed the coin visibly thins edge-on
+mid-spin without ever looking blank (this is the same front/back
+checkmark fix from the 3D model, just replicated in CSS), confirmed the
+bar fills and the whole overlay fades cleanly into the real Home page,
+and confirmed via `document.getElementById('app-splash')` that the node
+is actually removed from the DOM afterward, not just hidden. No console
+errors.
+
 ## 2026-08-28 — "Ver cursos": a free-practice hub, no placement test required
 
 Resolves the "Ver cursos" item that had sat as an open product question
