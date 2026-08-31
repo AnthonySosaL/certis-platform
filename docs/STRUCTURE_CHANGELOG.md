@@ -43,6 +43,21 @@ placement test required" claim in the page's own copy is actually true,
 not just written. No console errors. `ng build` clean (same
 already-accepted budget warnings).
 
+## 2026-08-31 — Creator credit in the footer; ARCHITECTURE.md brought current
+
+- Footer now reads "Created by Anthony Sosa" under the copyright line -
+  explicitly requested.
+- `ARCHITECTURE.md` was still describing the project as it was on
+  2026-08-26/27 (no domain model, "the rest are placeholders", no route
+  guards) - wildly stale after everything built since. Rewrote it as a
+  current-state snapshot: the real feature list (placement test,
+  reinforcement, Courses with the 3-choice entry and multi-slide AI
+  courses, Speaking, Dashboard Coach, Admin), the AI-features table
+  (what each Groq call does and its endpoint), the real domain
+  entities, and an updated repo/frontend structure. `STRUCTURE_CHANGELOG.md`
+  stays the chronological "what happened when" log; `ARCHITECTURE.md` is
+  now the "what it currently is" one, per its own stated purpose.
+
 ## 2026-08-30 — Course entry redesigned into three real choices, courses expanded with ungraded practice exercises
 
 Two rounds of direct feedback, building on the multi-slide course from

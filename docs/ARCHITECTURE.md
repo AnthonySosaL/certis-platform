@@ -1,129 +1,180 @@
 # Architecture
 
-Working name: TBD — see [NAMING.md](NAMING.md). A platform to practice and
-evaluate English (targeting Cambridge C1) for you and a friend, built with
-C# .NET partly as a learning goal in itself. Possibly expanded/offered to
+Brand name: **Certis** — see [NAMING.md](NAMING.md) (the backend
+namespace, repo folder, and production subdomains still say the old
+placeholder `english-c1`, deliberately deferred — see "Rough edges" in
+[PENDING_IDEAS.md](PENDING_IDEAS.md)). An English placement and
+practice platform (targeting Cambridge C1) for you and a friend, built
+with C# .NET partly as a learning goal in itself. Possibly expanded to
 institutions later — not the near-term scope. This doc is the source of
-truth for *why* things are built the way they are; update it whenever a
-decision changes, and log the change in
-[STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md).
+truth for *what the platform actually is and why it's built this way*;
+update it whenever the feature set or a real decision changes, and log
+the change in [STRUCTURE_CHANGELOG.md](STRUCTURE_CHANGELOG.md) (that
+file is the chronological "what happened when" log — this one is the
+current-state snapshot).
 
-**What's built so far is infrastructure, not features.** The actual
-English-practice domain (what a "practice session" or "evaluation" even
-consists of) isn't decided yet — see
-[PENDING_IDEAS.md](PENDING_IDEAS.md#feature-scope-not-yet-decided). Don't
-read the folder names below as a finished design; they're a scaffold
-waiting for that decision.
+Live in production: `https://english-c1.runasp.net` (frontend),
+`https://english-c1-api.runasp.net` (backend) — see [HOSTING.md](HOSTING.md).
+
+## What the platform actually does (2026-08-30)
+
+- **Placement test**: a fixed 64-question multiple-choice test (Grammar,
+  Vocabulary, Reading, Listening - 4 CEFR levels A2-C1 each) taken in one
+  sitting, self-graded. Placement = the highest level passed
+  consecutively from A2, each (level, skill) cell graded 0-10
+  school-style, 7/10 to pass. Results page shows a circular level badge
+  and a per-area breakdown grid with "Practice this" links into weak
+  areas.
+- **Reinforcement quizzes**: a focused quiz for one (level, skill) cell,
+  reachable from the placement results breakdown, from Courses, or
+  directly by URL (`/test/reinforce/:level/:skill`). Reviews missed
+  questions with explanations after submitting. Also offers
+  Groq-generated replacement questions ("Practice different questions")
+  for Grammar/Vocabulary/Speaking-adjacent skills.
+- **Courses** (`/courses`): a free-practice hub organized like a
+  Cambridge exam - Grammar/Vocabulary ("Use of English"), Reading,
+  Listening, Speaking. Picking a (level, skill) opens `/courses/:level/
+  :skill`, which offers three real choices: take a full AI-generated
+  multi-slide course (8-11 slides mixing explanation with ungraded
+  drag-and-drop or type-the-answer self-check exercises - drag for A2/
+  B1, write for B2/C1), take a real graded 3-question mini-quiz to
+  gauge readiness, or skip straight to the full reinforcement quiz.
+- **Speaking practice** (`/speaking`): AI-only roleplay across four
+  fixed scenarios modeled on the parts of a real Cambridge speaking
+  exam (interview, long turn, collaborative task, abstract discussion).
+  Stateless text chat with Groq playing the examiner - full history
+  sent by the client each turn, nothing persisted server-side yet.
+  Matching with a real practice partner is explicitly out of scope for
+  now (needs its own design pass - presence, pairing, real-time state).
+- **Dashboard** (`/dashboard`): full attempt history (placement +
+  reinforcement, split), current level, tutor assignment if any, and
+  the **Coach panel** - an on-demand Groq call that aggregates a
+  student's *entire* history per (level, skill) cell into one overall
+  progress diagnostic, not tied to any single attempt.
+- **Admin panel** (`/admin`, Admin/Tutor roles): Students tab (roster,
+  early-warning flags), Content tab (question bank CRUD, shows an "AI"
+  badge on Groq-generated questions), Access tab (grant/revoke Admin/
+  Tutor roles, assign a tutor per student). A seeded `ai-tutor@certis.local`
+  account exists as a real, assignable Tutor persona nobody can sign
+  into.
+- **About page**: methodology write-up (how scoring works, what's
+  in/out of scope), plus a photo section and closing CTA.
+- **Real imagery**: several hand-picked Pexels photos (landing/About/
+  Courses banners), downloaded once as static assets - no live Pexels
+  API calls at runtime, no key shipped to the client. A scrolling tips
+  ticker runs below the navbar on every page.
+
+## AI features (all via Groq, `openai/gpt-oss-20b`, on-demand only - never automatic)
+
+| Feature | What it generates | Endpoint |
+|---|---|---|
+| Reinforcement question generation | One new MCQ for a (level, skill), structured JSON output | `POST /api/test/reinforcement/{level}/{skill}/generate` |
+| Course generation | 8-11 slides (content + drag/write exercises) for a (level, skill) | `POST /api/test/reinforcement/{level}/{skill}/course` |
+| Per-attempt insight | (backend method still exists; no longer surfaced in the UI - superseded by the Coach panel) | — |
+| Coach panel (overall insight) | A progress diagnostic aggregated across a student's full history | `POST /api/test/insight/overall` |
+| Speaking roleplay | A single in-character reply as the Cambridge examiner/partner | `POST /api/speaking/{scenarioId}/reply` |
+
+All use `reasoning_effort: "low"` (gpt-oss-20b is a reasoning model -
+without this, most of the token budget goes to hidden chain-of-thought
+instead of the actual answer) and return `null`/503 when unavailable
+(no `Groq:ApiKey` configured, or the upstream call failed) rather than
+a generic 500.
 
 ## Stack decision
 
 | Layer | Choice | Why |
 |---|---|---|
 | Backend | **ASP.NET Core 8 (C#) Web API** | Explicitly requested — partly to learn C#/.NET, which is widely asked for in job postings. LTS version. Live at `https://english-c1-api.runasp.net` — see [HOSTING.md](HOSTING.md). |
-| Frontend | **Angular 22 + TypeScript** | Switched from React on 2026-08-26 — deliberate choice, not a mistake: the user already has "a ton" of React projects and wants portfolio breadth. Angular over Blazor (a C#-frontend option that was also considered and briefly started) because the user explicitly asked for Angular by name after weighing it. |
-| Component library | **Angular Material** (Material 3 theming via `mat.theme()`) | Official, best-integrated Angular UI kit — analogous role to what shadcn played for the React version. |
-| ORM | **EF Core** | The direct .NET equivalent of Prisma-style "controlled, tracked schema changes" — migrations live in source control. |
-| Database | **SQL Server** (MonsterASP.NET, free tier) | Switched from PostgreSQL on 2026-08-26 once a real database was created — see [HOSTING.md](HOSTING.md). |
-| Icons | **Inline SVG**, hand-written | `lucide-angular`'s peer dependency range doesn't yet cover Angular 22 (too new); a handful of small inline SVGs (menu, sun/moon) avoids both the version conflict and an icon web font. |
-| Auth | **ASP.NET Core Identity + JWT bearer tokens** | Email/password register + login, built 2026-08-26 (the user asked for a standard pattern directly rather than routing it through a separate Fable 5 review first). JWT (not cookies) because Angular is a separate SPA calling the API cross-origin. |
+| Frontend | **Angular 22 + TypeScript** | Switched from React on 2026-08-26 — deliberate choice, not a mistake: the user already has "a ton" of React projects and wants portfolio breadth. |
+| Component library | **Angular Material** (Material 3 theming via `mat.theme()`) | Official, best-integrated Angular UI kit. Custom azure+orange palette (not the generic starter green/blue), plus light/dark mode via the `Theme` service. |
+| ORM | **EF Core** | Migrations live in source control, applied directly against the shared dev+prod database (no separate local DB). |
+| Database | **SQL Server** (MonsterASP.NET, free tier) | Switched from PostgreSQL on 2026-08-26 — see [HOSTING.md](HOSTING.md). |
+| Icons | **Inline SVG**, hand-written | Avoids an icon-library version conflict and an icon web font. |
+| Auth | **ASP.NET Core Identity + JWT bearer tokens** | Email/password register + login. JWT (not cookies) because Angular is a separate SPA calling the API cross-origin. Roles: `Admin`, `Tutor`. |
+| Images | **Pexels** (downloaded once, static) | A real Pexels API key the user already had in a sibling project, reused with explicit authorization - not a live runtime dependency. |
+| Local text-to-speech | **edge-tts** (Python, already installed locally) | Generates the Listening question bank's audio once, offline from the app - not a runtime dependency either. Picked over Groq's TTS (blocked on terms acceptance) and ElevenLabs (not installed). |
 
 ## Repo layout
 
 ```
 english-c1-platform/   (folder name — placeholder, see NAMING.md)
-├── client-frontend/    Angular 22 + Material — UI shell exists, no real pages yet
-├── client-backend/     ASP.NET Core Web API — layered, builds and runs, live on MonsterASP.NET, no domain model yet
+├── client-frontend/    Angular 22 + Material
+├── client-backend/     ASP.NET Core Web API, Clean Architecture, live on MonsterASP.NET
 ├── docs/                this folder
-└── scripts/             local dev start/stop helpers
+└── scripts/             local dev start/stop helpers, scripts/generate_listening_audio.py
 ```
 
-A single app for now (not split into separate "client" and "admin" apps).
-The client/admin isolation pattern that shows up in some of the reference
-notes belongs to a *different* project (an e-commerce platform, seemingly
-already in progress elsewhere on this machine — see
-[docs/errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md))
-and doesn't apply here unless this platform later grows a real
-teacher/institution-facing admin surface.
+A single app for now (not split into separate "client" and "admin"
+apps) - the admin panel is a route (`/admin`) inside the same Angular
+app, guarded client-side and enforced server-side by role.
 
 ## Backend: layered / Clean Architecture
 
 `client-backend` is split into separate projects in one `.sln` so
 dependencies are enforced by the compiler, not just convention:
 
-- **Domain** — entities, value objects, domain logic. No dependencies on
-  anything else. Currently empty — no entities defined yet.
-- **Application** — use cases, interfaces for infrastructure. Depends only
-  on Domain.
-- **Infrastructure** — EF Core `DbContext` (`AppDbContext` — now an
-  `IdentityDbContext`, so the Identity tables are the domain model so
-  far), repository implementations, ASP.NET Core Identity setup
-  (`Identity/ApplicationUser.cs`, `JwtTokenService`). Implements
-  Application's interfaces.
-- **Api** — controllers/minimal-API endpoints, DI wiring, middleware, CORS,
-  JWT bearer authentication scheme. The only project that knows about
-  HTTP. Exposes `GET /health` and `POST /api/auth/register`,
-  `POST /api/auth/login`, `GET /api/auth/me` (`[Authorize]`).
+- **Domain** — entities and value objects, no dependencies on anything
+  else. Key entities: `Question`/`QuestionOption` (with `IsAiGenerated`,
+  `Passage`, `AudioUrl`), `TestAttempt`/`TestAnswer`, `ApplicationUser`
+  (self-referencing `TutorId`), `CefrLevel`/`SkillArea`/`AttemptKind`
+  enums.
+- **Application** — use cases and interfaces for infrastructure
+  (`ITestService`, `IContentService`, `IAdminService`, the `IAi*Service`
+  family, `ISpeakingService`). Depends only on Domain.
+- **Infrastructure** — EF Core `AppDbContext` (an `IdentityDbContext`),
+  service implementations, Groq HTTP clients, `QuestionSeeder` (the
+  hand-written question bank + `ReadingBank`/`ListeningBank`, idempotent
+  match-by-text seeding on every startup).
+- **Api** — controllers, DI wiring (`DependencyInjection.cs`), CORS, JWT
+  bearer auth, `UseStaticFiles()` (serves the Listening audio bank). The
+  only project that knows about HTTP.
 
-Rationale: keeps business rules testable without a database or HTTP server,
-and keeps "which layer am I editing" explicit.
-
-Namespaces/project names are `EnglishC1.Client.*` (`.sln`, `.csproj`
-files, C# `namespace` declarations) — a placeholder tied to the folder
-name, not a final brand (renamed from an earlier `NutriBoost.Client.*`
-holdover on 2026-08-26; see
-[errors/2026-08-26-scope-mixup.md](errors/2026-08-26-scope-mixup.md)).
+Namespaces/project names are still `EnglishC1.Client.*` — a placeholder
+tied to the original folder name, deliberately not renamed to match the
+`Certis` brand yet (see [PENDING_IDEAS.md](PENDING_IDEAS.md) - renaming
+would mean re-provisioning the live subdomains' HTTPS certs).
 
 ## Frontend structure
 
 ```
 src/app/
-├── layout/          Navbar, Footer — structural, reused components
-├── pages/           Route-level standalone components (Home, About, Contact,
-│                    Login, Register — Login/Register are real, the rest are placeholders)
-├── core/            Cross-cutting services: Theme, Auth (JWT in localStorage,
-│                    signals for isAuthenticated/email), auth.interceptor.ts
-│                    (attaches the token to requests to our own API), api-config.ts
+├── layout/          Navbar (nav items vary by auth/role), Footer, TipsTicker
+├── pages/           Route-level standalone components: home, about, test/
+│                    (placement-test, test-result, reinforcement), course,
+│                    courses, dashboard, admin, speaking, auth, forgot-password
+├── core/             Cross-cutting services: Theme, Auth (JWT in localStorage,
+│                     signals), test-api.ts/admin-api.ts/speaking-api.ts (thin
+│                     HTTP wrappers), cefr.ts, skill-icons.ts, grading.ts,
+│                     auth.guard.ts/admin.guard.ts, api-config.ts
+├── shared/           Quiz (the reusable MCQ-taking component, used by both
+│                     the placement test and every reinforcement quiz)
 ├── app.routes.ts    Route table
-└── app.ts/.html     App shell (renders Navbar + <router-outlet /> + Footer)
+└── app.ts/.html     App shell (Navbar + TipsTicker + <router-outlet /> + Footer)
 ```
 
-Standalone components throughout (no NgModules) — Angular 22's default and
-recommended style. Component rule carried over from the original project
-notes (still applies generically regardless of framework): build reusable
-components from the start, prefer cards over extra tabs/pages where
-content allows it, no emoji/text-icons — SVG icons only, sized
-responsively.
+Standalone components throughout (no NgModules), signals for reactive
+state. Light mode is the default; the full Material 3 dark theme is
+built and toggle-able (`Theme` service, `html.dark`).
 
-## Cross-cutting concerns staged for later (not built yet)
+## Not built yet / deliberately deferred
 
-- **Theming**: light mode is the default and only active mode; the full
-  Material 3 dark theme already exists (`html.dark`, toggled via the
-  `Theme` service — `src/app/core/theme.ts`) — flipping the default later
-  is a one-line change.
-- **i18n**: English only for now, no i18n library wired in yet (the React
-  version had `i18next`; Angular's equivalent — `@angular/localize` for
-  build-time, or `ngx-translate` for a runtime-switchable setup closer to
-  what `i18next` did — isn't set up yet since the platform's primary
-  language is English by design). Add if/when a language switcher is
-  actually needed.
-- **Route guard**: register/login/JWT (both backend and Angular UI) are
-  built and verified end-to-end (2026-08-27) — email/password register,
-  login, session persisted in `localStorage`, Navbar reflects real auth
-  state. What's *not* built yet: a route guard (nothing is actually
-  protected client-side yet — there's no route that needs to be).
-- **Password reset / email confirmation**: `AddDefaultTokenProviders()`
-  is deliberately not called yet in `DependencyInjection.cs` — it's only
-  needed for those tokens, and there's no email sender configured to
-  actually deliver them. Revisit together.
-- **Google OAuth**: mentioned as a nice-to-have in the original notes;
-  email/password shipped first since it needed no external app
-  registration to stand up.
+See [PENDING_IDEAS.md](PENDING_IDEAS.md) for the full, current list -
+as of this writing: password reset/email confirmation (needs an email
+sender), Google OAuth, i18n, real-user speaking matching (needs its own
+design pass), a course catalog beyond what Courses already covers, CI
+(no GitHub remote configured), and the technical rename to `Certis`
+(namespace/folder/subdomains).
 
-## Design patterns in play so far
+## Design patterns in play
 
-- **Signals** for reactive UI state (`Theme.mode`), Angular's current
+- **Signals** for reactive UI state throughout, Angular's current
   recommended default over RxJS `BehaviorSubject` for simple state.
 - **Standalone components** — no NgModules, direct `imports: []` per
   component.
-- **Repository pattern** (planned) for the backend's Infrastructure layer,
-  once there's a real domain to persist.
+- **On-demand AI, never automatic** — every Groq call is triggered by an
+  explicit user action (a button), with a clear "not available right
+  now" state distinct from a generic error.
+- **Hand-written content by default, AI as an addition** — the core
+  question bank, Reading passages, and Listening transcripts are
+  hand-authored and seeded; AI generation (questions, courses, insight)
+  supplements it rather than replacing it.
