@@ -19,23 +19,58 @@
       Gold" 3D seal used elsewhere (see docs/STRUCTURE_CHANGELOG.md), not
       the navbar's azure brand color - this is a deliberate one-off dark
       brand moment, not tied to the user's light/dark theme preference.
+
+      Split into two half-width panels rather than one solid overlay so
+      the exit can be a seal breaking open down the middle (two halves
+      sliding apart) instead of a plain fade - see the "opening" class
+      logic in the script below.
     -->
     <style>
       #app-splash {
         position: fixed;
         inset: 0;
         z-index: 9999;
+        overflow: hidden;
+      }
+      .app-splash__panel {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 50%;
+        background: radial-gradient(circle at 50% 38%, #223969 0%, #101c3a 55%, #070c1a 100%);
+        background-size: 200% 100%;
+        transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+      }
+      .app-splash__panel--left {
+        left: 0;
+        /* A couple of extra pixels of width, overlapping the right panel,
+           so sub-pixel rounding of the 50% split never leaves a hairline
+           gap showing the page behind it. */
+        width: calc(50% + 2px);
+        background-position: 0% 0%;
+      }
+      .app-splash__panel--right {
+        right: 0;
+        background-position: 100% 0%;
+      }
+      #app-splash.app-splash--opening .app-splash__panel--left {
+        transform: translateX(-100%);
+      }
+      #app-splash.app-splash--opening .app-splash__panel--right {
+        transform: translateX(100%);
+      }
+      .app-splash__center {
+        position: absolute;
+        inset: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 1rem;
-        background: radial-gradient(circle at 50% 38%, #223969 0%, #101c3a 55%, #070c1a 100%);
-        transition: opacity 0.5s ease;
+        gap: 0.9rem;
+        transition: opacity 0.35s ease;
       }
-      #app-splash.app-splash--done {
+      #app-splash.app-splash--opening .app-splash__center {
         opacity: 0;
-        pointer-events: none;
       }
       .app-splash__stage {
         position: relative;
@@ -116,8 +151,23 @@
           transform: translateY(0);
         }
       }
+      .app-splash__status {
+        font-family: 'Roboto', sans-serif;
+        font-size: 0.78rem;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+        color: rgba(255, 255, 255, 0.58);
+        min-height: 1.1em;
+        transition:
+          opacity 0.18s ease,
+          transform 0.18s ease;
+      }
+      .app-splash__status--out {
+        opacity: 0;
+        transform: translateY(3px);
+      }
       .app-splash__track {
-        width: 148px;
+        width: 160px;
         height: 3px;
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.14);
@@ -128,7 +178,7 @@
         width: 0%;
         border-radius: 999px;
         background: linear-gradient(90deg, #b5872f, #ecd28a);
-        transition: width 0.4s ease;
+        transition: width 0.45s ease;
       }
       app-root:empty {
         display: none;
@@ -140,6 +190,10 @@
           animation: none;
           opacity: 1;
         }
+        .app-splash__panel,
+        .app-splash__center {
+          transition: none;
+        }
       }
     </style>
   </head>
@@ -147,70 +201,113 @@
     <app-root></app-root>
 
     <div id="app-splash" role="status" aria-label="Loading Certis">
-      <div class="app-splash__stage">
-        <div class="app-splash__glow"></div>
-        <svg class="app-splash__coin" viewBox="0 0 28 34" width="72" height="87" aria-hidden="true">
-          <path class="app-splash__ribbon" d="M9 16 L7 32 L14 27 L21 32 L19 16Z" />
-          <circle class="app-splash__disc" cx="14" cy="13" r="12" />
-          <path class="app-splash__check" d="M8.5 13.5 12 17 19.5 9" />
-        </svg>
+      <div class="app-splash__panel app-splash__panel--left"></div>
+      <div class="app-splash__panel app-splash__panel--right"></div>
+      <div class="app-splash__center">
+        <div class="app-splash__stage">
+          <div class="app-splash__glow"></div>
+          <svg class="app-splash__coin" viewBox="0 0 28 34" width="72" height="87" aria-hidden="true">
+            <path class="app-splash__ribbon" d="M9 16 L7 32 L14 27 L21 32 L19 16Z" />
+            <circle class="app-splash__disc" cx="14" cy="13" r="12" />
+            <path class="app-splash__check" d="M8.5 13.5 12 17 19.5 9" />
+          </svg>
+        </div>
+        <div class="app-splash__word">Certis</div>
+        <div class="app-splash__status" id="app-splash-status">Loading resources&hellip;</div>
+        <div class="app-splash__track"><div class="app-splash__fill" id="app-splash-fill"></div></div>
       </div>
-      <div class="app-splash__word">Certis</div>
-      <div class="app-splash__track"><div class="app-splash__fill" id="app-splash-fill"></div></div>
     </div>
+    <noscript>
+      <style>
+        #app-splash {
+          display: none !important;
+        }
+      </style>
+    </noscript>
 
     <script>
       (function () {
         var splash = document.getElementById('app-splash');
         var fill = document.getElementById('app-splash-fill');
+        var status = document.getElementById('app-splash-status');
         var appRoot = document.querySelector('app-root');
-        if (!splash || !fill || !appRoot) return;
+        if (!splash || !fill || !status || !appRoot) return;
 
-        var start = Date.now();
-        var minVisibleMs = 700;
+        // A staged, labeled sequence rather than one bar tied straight to
+        // network events - the real load is often too quick for a bar
+        // like that to read as more than a blink. Real readiness (the
+        // observer below) still gates the very last step, so this never
+        // claims "ready" before Angular actually is.
+        var phases = [
+          { pct: 14, label: 'Loading resources…' },
+          { pct: 34, label: 'Preparing the placement engine…' },
+          { pct: 58, label: 'Warming up the AI…' },
+          { pct: 80, label: 'Polishing the details…' },
+          { pct: 95, label: 'Almost ready…' },
+        ];
+        var phaseDelayMs = 480;
+        var appReady = false;
         var finished = false;
 
-        function setProgress(pct) {
+        function setPhase(pct, label) {
           fill.style.width = pct + '%';
+          status.classList.add('app-splash__status--out');
+          setTimeout(function () {
+            status.textContent = label;
+            status.classList.remove('app-splash__status--out');
+          }, 170);
         }
 
-        // Not a fake timed bar: 20% on first paint, 65% once every initial
-        // resource (the JS bundle, fonts, etc.) has actually finished
-        // downloading, 100% only once Angular has really rendered the
-        // shell - the observer below is the real signal, everything else
-        // is just texture so the bar isn't sitting still in between.
-        requestAnimationFrame(function () {
-          setProgress(20);
-        });
-        window.addEventListener('load', function () {
-          setProgress(65);
-        });
+        function runPhases(index) {
+          if (index >= phases.length) {
+            if (appReady) {
+              finish();
+              return;
+            }
+            // The fake sequence finished before Angular actually has -
+            // hold here and poll for the real signal instead of lying
+            // about being done.
+            var poll = setInterval(function () {
+              if (appReady) {
+                clearInterval(poll);
+                finish();
+              }
+            }, 150);
+            return;
+          }
+          setPhase(phases[index].pct, phases[index].label);
+          setTimeout(function () {
+            runPhases(index + 1);
+          }, phaseDelayMs);
+        }
 
         function finish() {
           if (finished) return;
           finished = true;
-          setProgress(100);
-          var elapsed = Date.now() - start;
-          var wait = Math.max(250, minVisibleMs - elapsed);
+          setPhase(100, 'Ready');
           setTimeout(function () {
-            splash.classList.add('app-splash--done');
+            splash.classList.add('app-splash--opening');
             setTimeout(function () {
               splash.remove();
-            }, 550);
-          }, wait);
+            }, 950);
+          }, 420);
         }
 
         var observer = new MutationObserver(function () {
           if (appRoot.childNodes.length > 0) {
             observer.disconnect();
-            finish();
+            appReady = true;
           }
         });
         observer.observe(appRoot, { childList: true });
 
-        // Safety net: never mask the app for more than ~6s even if the
+        requestAnimationFrame(function () {
+          runPhases(0);
+        });
+
+        // Safety net: never mask the app for more than ~9s even if the
         // observer above somehow never fires.
-        setTimeout(finish, 6000);
+        setTimeout(finish, 9000);
       })();
     </script>
   </body>

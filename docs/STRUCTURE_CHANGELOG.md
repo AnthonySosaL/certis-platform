@@ -5,6 +5,56 @@ gets an entry here, newest first — this is the traceability log the notes
 asked for, separate from git history so it reads as a narrative instead of
 a diff.
 
+## 2026-08-31 — Boot splash: staged fake progress, seal-opening reveal
+
+Follow-up to the boot splash below. Feedback on the first version: it
+finished too fast to actually read as a loading screen (a fast/cached
+load resolves the real signals it was tied to in well under a second),
+and the exit should feel like the seal itself opening, not a plain
+fade.
+
+- **Staged, labeled progress instead of a bar tied straight to network
+  events.** Five phases (`Loading resources…` → `Preparing the
+  placement engine…` → `Warming up the AI…` → `Polishing the
+  details…` → `Almost ready…`), each holding ~480ms, advance the bar
+  and crossfade the label underneath. This is honest about being
+  paced, not measured - Angular's actual boot is almost always faster
+  than this on a warm cache - but real readiness still gates the last
+  step: if the `MutationObserver` on `<app-root>` hasn't fired by the
+  time the fake phases run out, it holds on "Almost ready…" and polls
+  rather than claiming completion early.
+- **The exit is the seal breaking open, not a fade.** Split the one
+  overlay into two half-width `<div>` panels, each showing one half of
+  the same radial-gradient background (via `background-size: 200%
+  100%` and a 0%/100% `background-position` split - both panels render
+  the identical viewport-wide gradient, just clipped to their own
+  half, so the seam is invisible). On finish, the left panel
+  translates to `-100%` and the right to `100%` while the coin/word/bar
+  fade out slightly faster, so the two halves slide apart from the
+  center like a locket or a wax seal cracking open, revealing the real
+  app underneath. A 2px overlap on the left panel (`width: calc(50% +
+  2px)`) covers a hairline sub-pixel gap that otherwise showed as a
+  thin vertical seam down the middle.
+- `<noscript>` now force-hides the splash - without it, a JS-disabled
+  browser would be stuck staring at a loading screen that can never
+  finish.
+
+Verified in the Browser pane against the real dev server: temporarily
+lengthened the per-phase delay (reverted after) to inspect the label
+cycling and coin spin without racing the real ~2.4s sequence: confirmed
+each phase's label and bar width. Forced the `app-splash--opening`
+class directly (with transitions disabled) to check the end state
+deterministically rather than trying to catch a sub-second CSS
+transition mid-flight in a screenshot: `getBoundingClientRect()` on
+both panels confirmed they land fully off-screen (negative left edge
+for the left panel, past the viewport's right edge for the right one),
+and the screenshot showed a clean Home page with no leftover overlay.
+Confirmed no seam at the panel boundary at the default state, and via
+`document.getElementById('app-splash')` that the node is still removed
+from the DOM once the real sequence completes. No console errors (one
+`ERR_CONNECTION_REFUSED` seen was stale console buffer from a prior
+rapid reload during testing, not reproducible in a fresh tab).
+
 ## 2026-08-31 — A branded boot splash, tied to real load state
 
 Requested as a "professional loading screen" using the 3D seal's own
