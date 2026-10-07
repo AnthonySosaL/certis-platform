@@ -1,4 +1,10 @@
 <footer class="footer">
+  <nav class="footer__projects" aria-label="Other projects">
+    <span>Other projects:</span>
+    @for (link of otherProjects; track link.href) {
+      <a [href]="link.href" target="_blank" rel="noopener">{{ link.label }}</a>
+    }
+  </nav>
   <p>&copy; {{ year }} {{ brandName }}. All rights reserved.</p>
   <p class="footer__creator">Created by Anthony Sosa</p>
 </footer>

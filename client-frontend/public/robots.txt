@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /test
+Disallow: /speaking
+Disallow: /courses
+
+Sitemap: https://english-c1.runasp.net/sitemap.xml
