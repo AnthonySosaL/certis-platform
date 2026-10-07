@@ -6,7 +6,7 @@
 // Recuerda poner el mismo ID en /ads.txt.
 // ============================================================
 (function () {
-  var ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXX';
+  var ADSENSE_CLIENT = 'ca-pub-6972285940439853';
 
   if (!/^ca-pub-\d{16}$/.test(ADSENSE_CLIENT)) return;
 
