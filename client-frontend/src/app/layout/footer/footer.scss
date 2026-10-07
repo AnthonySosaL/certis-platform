@@ -15,3 +15,16 @@
   font-size: 0.8rem;
   opacity: 0.85;
 }
+
+.footer__projects {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.footer__projects a {
+  color: inherit;
+}

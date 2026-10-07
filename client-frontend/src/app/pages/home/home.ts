@@ -1,4 +1,5 @@
-import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, inject } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -48,6 +49,7 @@ export class Home implements OnInit {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
   private readonly authDialog = inject(AuthDialogService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly steps = STEPS;
   protected readonly levels = LEVELS;
@@ -58,8 +60,9 @@ export class Home implements OnInit {
     // (it bundles its own three.js-based renderer) - eagerly importing
     // it at the top of this file put that weight in the MAIN bundle,
     // loaded on every page. This way it's a separate chunk, fetched
-    // only when Home actually renders.
-    import('@google/model-viewer');
+    // only when Home actually renders. Skipped during build-time
+    // prerendering - it's a browser-only custom element.
+    if (isPlatformBrowser(this.platformId)) import('@google/model-viewer');
   }
 
   startTest(): void {

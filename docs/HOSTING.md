@@ -107,8 +107,7 @@ plan's limits (5GB disk, low-performance servers) become a real problem.
 
 ```powershell
 cd client-frontend
-ng build
-# copy the SPA web.config (below) into dist/client-frontend/browser/ if it's not already there
+ng build   # also prerenders / and /about, and copies public/web.config into dist/
 cd dist/client-frontend/browser
 scp -r * site87768@site87768.siteasp.net:wwwroot/
 ```
@@ -117,34 +116,17 @@ Unlike the backend, this site is almost never locked (static files, no
 long-running process holding them open) - the `app_offline.htm` dance
 usually isn't needed here, plain `scp -r` overwrites cleanly.
 
-**SPA routing needs one extra file**: Angular's client-side router means
-a direct hit on `/test` or `/about` isn't a real file on the server - IIS
-needs a rewrite rule to serve `index.html` for anything that isn't a real
-file, and let Angular's router take over from there. `ng build` doesn't
-generate this itself, so `dist/client-frontend/browser/web.config` is
-hand-maintained (not generated, and not overwritten by `ng build` since
-it's not part of source but must be manually copied back in after every
-clean `dist/` wipe):
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <system.webServer>
-    <rewrite>
-      <rules>
-        <rule name="Angular Routes" stopProcessing="true">
-          <match url=".*" />
-          <conditions logicalGrouping="MatchAll">
-            <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-            <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-          </conditions>
-          <action type="Rewrite" url="/index.html" />
-        </rule>
-      </rules>
-    </rewrite>
-  </system.webServer>
-</configuration>
-```
+**SPA routing + prerendering (updated 2026-10-07)**: `ng build` now
+prerenders the public pages (`/` and `/about`, see
+`client-frontend/src/app/app.routes.server.ts`) into real HTML files
+(`index.html`, `about/index.html`) so search engines can index them -
+build-time only (`outputMode: "static"`), no Node server needed, still
+plain static files on IIS. Every other route is client-rendered from
+`index.csr.html`. The IIS rewrite rule for that now lives in
+`client-frontend/public/web.config`, so `ng build` copies it into
+`dist/` automatically - no more hand-copying after a clean `dist/` wipe.
+If the server's current `wwwroot/web.config` has extra settings, merge
+them into `public/web.config` before the next deploy.
 
 **API base URL**: `client-frontend/src/app/core/api-config.ts` picks the
 backend URL at runtime from `location.hostname` (localhost → local

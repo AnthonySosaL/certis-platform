@@ -15,8 +15,8 @@ import { authGuard } from './core/auth.guard';
 import { adminGuard } from './core/admin.guard';
 
 export const routes: Routes = [
-  { path: '', component: Home },
-  { path: 'about', component: About },
+  { path: '', component: Home, title: 'Certis — Free English Placement Test (A2 to C1) & Practice' },
+  { path: 'about', component: About, title: 'How the Certis placement test works — Certis' },
   { path: 'forgot-password', component: ForgotPassword },
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
   { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] },
